@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Meeting App | BKN</title>
+
+    <link rel="stylesheet" href="/login2.css">
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <!-- GELEMBUNG -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    <div class="bubble bubble-5"></div>
+
+    <!-- CARD LOGIN -->
+    <div class="login-card">
+
+        <!-- LOGO -->
+        <div class="logo-wrapper">
+
+            <img
+                src="/logo-bkn-asli.png"
+                alt="Logo BKN"
+                class="logo-bkn"
+            >
+
+        </div>
+
+
+        <!-- JUDUL -->
+        <div class="login-header">
+
+            <h1>Meeting App</h1>
+
+            <p>
+                Kantor Regional V BKN Jakarta
+            </p>
+
+        </div>
+
+
+        <!-- WELCOME -->
+        <div class="welcome-box">
+
+            <h2>Selamat Datang di Meeting App</h2>
+
+            <p>
+                Silakan masuk untuk melanjutkan
+                ke sistem manajemen ruang rapat.
+            </p>
+
+        </div>
+
+
+        <!-- FORM -->
+        <form action="/" method="POST">
+
+            <!-- USER ID -->
+            <div class="form-group">
+
+                <label for="id">
+                    User ID
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">👤</span>
+
+                    <input
+                        type="text"
+                        id="id"
+                        name="id"
+                        placeholder="Masukkan User ID"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">🔒</span>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Masukkan Password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword()"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Masuk
+            </button>
+
+        </form>
+
+
+        <!-- FOOTER -->
+        <div class="login-footer">
+
+            <p>Meeting App</p>
+
+            <span>
+                Badan Kepegawaian Negara • 2026
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".toggle-password");
+
+    if (password.type === "password") {
+
+        password.type = "text";
+
+        button.textContent = "🙈";
+
+    } else {
+
+        password.type = "password";
+
+        button.textContent = "👁";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>

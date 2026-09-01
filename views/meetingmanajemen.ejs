@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | Meeting App BKN</title>
+
+    <link rel="stylesheet" href="/dashboard.css">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- GELEMBUNG BACKGROUND -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-logo">
+                <img src="/logo-bkn-asli.png" alt="Logo BKN">
+            </div>
+
+            <div>
+                <h2>Meeting App</h2>
+                <span>BKN Regional V</span>
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="#" class="menu-item active">
+                <span>⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>▣</span>
+                <span>Ruang Rapat</span>
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>▦</span>
+                <span>Jadwal Rapat</span>
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>＋</span>
+                <span>Pemesanan</span>
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>♙</span>
+                <span>Pengguna</span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="help-box">
+                <span class="help-icon">?</span>
+
+                <div>
+                    <strong>Butuh bantuan?</strong>
+                    <p>Hubungi administrator sistem.</p>
+                </div>
+            </div>
+
+            <a href="#" class="logout">
+                <span>↪</span>
+                Keluar
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div>
+                <p class="breadcrumb">Dashboard</p>
+                <h1>Selamat Datang 👋</h1>
+                <p class="subtitle">
+                    Kelola ruang dan jadwal rapat dengan mudah.
+                </p>
+            </div>
+
+
+            <div class="profile">
+
+                <div class="notification">
+                    🔔
+                    <span></span>
+                </div>
+
+                <div class="profile-info">
+                    <strong>Administrator</strong>
+                    <small>Pengguna Sistem</small>
+                </div>
+
+                <div class="avatar">
+                    A
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- STATISTIK -->
+        <section class="stats">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    ▣
+                </div>
+
+                <div>
+                    <span>Total Ruangan</span>
+                    <strong>8</strong>
+                    <small>Ruang tersedia dalam sistem</small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ✓
+                </div>
+
+                <div>
+                    <span>Ruangan Tersedia</span>
+                    <strong>5</strong>
+                    <small>Siap digunakan hari ini</small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    ◷
+                </div>
+
+                <div>
+                    <span>Sedang Digunakan</span>
+                    <strong>2</strong>
+                    <small>Sedang berlangsung</small>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    ▦
+                </div>
+
+                <div>
+                    <span>Jadwal Hari Ini</span>
+                    <strong>6</strong>
+                    <small>Total agenda rapat</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTENT GRID -->
+        <section class="content-grid">
+
+
+            <!-- RUANG RAPAT -->
+            <div class="panel rooms-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h2>Ruang Rapat</h2>
+                        <p>Status penggunaan ruangan hari ini</p>
+                    </div>
+
+                    <button class="view-button">
+                        Lihat Semua →
+                    </button>
+
+                </div>
+
+
+                <div class="room-list">
+
+                    <div class="room">
+
+                        <div class="room-icon">
+                            R1
+                        </div>
+
+                        <div class="room-info">
+                            <strong>Ruang Rapat Utama</strong>
+                            <span>Lantai 1 • Kapasitas 20 orang</span>
+                        </div>
+
+                        <span class="status available">
+                            Tersedia
+                        </span>
+
+                    </div>
+
+
+                    <div class="room">
+
+                        <div class="room-icon">
+                            R2
+                        </div>
+
+                        <div class="room-info">
+                            <strong>Ruang Rapat Garuda</strong>
+                            <span>Lantai 2 • Kapasitas 15 orang</span>
+                        </div>
+
+                        <span class="status used">
+                            Digunakan
+                        </span>
+
+                    </div>
+
+
+                    <div class="room">
+
+                        <div class="room-icon">
+                            R3
+                        </div>
+
+                        <div class="room-info">
+                            <strong>Ruang Rapat Nusantara</strong>
+                            <span>Lantai 2 • Kapasitas 12 orang</span>
+                        </div>
+
+                        <span class="status available">
+                            Tersedia
+                        </span>
+
+                    </div>
+
+
+                    <div class="room">
+
+                        <div class="room-icon">
+                            R4
+                        </div>
+
+                        <div class="room-info">
+                            <strong>Ruang Rapat Merah Putih</strong>
+                            <span>Lantai 3 • Kapasitas 25 orang</span>
+                        </div>
+
+                        <span class="status booked">
+                            Terjadwal
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- JADWAL -->
+            <div class="panel schedule-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h2>Jadwal Hari Ini</h2>
+                        <p>Agenda rapat yang sedang berjalan</p>
+                    </div>
+
+                </div>
+
+
+                <div class="timeline">
+
+                    <div class="schedule-item">
+
+                        <div class="time">
+                            <strong>09:00</strong>
+                            <span>10:00</span>
+                        </div>
+
+                        <div class="timeline-line">
+                            <span></span>
+                        </div>
+
+                        <div class="schedule-info">
+                            <strong>Rapat Koordinasi</strong>
+                            <span>Ruang Rapat Utama</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="schedule-item active-schedule">
+
+                        <div class="time">
+                            <strong>10:30</strong>
+                            <span>12:00</span>
+                        </div>
+
+                        <div class="timeline-line">
+                            <span></span>
+                        </div>
+
+                        <div class="schedule-info">
+                            <strong>Evaluasi Kinerja</strong>
+                            <span>Ruang Rapat Garuda</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="schedule-item">
+
+                        <div class="time">
+                            <strong>13:00</strong>
+                            <span>14:00</span>
+                        </div>
+
+                        <div class="timeline-line">
+                            <span></span>
+                        </div>
+
+                        <div class="schedule-info">
+                            <strong>Diskusi Program Kerja</strong>
+                            <span>Ruang Rapat Nusantara</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="schedule-item">
+
+                        <div class="time">
+                            <strong>14:30</strong>
+                            <span>16:00</span>
+                        </div>
+
+                        <div class="timeline-line">
+                            <span></span>
+                        </div>
+
+                        <div class="schedule-info">
+                            <strong>Rapat Internal</strong>
+                            <span>Ruang Rapat Merah Putih</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- QUICK ACTION -->
+        <section class="quick-action">
+
+            <div>
+                <span class="quick-label">AKSI CEPAT</span>
+
+                <h2>Siap mengatur rapat?</h2>
+
+                <p>
+                    Buat pemesanan ruang rapat baru dengan cepat.
+                </p>
+            </div>
+
+            <button type="button" onclick="openMeetingModal()">
+                ＋ Pesan Ruang Rapat
+            </button>
+
+        </section>
+
+
+        <footer>
+            Meeting App • Kantor Regional V BKN Jakarta • 2026
+        </footer>
+
+    </main>
+
+</div>
+<!-- MODAL PESAN RUANG RAPAT -->
+
+<div class="meeting-modal" id="meetingModal">
+
+    <div class="meeting-modal-content">
+
+        <button type="button"
+                class="modal-close"
+                id="closeMeetingModal">
+            ×
+        </button>
+
+        <div class="modal-title">
+
+            <div class="modal-icon">
+                📅
+            </div>
+
+            <div>
+                <h2>Pesan Ruang Rapat</h2>
+                <p>Lengkapi informasi rapat Anda</p>
+            </div>
+
+        </div>
+
+        <form id="meetingForm">
+
+            <div class="modal-form-group">
+
+                <label for="meetingName">
+                    Nama Rapat
+                </label>
+
+                <input
+                    type="text"
+                    id="meetingName"
+                    placeholder="Contoh: Rapat Koordinasi"
+                    required
+                >
+
+            </div>
+
+
+            <div class="modal-form-row">
+
+                <div class="modal-form-group">
+
+                    <label for="meetingDate">
+                        Tanggal
+                    </label>
+
+                    <input
+                        type="date"
+                        id="meetingDate"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="modal-form-group">
+
+                    <label for="meetingTime">
+                        Waktu
+                    </label>
+
+                    <input
+                        type="time"
+                        id="meetingTime"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-form-group">
+
+                <label for="meetingRoom">
+                    Ruang Rapat
+                </label>
+
+                <select id="meetingRoom" required>
+
+                    <option value="">
+                        Pilih ruang rapat
+                    </option>
+
+                    <option>Ruang Rapat Utama</option>
+                    <option>Ruang Rapat Garuda</option>
+                    <option>Ruang Rapat Nusantara</option>
+                    <option>Ruang Rapat Merah Putih</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="modal-form-group">
+
+                <label for="meetingDescription">
+                    Keterangan
+                </label>
+
+                <textarea
+                    id="meetingDescription"
+                    rows="3"
+                    placeholder="Tambahkan keterangan rapat..."
+                ></textarea>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="modal-cancel"
+                    id="cancelMeetingModal">
+                    Batal
+                </button>
+
+                <button
+                    type="submit"
+                    class="modal-save">
+                    ✓ Simpan Jadwal
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const meetingModal =
+    document.getElementById("meetingModal");
+
+const openMeetingButton =
+    document.querySelector(".quick-action button");
+
+const closeMeetingButton =
+    document.getElementById("closeMeetingModal");
+
+const cancelMeetingButton =
+    document.getElementById("cancelMeetingModal");
+
+
+function openMeetingModal() {
+
+    meetingModal.classList.add("show");
+
+}
+
+
+function closeMeetingModal() {
+
+    meetingModal.classList.remove("show");
+
+}
+
+
+if (openMeetingButton) {
+
+    openMeetingButton.addEventListener(
+        "click",
+        openMeetingModal
+    );
+
+}
+
+
+closeMeetingButton.addEventListener(
+    "click",
+    closeMeetingModal
+);
+
+
+cancelMeetingButton.addEventListener(
+    "click",
+    closeMeetingModal
+);
+
+
+meetingModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (event.target === meetingModal) {
+
+            closeMeetingModal();
+
+        }
+
+    }
+);
+
+
+document
+    .getElementById("meetingForm")
+    .addEventListener(
+        "submit",
+        function(event) {
+
+            event.preventDefault();
+
+            alert(
+                "Jadwal rapat berhasil disiapkan."
+            );
+
+            closeMeetingModal();
+
+            this.reset();
+
+        }
+    );
+
+</script>
+</body>
+</html>
