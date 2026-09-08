@@ -13,9 +13,9 @@
 
 <div class="dashboard">
 
-    <!-- GELEMBUNG BACKGROUND -->
-    <div class="bubble bubble-1"></div>
-    <div class="bubble bubble-2"></div>
+    <!-- ANIMASI EMBLEM BKN BACKGROUND (1 KANAN ATAS & 1 KIRI BAWAH) -->
+    <div class="bubble bubble-top-right"></div>
+    <div class="bubble bubble-bottom-left"></div>
 
 
     <!-- SIDEBAR -->
@@ -76,7 +76,7 @@
                 </div>
             </div>
 
-            <a href="#" class="logout">
+            <a href="/" class="logout" onclick="showLogoutModal(event)">
                 <span>↪</span>
                 Keluar
             </a>
@@ -411,5 +411,37 @@
 
 </div>
 
+    <!-- MODAL KONFIRMASI LOGOUT -->
+    <div id="logoutModal" class="logout-modal-overlay">
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon">
+                ⚠️
+            </div>
+            <h3>Konfirmasi Keluar</h3>
+            <p>Apakah Anda yakin ingin keluar dari Sistem Informasi Manajemen Ruang Rapat (SIM-RAPAT BKN)?</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Batal</button>
+                <a href="/" class="btn-logout-confirm">Ya, Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showLogoutModal(event) {
+        if (event) event.preventDefault();
+        document.getElementById("logoutModal").classList.add("show");
+    }
+
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("show");
+    }
+
+    window.addEventListener("click", function(event) {
+        const modal = document.getElementById("logoutModal");
+        if (event.target === modal) {
+            closeLogoutModal();
+        }
+    });
+    </script>
 </body>
 </html>

@@ -6,6 +6,7 @@ import "./config/passport.js";
 import loginRouter from "./routes/login.js";
 import dashboardRouter from "./routes/dashboard.js";
 import meetingRouter from "./routes/meetingRouter.js"
+import presensiRouter from "./routes/presensiRouter.js";
 
 const app = express();
 
@@ -14,8 +15,8 @@ app.set("view engine", "ejs");
 // 1. TAMBAHKAN BARIS INI AGAR BROWSER BISA MENGAKSES FOLDER PUBLIC (/bkn.png)
 app.use(express.static("public"));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
 
 app.use(
     session({
@@ -30,6 +31,7 @@ app.use(passport.session());
 
 app.use("/", loginRouter);
 app.use("/", dashboardRouter);
+app.use("/", presensiRouter);
 app.use("/",meetingRouter);
 
 export default app;

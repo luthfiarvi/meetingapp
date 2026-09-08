@@ -1,11 +1,11 @@
-import {Pool} from"pg";
+import { Pool } from "pg";
 
 const pool = new Pool({
     host: "localhost",
     port: 5432,
-    user: "magangit",
-    password: "K@nreg5",
-    database:"meeting"
+    user: "postgres",
+    password: "postgres",
+    database: "appmeeting"
 });
 
 export default pool;

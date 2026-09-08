@@ -22,53 +22,57 @@ body {
 }
 
 /* =================================
-   BUBBLE BACKGROUND
+   ANIMASI EMBLEM BKN BACKGROUND
+   (1 Kanan Atas & 1 Kiri Bawah)
 ================================= */
 
-.dashboard::before,
-.dashboard::after {
-    content: "";
+.bubble {
     position: fixed;
-    border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    background-image: url('/logo-animasi.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.dashboard::before {
-    width: 420px;
-    height: 420px;
-    right: -170px;
-    top: -170px;
-    background: rgba(37, 99, 235, .11);
-    animation: bubbleOne 3s ease-in-out infinite;
+/* Emblem Kanan Atas (Behind Profile / Top Card) */
+.bubble-top-right {
+    width: 320px;
+    height: 320px;
+    top: -30px;
+    right: -20px;
+    opacity: 0.16;
+    filter: drop-shadow(0 10px 20px rgba(37, 99, 235, 0.15));
+    animation: floatTopRight 7.5s ease-in-out infinite alternate;
 }
 
-.dashboard::after {
-    width: 330px;
-    height: 330px;
-    left: -140px;
-    bottom: -140px;
-    background: rgba(14, 165, 233, .10);
-    animation: bubbleTwo 2.5s ease-in-out infinite;
+/* Emblem Kiri Bawah (Behind Main Content) */
+.bubble-bottom-left {
+    width: 260px;
+    height: 260px;
+    bottom: -30px;
+    left: 210px;
+    opacity: 0.12;
+    filter: drop-shadow(0 8px 16px rgba(14, 165, 233, 0.12));
+    animation: floatBottomLeft 8.5s ease-in-out infinite alternate;
 }
 
-@keyframes bubbleOne {
-    0%, 100% {
-        transform: translate(0, 0);
+@keyframes floatTopRight {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
     }
-
-    50% {
-        transform: translate(-22px, 20px);
+    100% {
+        transform: translate(-18px, 18px) rotate(6deg);
     }
 }
 
-@keyframes bubbleTwo {
-    0%, 100% {
-        transform: translate(0, 0);
+@keyframes floatBottomLeft {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
     }
-
-    50% {
-        transform: translate(20px, -18px);
+    100% {
+        transform: translate(18px, -15px) rotate(-5deg);
     }
 }
 
@@ -78,7 +82,7 @@ body {
 
 .sidebar {
     width: 245px;
-    min-height: 100vh;
+    height: 100vh;
 
     padding: 24px 17px;
 
@@ -95,11 +99,20 @@ body {
     display: flex;
     flex-direction: column;
 
-    position: relative;
-    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
 
     box-shadow:
         7px 0 30px rgba(13,43,92,.16);
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 /* =================================
@@ -313,14 +326,10 @@ body {
 
 .main-content {
     flex: 1;
-
     min-width: 0;
-
-    padding:
-        29px 34px;
-
+    margin-left: 245px;
+    padding: 29px 34px;
     position: relative;
-
     z-index: 2;
 }
 
@@ -1094,6 +1103,7 @@ footer {
     visibility: hidden;
     transition: opacity .2s ease, visibility .2s ease;
     z-index: 9999;
+    overflow-y: auto;
 }
 
 .meeting-modal.show {
@@ -1102,8 +1112,10 @@ footer {
 }
 
 .meeting-modal-content {
-    width: 100%;
-    max-width: 480px;
+    width: 92%;
+    max-width: 720px;
+    max-height: 88vh;
+    overflow-y: auto;
     position: relative;
     padding: 28px;
     background: #fff;
@@ -1112,6 +1124,24 @@ footer {
     box-shadow: 0 25px 70px rgba(8, 35, 75, .28);
     transform: translateY(15px) scale(.97);
     transition: transform .2s ease;
+}
+
+.meeting-modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.meeting-modal-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.meeting-modal-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.meeting-modal-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .meeting-modal.show .meeting-modal-content {
@@ -1290,3 +1320,379 @@ footer {
     }
 }
 
+/* =================================
+   MANAJEMEN MEETING PAGE STYLES
+================================= */
+
+.management-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    background: #ffffff;
+    padding: 18px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(13, 43, 92, 0.05);
+    border: 1px solid #d7e2ef;
+}
+
+.management-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.management-icon-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #e0e7ff;
+    color: #4338ca;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.management-title-text h1 {
+    font-size: 20px;
+    color: #0d2b5c;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.management-title-text p {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.management-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-box-wrapper {
+    position: relative;
+    width: 220px;
+}
+
+.search-box-wrapper input {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    border-radius: 20px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.search-box-wrapper input:focus {
+    background: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.btn-add-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s;
+}
+
+.btn-add-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+/* CARDS GRID (EXACTLY 3 COLUMNS PER ROW) */
+.meeting-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 1024px) {
+    .meeting-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .meeting-cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meeting-card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 18px rgba(13, 43, 92, 0.06);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.meeting-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(13, 43, 92, 0.12);
+}
+
+.meeting-card-banner {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    background-color: #f1f5f9;
+}
+
+.meeting-card-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.meeting-card:hover .meeting-card-banner img {
+    transform: scale(1.05);
+}
+
+.meeting-card-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(13, 43, 92, 0.75);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.meeting-card-content {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.meeting-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0d2b5c;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 44px;
+}
+
+.meeting-card-meta {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.meeting-card-actions {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.btn-card-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: #e0f2fe;
+    color: #0284c7;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-card-view:hover {
+    background: #bae6fd;
+    color: #0369a1;
+}
+
+.btn-card-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-card-edit:hover {
+    background: #dbeafe;
+}
+
+
+
+
+/* =================================
+   MODAL KONFIRMASI LOGOUT
+================================= */
+
+.logout-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.logout-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.logout-modal-card {
+    background: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    padding: 28px 24px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transform: scale(0.92);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logout-modal-overlay.show .logout-modal-card {
+    transform: scale(1);
+}
+
+.logout-modal-icon {
+    width: 56px;
+    height: 56px;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #d97706;
+    font-size: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.logout-modal-card h3 {
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.logout-modal-card p {
+    color: #64748b;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin-bottom: 22px;
+}
+
+.logout-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-logout-cancel {
+    flex: 1;
+    padding: 11px 16px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-logout-cancel:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-logout-confirm {
+    flex: 1;
+    padding: 11px 16px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-logout-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    color: #ffffff;
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Presensi Meeting | BKN</title>
+    <link rel="stylesheet" href="/presensi.css">
+</head>
+
+<body>
+
+<div class="presensi-page">
+
+    <!-- GELEMBUNG BACKGROUND -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    <div class="bubble bubble-5"></div>
+
+    <!-- CARD PRESENSI -->
+    <div class="presensi-card">
+
+        <!-- LOGO BKN -->
+        <div class="logo-wrapper">
+            <div class="brand-logo-card">
+                <img src="/logo-bkn-asli.png" alt="Logo BKN" class="logo-bkn">
+            </div>
+        </div>
+
+        <!-- JUDUL HEADER -->
+        <div class="login-header">
+            <h1>Meeting App</h1>
+            <p>Kantor Regional V BKN Jakarta</p>
+        </div>
+
+        <!-- WELCOME / DESCRIPTION BOX -->
+        <div class="welcome-box">
+            <h2>Form Presensi Meeting</h2>
+            <p>Silakan isi data kehadiran Anda dengan lengkap dan tepat.</p>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                ⚠️ <%= error %>
+            </div>
+        <% } %>
+
+        <!-- FORM -->
+        <form action="/presensi" method="POST" id="presensiForm">
+
+            <input type="hidden" name="meeting_id" value="<%= meeting_id %>">
+
+            <!-- NAMA LENGKAP -->
+            <div class="form-group">
+                <label for="nama">Nama Lengkap <span>*</span></label>
+                <div class="input-wrapper">
+                    <span class="input-icon">👤</span>
+                    <input
+                        type="text"
+                        id="nama"
+                        name="nama"
+                        placeholder="Masukkan nama lengkap"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- NIP / NIK -->
+            <div class="form-group">
+                <label for="nip">NIP / NIK</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🆔</span>
+                    <input
+                        type="text"
+                        id="nip"
+                        name="nip"
+                        placeholder="Masukkan NIP atau NIK"
+                    >
+                </div>
+            </div>
+
+            <!-- INSTANSI / UNIT KERJA -->
+            <div class="form-group">
+                <label for="instansi">Instansi / Unit Kerja</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">🏢</span>
+                    <input
+                        type="text"
+                        id="instansi"
+                        name="instansi"
+                        placeholder="Masukkan instansi atau unit kerja"
+                    >
+                </div>
+            </div>
+
+            <!-- JABATAN -->
+            <div class="form-group">
+                <label for="jabatan">Jabatan</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">💼</span>
+                    <input
+                        type="text"
+                        id="jabatan"
+                        name="jabatan"
+                        placeholder="Masukkan jabatan"
+                    >
+                </div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">✉️</span>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Masukkan email"
+                    >
+                </div>
+            </div>
+
+            <!-- KETERANGAN -->
+            <div class="form-group">
+                <label for="keterangan">Keterangan</label>
+                <div class="input-wrapper textarea-wrapper">
+                    <span class="input-icon textarea-icon">📝</span>
+                    <textarea
+                        id="keterangan"
+                        name="keterangan"
+                        placeholder="Masukkan keterangan jika diperlukan"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- TANDA TANGAN (MULTI OPSI) -->
+            <div class="form-group">
+                <div class="signature-header-label">
+                    <label>Tanda Tangan <span>*</span></label>
+                    <span class="sig-mode-hint">Pilih metode input di bawah:</span>
+                </div>
+
+                <!-- Tabs Pilihan Metode Tanda Tangan -->
+                <div class="signature-tabs" role="tablist">
+                    <button type="button" class="sig-tab-btn active" data-tab="canvas">
+                        ✍️ Gores Canvas
+                    </button>
+                    <button type="button" class="sig-tab-btn" data-tab="upload">
+                        📁 Unggah Gambar Tanda Tangan
+                    </button>
+                </div>
+
+                <div class="signature-container">
+                    <!-- Panel 1: Canvas Drawing -->
+                    <div class="sig-panel active" id="sigPanelCanvas">
+                        <div class="signature-wrapper" id="signatureWrapper">
+                            <canvas id="signatureCanvas"></canvas>
+                            <div class="signature-hint" id="signatureHint">
+                                ✍️ Goreskan tanda tangan di sini
+                            </div>
+                        </div>
+                        <div class="signature-actions">
+                            <button type="button" class="clear-signature" id="clearCanvasBtn">
+                                🗑️ Hapus Goresan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Upload Gambar -->
+                    <div class="sig-panel" id="sigPanelUpload" style="display: none;">
+                        <div class="upload-zone" id="uploadZone">
+                            <input type="file" id="sigFileInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                            <div class="upload-empty" id="uploadEmpty">
+                                <div class="upload-icon">📁</div>
+                                <p class="upload-title">Klik atau seret file tanda tangan ke sini</p>
+                                <span class="upload-sub">Format PNG / JPG (Background putih / transparan)</span>
+                            </div>
+                            <div class="upload-preview" id="uploadPreview" style="display: none;">
+                                <div class="upload-img-box">
+                                    <img id="uploadPreviewImg" src="" alt="Preview Tanda Tangan">
+                                </div>
+                                <button type="button" class="clear-signature" id="removeUploadBtn">
+                                    🗑️ Ganti Gambar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="tanda_tangan" id="tandaTangan">
+            </div>
+
+            <!-- BUTTON -->
+            <button type="submit" class="submit-button" id="submitPresensiBtn">
+                ✓ Kirim Presensi
+            </button>
+
+        </form>
+
+        <!-- FOOTER -->
+        <div class="login-footer">
+            <p>Meeting App</p>
+            <span>Badan Kepegawaian Negara • 2026</span>
+        </div>
+
+    </div>
+
+    <!-- MODAL DIALOG POPUP -->
+    <div class="custom-modal-backdrop" id="modalBackdrop" aria-hidden="true">
+        <div class="custom-modal-card" id="modalCard">
+            <!-- Icon State: Success -->
+            <div class="modal-icon-wrapper success" id="modalIconSuccess">
+                <div class="modal-icon-circle">
+                    <svg viewBox="0 0 52 52" class="checkmark-svg">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="23" fill="none"/>
+                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Icon State: Warning -->
+            <div class="modal-icon-wrapper warning" id="modalIconWarning" style="display: none;">
+                <div class="modal-icon-circle">
+                    <span class="modal-emoji-icon">⚠️</span>
+                </div>
+            </div>
+
+            <!-- Icon State: Error -->
+            <div class="modal-icon-wrapper error" id="modalIconError" style="display: none;">
+                <div class="modal-icon-circle">
+                    <span class="modal-emoji-icon">❌</span>
+                </div>
+            </div>
+
+            <h3 class="modal-title" id="modalTitle">Presensi Berhasil!</h3>
+            <p class="modal-desc" id="modalDesc">
+                Data presensi kehadiran Anda telah berhasil disimpan dan tercatat di sistem.
+            </p>
+
+            <div class="modal-info-box" id="modalInfoBox" style="display: none;">
+                <div class="modal-info-row">
+                    <span class="modal-info-label">Nama</span>
+                    <strong class="modal-info-value" id="modalInfoNama">-</strong>
+                </div>
+                <div class="modal-info-row">
+                    <span class="modal-info-label">Waktu</span>
+                    <strong class="modal-info-value" id="modalInfoWaktu">-</strong>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-primary" id="modalBtnClose">
+                    ✓ Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Data container for server flash/query status -->
+<div id="serverState" 
+     data-success="<%= typeof success !== 'undefined' && success ? success : '' %>"
+     data-error="<%= typeof error !== 'undefined' && error ? error : '' %>"
+     style="display: none;">
+</div>
+
+<script src="/presensi.js"></script>
+
+</body>
+</html>

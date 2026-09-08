@@ -1,0 +1,1115 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            #dfeaf7 0%,
+            #f4f8fd 48%,
+            #d7e7fa 100%
+        );
+    color: #1f2937;
+}
+
+/* =================================
+   HALAMAN PRESENSI & DAFTAR PRESENSI
+================================= */
+
+.presensi-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* =================================
+   ANIMASI EMBLEM BKN BACKGROUND
+================================= */
+
+.bubble {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+    background-image: url('/logo-animasi.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 0;
+    filter: drop-shadow(0 10px 20px rgba(16, 47, 99, 0.15));
+}
+
+.bubble-1 {
+    width: 280px;
+    height: 280px;
+    top: -80px;
+    right: -60px;
+    opacity: 0.22;
+    animation: bubble1 6s ease-in-out infinite alternate;
+}
+
+.bubble-2 {
+    width: 220px;
+    height: 220px;
+    bottom: -50px;
+    left: -50px;
+    opacity: 0.20;
+    animation: bubble2 7s ease-in-out infinite alternate;
+}
+
+.bubble-3 {
+    width: 120px;
+    height: 120px;
+    top: 15%;
+    left: 8%;
+    opacity: 0.16;
+    animation: bubble3 5s ease-in-out infinite alternate;
+}
+
+.bubble-4 {
+    width: 90px;
+    height: 90px;
+    right: 10%;
+    bottom: 18%;
+    opacity: 0.16;
+    animation: bubble4 4.5s ease-in-out infinite alternate;
+}
+
+.bubble-5 {
+    width: 65px;
+    height: 65px;
+    left: 20%;
+    bottom: 22%;
+    opacity: 0.14;
+    animation: bubble5 4s ease-in-out infinite alternate;
+}
+
+@keyframes bubble1 {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-25px, 20px) rotate(10deg) scale(1.05); }
+}
+
+@keyframes bubble2 {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(20px, -20px) rotate(-8deg) scale(1.06); }
+}
+
+@keyframes bubble3 {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-16px) rotate(6deg); }
+}
+
+@keyframes bubble4 {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-12px, -12px) rotate(-5deg); }
+}
+
+@keyframes bubble5 {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-10px) scale(1.08); }
+}
+
+/* =================================
+   CARD CONTAINER PRESENSI
+================================= */
+
+.presensi-card {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px 30px 24px;
+    background: rgba(255, 255, 255, .96);
+    border: 1px solid rgba(255, 255, 255, .9);
+    border-radius: 20px;
+    position: relative;
+    z-index: 5;
+    box-shadow:
+        0 25px 60px rgba(16, 47, 99, .16),
+        0 5px 20px rgba(16, 47, 99, .07);
+}
+
+.presensi-card.daftar-card {
+    max-width: 720px;
+}
+
+/* Garis aksen atas */
+.presensi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12%;
+    width: 76%;
+    height: 4px;
+    border-radius: 0 0 10px 10px;
+    background:
+        linear-gradient(
+            90deg,
+            #102f63,
+            #2563eb,
+            #0ea5e9
+        );
+}
+
+/* =================================
+   LOGO & HEADER
+================================= */
+
+.logo-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.brand-logo-card {
+    width: 52px;
+    height: 52px;
+    background: #ffffff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 18px rgba(16, 47, 99, 0.12);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brand-logo-card:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 22px rgba(16, 47, 99, 0.18);
+}
+
+.logo-bkn {
+    width: 38px;
+    height: auto;
+    display: block;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.login-header h1 {
+    color: #102f63;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.4px;
+    margin-bottom: 3px;
+}
+
+.login-header p {
+    color: #64748b;
+    font-size: 11px;
+}
+
+/* =================================
+   WELCOME / SUMMARY BOX
+================================= */
+
+.welcome-box {
+    text-align: center;
+    background: linear-gradient(135deg, #edf5ff, #f6fbff);
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+}
+
+.welcome-box h2 {
+    color: #1d4ed8;
+    font-size: 15px;
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+
+.welcome-box p {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.daftar-header-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    gap: 12px;
+}
+
+.total-badge {
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    padding: 8px 14px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    white-space: nowrap;
+}
+
+.total-badge span {
+    display: block;
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.total-badge strong {
+    font-size: 14px;
+    color: #1d4ed8;
+}
+
+/* =================================
+   FORM & INPUTS
+================================= */
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.form-group label span {
+    color: #ef4444;
+}
+
+.input-wrapper {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    background: #fafdff;
+    border: 1px solid #d4dfed;
+    border-radius: 10px;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+.input-wrapper:hover {
+    border-color: #b7c8df;
+}
+
+.input-wrapper:focus-within {
+    background: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+.input-icon {
+    width: 40px;
+    text-align: center;
+    font-size: 15px;
+    color: #64748b;
+}
+
+.input-wrapper input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #334155;
+    font-size: 12px;
+    padding-right: 12px;
+    font-family: inherit;
+}
+
+.input-wrapper input::placeholder {
+    color: #9aa9bb;
+}
+
+.textarea-wrapper {
+    height: auto;
+    min-height: 80px;
+    align-items: flex-start;
+    padding-top: 8px;
+}
+
+.textarea-icon {
+    padding-top: 4px;
+}
+
+.input-wrapper textarea {
+    flex: 1;
+    min-height: 70px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #334155;
+    font-size: 12px;
+    padding: 2px 12px 8px 0;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.input-wrapper textarea::placeholder {
+    color: #9aa9bb;
+}
+
+/* =================================
+   TANDA TANGAN & MULTI METODE INPUT
+================================= */
+
+.signature-header-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.sig-mode-hint {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Tabs Switcher */
+.signature-tabs {
+    display: flex;
+    gap: 6px;
+    background: #eef4fb;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #d8e5f3;
+}
+
+.sig-tab-btn {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.sig-tab-btn:hover {
+    color: #1e40af;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.sig-tab-btn.active {
+    background: #ffffff;
+    color: #1d4ed8;
+    box-shadow: 0 2px 6px rgba(16, 47, 99, 0.08);
+    font-weight: 700;
+}
+
+/* Container & Panels */
+.signature-container {
+    background: #fafdff;
+    border: 1px solid #d4dfed;
+    border-radius: 12px;
+    padding: 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.signature-container:focus-within,
+.signature-container:hover {
+    border-color: #b7c8df;
+}
+
+.sig-panel {
+    display: none;
+    width: 100%;
+}
+
+.sig-panel.active {
+    display: block;
+    animation: sigFadeIn 0.25s ease-out;
+}
+
+@keyframes sigFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Panel 1: Canvas */
+.signature-wrapper {
+    width: 100%;
+    height: 160px;
+    background: #ffffff;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    cursor: crosshair;
+}
+
+.signature-wrapper:hover {
+    border-color: #94a3b8;
+}
+
+#signatureCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair !important;
+    touch-action: none;
+    position: relative;
+    z-index: 2;
+}
+
+.signature-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    color: #94a3b8;
+    pointer-events: none;
+    z-index: 1;
+    transition: opacity 0.2s;
+    user-select: none;
+}
+
+.signature-hint.hidden {
+    opacity: 0;
+}
+
+.signature-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.clear-signature {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.clear-signature:hover {
+    background: #f1f5f9;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+/* Panel 2: Upload Zone */
+.upload-zone {
+    width: 100%;
+    min-height: 160px;
+    background: #ffffff;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #2563eb;
+    background: #f0f7ff;
+}
+
+.upload-empty {
+    text-align: center;
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 32px;
+    margin-bottom: 6px;
+}
+
+.upload-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.upload-sub {
+    font-size: 10px;
+    color: #64748b;
+    display: block;
+}
+
+.upload-preview {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-img-box {
+    max-width: 100%;
+    height: 100px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-img-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* =================================
+   SUBMIT BUTTON & ERROR MESSAGE
+================================= */
+
+.submit-button {
+    width: 100%;
+    height: 46px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    background:
+        linear-gradient(
+            100deg,
+            #102f63,
+            #2563eb,
+            #0ea5e9
+        );
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, .22);
+    transition: transform .2s, box-shadow .2s;
+    font-family: inherit;
+}
+
+.submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(37, 99, 235, .30);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+}
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =================================
+   DAFTAR PRESENSI PESERTA LIST
+================================= */
+
+.peserta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.peserta-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(16, 47, 99, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.peserta-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 47, 99, 0.08);
+}
+
+.peserta-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.peserta-number {
+    background: linear-gradient(135deg, #102f63, #2563eb);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.peserta-nama {
+    font-size: 15px;
+    font-weight: 700;
+    color: #102f63;
+}
+
+.peserta-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detail-item.full-width {
+    grid-column: span 2;
+}
+
+.detail-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.detail-value {
+    font-size: 12px;
+    color: #334155;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.time-badge {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #3b82f6;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.signature-display-box {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.signature-img-wrapper {
+    margin-top: 6px;
+    background: #fafdff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px;
+    display: inline-block;
+}
+
+.signature-img-wrapper img {
+    max-width: 260px;
+    height: 90px;
+    object-fit: contain;
+    display: block;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 36px 20px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+}
+
+.empty-icon {
+    font-size: 38px;
+    margin-bottom: 8px;
+}
+
+.empty-state h3 {
+    font-size: 15px;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.empty-state p {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* =================================
+   FOOTER
+================================= */
+
+.login-footer {
+    text-align: center;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #e3eaf2;
+}
+
+.login-footer p {
+    color: #64748b;
+    font-size: 9px;
+    margin-bottom: 4px;
+}
+
+.login-footer span {
+    color: #9aa7b8;
+    font-size: 8px;
+}
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 580px) {
+    .presensi-page {
+        padding: 16px 12px;
+    }
+
+    .presensi-card {
+        padding: 24px 18px 20px;
+        border-radius: 16px;
+    }
+
+    .daftar-header-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .total-badge {
+        align-self: flex-start;
+    }
+
+    .peserta-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-item.full-width {
+        grid-column: span 1;
+    }
+
+    .signature-img-wrapper img {
+        max-width: 100%;
+        height: 75px;
+    }
+
+    .bubble-3,
+    .bubble-4,
+    .bubble-5 {
+        display: none;
+    }
+}
+
+/* =================================
+   CUSTOM MODAL POPUP DIALOG
+================================= */
+
+.custom-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-modal-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.custom-modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 24px;
+    padding: 32px 28px 26px;
+    text-align: center;
+    box-shadow: 
+        0 25px 60px -12px rgba(16, 47, 99, 0.35),
+        0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    position: relative;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                opacity 0.3s ease-out;
+}
+
+.custom-modal-backdrop.show .custom-modal-card {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Modal Icon Animations */
+.modal-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-icon-circle {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.modal-icon-wrapper.success .modal-icon-circle {
+    background: #ecfdf5;
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0.12),
+                0 8px 20px rgba(16, 185, 129, 0.2);
+}
+
+.modal-icon-wrapper.warning .modal-icon-circle {
+    background: #fffbeb;
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.12),
+                0 8px 20px rgba(245, 158, 11, 0.2);
+}
+
+.modal-icon-wrapper.error .modal-icon-circle {
+    background: #fef2f2;
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.12),
+                0 8px 20px rgba(239, 68, 68, 0.2);
+}
+
+.modal-emoji-icon {
+    font-size: 36px;
+    animation: modalPopIcon 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* SVG Animated Checkmark */
+.checkmark-svg {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3.5;
+    stroke: #10b981;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #10b981;
+}
+
+.custom-modal-backdrop.show .checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3.5;
+    stroke-miterlimit: 10;
+    stroke: #10b981;
+    fill: none;
+    animation: strokeCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.custom-modal-backdrop.show .checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke: #10b981;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: strokeCheck 0.35s cubic-bezier(0.65, 0, 0.45, 1) 0.45s forwards;
+}
+
+@keyframes strokeCircle {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes strokeCheck {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes modalPopIcon {
+    0% {
+        transform: scale(0);
+    }
+    70% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Modal Typography */
+.modal-title {
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+}
+
+.modal-desc {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 18px;
+}
+
+/* Info Box */
+.modal-info-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.modal-info-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.modal-info-value {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* Modal Buttons */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.modal-btn {
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.modal-btn-primary {
+    background: linear-gradient(100deg, #102f63, #2563eb, #0ea5e9);
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.modal-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.35);
+}
+
+.modal-btn-primary:active {
+    transform: translateY(0);
+}
+
+.modal-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.modal-btn-secondary:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Loading Spinner on submit button */
+.btn-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+

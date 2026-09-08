@@ -169,9 +169,14 @@
             color: #1e293b;
         }
     </style>
+    <link rel="stylesheet" href="/dashboard.css">
 </head>
 
 <body>
+
+    <!-- ANIMASI EMBLEM BKN BACKGROUND (1 KANAN ATAS & 1 KIRI BAWAH) -->
+    <div class="bubble bubble-top-right"></div>
+    <div class="bubble bubble-bottom-left"></div>
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -187,7 +192,7 @@
             <a href="/setupsertifikat"><i class="fa-solid fa-award"></i> Setup Sertifikat</a>
         </div>
         <div class="p-3 border-top border-secondary border-opacity-25">
-            <a href="/logout"
+            <a href="/" onclick="showLogoutModal(event)"
                 class="text-danger text-decoration-none d-flex align-items-center gap-2 px-3 py-2 fw-semibold">
                 <i class="fa-solid fa-right-from-bracket"></i> Keluar
             </a>
@@ -280,6 +285,39 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL KONFIRMASI LOGOUT -->
+    <div id="logoutModal" class="logout-modal-overlay">
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon">
+                ⚠️
+            </div>
+            <h3>Konfirmasi Keluar</h3>
+            <p>Apakah Anda yakin ingin keluar dari Sistem Informasi Manajemen Ruang Rapat (SIM-RAPAT BKN)?</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Batal</button>
+                <a href="/" class="btn-logout-confirm">Ya, Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showLogoutModal(event) {
+        if (event) event.preventDefault();
+        document.getElementById("logoutModal").classList.add("show");
+    }
+
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("show");
+    }
+
+    window.addEventListener("click", function(event) {
+        const modal = document.getElementById("logoutModal");
+        if (event.target === modal) {
+            closeLogoutModal();
+        }
+    });
+    </script>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

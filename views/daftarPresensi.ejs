@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Presensi Meeting | BKN</title>
+    <link rel="stylesheet" href="/presensi.css">
+</head>
+
+<body>
+
+<div class="presensi-page">
+
+    <!-- GELEMBUNG BACKGROUND -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    <div class="bubble bubble-5"></div>
+
+    <!-- CARD DAFTAR PRESENSI -->
+    <div class="presensi-card daftar-card">
+
+        <!-- LOGO BKN -->
+        <div class="logo-wrapper">
+            <div class="brand-logo-card">
+                <img src="/logo-bkn-asli.png" alt="Logo BKN" class="logo-bkn">
+            </div>
+        </div>
+
+        <!-- JUDUL HEADER -->
+        <div class="login-header">
+            <h1>Meeting App</h1>
+            <p>Kantor Regional V BKN Jakarta</p>
+        </div>
+
+        <!-- WELCOME / SUMMARY BOX -->
+        <div class="welcome-box daftar-header-box">
+            <div class="header-text">
+                <h2>Daftar Presensi Meeting</h2>
+                <p>Data peserta yang telah melakukan presensi pada rapat ini.</p>
+            </div>
+            <div class="total-badge">
+                <span>Total Peserta</span>
+                <strong><%= dataPresensi.length %> Orang</strong>
+            </div>
+        </div>
+
+        <% if (dataPresensi.length === 0) { %>
+
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <h3>Belum Ada Presensi</h3>
+                <p>Belum ada peserta yang melakukan presensi untuk meeting ini.</p>
+            </div>
+
+        <% } else { %>
+
+            <div class="peserta-list">
+
+                <% dataPresensi.forEach((peserta, index) => { %>
+
+                    <div class="peserta-card">
+
+                        <div class="peserta-header">
+                            <span class="peserta-number">#<%= index + 1 %></span>
+                            <h3 class="peserta-nama"><%= peserta.nama %></h3>
+                        </div>
+
+                        <div class="peserta-details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">🆔 NIP / NIK</span>
+                                <span class="detail-value"><%= peserta.nip || "-" %></span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">🏢 Instansi</span>
+                                <span class="detail-value"><%= peserta.instansi || "-" %></span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">💼 Jabatan</span>
+                                <span class="detail-value"><%= peserta.jabatan || "-" %></span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">✉️ Email</span>
+                                <span class="detail-value"><%= peserta.email || "-" %></span>
+                            </div>
+
+                            <div class="detail-item full-width">
+                                <span class="detail-label">📝 Keterangan</span>
+                                <span class="detail-value"><%= peserta.keterangan || "-" %></span>
+                            </div>
+
+                            <div class="detail-item full-width">
+                                <span class="detail-label">⏰ Waktu Presensi</span>
+                                <span class="detail-value time-badge"><%= peserta.waktu_presensi ? (peserta.waktu_presensi instanceof Date ? peserta.waktu_presensi.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : peserta.waktu_presensi) : '-' %></span>
+                            </div>
+                        </div>
+
+                        <% if (peserta.tanda_tangan) { %>
+                            <div class="signature-display-box">
+                                <span class="detail-label">✍️ Tanda Tangan:</span>
+                                <div class="signature-img-wrapper">
+                                    <img
+                                        src="<%= peserta.tanda_tangan.startsWith('/') ? peserta.tanda_tangan : '/uploads/ttd/' + peserta.tanda_tangan %>"
+                                        alt="Tanda tangan <%= peserta.nama %>"
+                                    >
+                                </div>
+                            </div>
+                        <% } %>
+
+                    </div>
+
+                <% }); %>
+
+            </div>
+
+        <% } %>
+
+        <!-- FOOTER -->
+        <div class="login-footer">
+            <p>Meeting App</p>
+            <span>Badan Kepegawaian Negara • 2026</span>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
