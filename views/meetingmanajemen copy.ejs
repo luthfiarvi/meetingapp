@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Meeting | Meeting App BKN</title>
+    <link rel="stylesheet" href="/dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- ANIMASI EMBLEM BKN BACKGROUND (1 KANAN ATAS & 1 KIRI BAWAH) -->
+        <div class="bubble bubble-top-right"></div>
+        <div class="bubble bubble-bottom-left"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-logo">
+                    <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                </div>
+                <div>
+                    <h2>Meeting App</h2>
+                    <span>BKN Regional V</span>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <a href="/dashboard" class="menu-item">
+                    <span>🏠</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/manajemenmeeting" class="menu-item active">
+                    <span>📋</span>
+                    <span>Manajemen Meeting</span>
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span>📝</span>
+                    <span>Manajemen Presensi</span>
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span>📜</span>
+                    <span>Manajemen Sertifikat</span>
+                </a>
+
+                <a href="/" class="menu-item" onclick="showLogoutModal(event)">
+                    <span>🚪</span>
+                    <span>Manajemen Logout</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="help-box">
+                    <span class="help-icon">?</span>
+                    <div>
+                        <strong>Butuh bantuan?</strong>
+                        <p>Hubungi administrator sistem.</p>
+                    </div>
+                </div>
+
+                <a href="/" class="logout" onclick="showLogoutModal(event)">
+                    <span>↪</span>
+                    Keluar
+                </a>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- MANAGEMENT TOP BAR -->
+            <section class="management-top-bar">
+                <div class="management-title-wrapper">
+                    <div class="management-icon-badge">
+                        📑
+                    </div>
+                    <div class="management-title-text">
+                        <h1>Manajemen Meeting</h1>
+                        <p>Halaman untuk menambah, edit dan kelola daftar meeting BKN</p>
+                    </div>
+                </div>
+
+                <div class="management-actions">
+                    <div class="search-box-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchMeeting" placeholder="Cari Meeting..." onkeyup="filterMeetings()">
+                    </div>
+
+                    <button type="button" class="btn-add-primary" onclick="openMeetingModal()">
+                        ＋ Tambah Meeting
+                    </button>
+                </div>
+            </section>
+
+            <!-- CARDS GRID (3 KOLOM SAMPAI SELESAI) -->
+            <section class="meeting-cards-grid" id="meetingGrid">
+
+                <% if (typeof meetings !== 'undefined' && meetings && meetings.length > 0) { %>
+                    <% meetings.forEach(function(m) { %>
+                        <div class="meeting-card">
+                            <div class="meeting-card-banner">
+                                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop" alt="Meeting BKN" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                                <span class="meeting-card-badge"><%= m.m_tipe || 'Rapat Offline' %></span>
+                            </div>
+                            <div class="meeting-card-content">
+                                <h3 class="meeting-card-title"><%= m.m_nama %></h3>
+                                <p class="meeting-card-meta">📅 Tanggal: <%= m.tanggal || '21 Agustus 2026' %></p>
+                                <p class="meeting-card-desc" style="display:none;"><%= m.deskripsi || 'Pembahasan agenda rutin BKN Regional V.' %></p>
+                                <div class="meeting-card-actions">
+                                    <button type="button" class="btn-card-view" onclick="openViewModal(this)">
+                                        👁️ View
+                                    </button>
+                                    <button type="button" class="btn-card-edit" onclick="openEditModal(this)">
+                                        ✏️ Edit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+
+                <!-- DATA KARTU MEETING -->
+
+                <!-- KARTU 1 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop" alt="Sosialisasi Kenaikan Pangkat" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Rapat Offline</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Kanreg V BKN Sosialisasikan Kenaikan Pangkat Otomatis, Layanan Makin Praktis</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 21 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Pelaksanaan sosialisasi sistem peremajaan data dan kenaikan pangkat otomatis bagi seluruh pegawai ASN wilayah Kanreg V BKN.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 2 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1542744836-56758bfd3237?q=80&w=600&auto=format&fit=crop" alt="Peringatan HUT RI" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Rapat Offline</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Peringatan HUT ke-81 RI di Kanreg V BKN, Perkuat Semangat Jaga Persatuan</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 17 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Rapat pembentukan panitia serta koordinasi persiapan upacara dan perlombaan peringatan HUT ke-81 Republik Indonesia.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 3 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1577412647305-991150c7d163?q=80&w=600&auto=format&fit=crop" alt="Profiling ASN" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Zoom</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Ukur Potensi hingga Preferensi Karir, Kanreg V BKN Fasilitasi Profiling ASN</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 20 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Pelaksanaan kegiatan profiling kompetensi dan analisis preferensi karir ASN menggunakan platform penilaian online.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 4 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?q=80&w=600&auto=format&fit=crop" alt="Forum SIGAP Pensiun" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Rapat Offline</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Forum Kanreg V SIGAP, Matangkan Kesiapan Implementasi Pensiun Otomatis bagi ASN</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 20 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Pertemuan koordinasi tim SIGAP untuk memastikan validitas data pensiun otomatis ASN terintegrasi secara cepat.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 5 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=600&auto=format&fit=crop" alt="Etika Disiplin ASN" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Webinar</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Kanreg V BKN Dorong Etika, Integritas dan Disiplin sebagai Fondasi ASN BerAKHLAK</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 19 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Webinar sosialisasi nilai-nilai dasar ASN BerAKHLAK guna meningkatkan integritas dan kedisiplinan kerja aparatur.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 6 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=600&auto=format&fit=crop" alt="Vaksinasi KORPRI" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Rapat Offline</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Perluas Akses Perlindungan Kesehatan, Kanreg V BKN dan KORPRI Gelar Vaksinasi</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 13 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Rapat persiapan serta pelaksanaan vaksinasi kesehatan bagi keluarga besar pegawai Kanreg V BKN.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 7 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=600&auto=format&fit=crop" alt="Manajemen Talenta" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Zoom</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Percepat Implementasi Manajemen Talenta, Kanreg V BKN Awali Pelaksanaan Profiling</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 5 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Pertemuan virtual membahas pemetaan talent pool ASN serta akselerasi pola karir berbasis kualifikasi.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 8 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=600&auto=format&fit=crop" alt="Forum Konsultasi" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Rapat Offline</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Kanreg V BKN Gelar Forum Konsultasi Publik, Perkuat Kolaborasi Standar Pelayanan</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 5 Agustus 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Forum konsultasi publik yang melibatkan stakeholder eksternal dalam penyempurnaan maklumat pelayanan publik.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARTU 9 -->
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="https://images.unsplash.com/photo-1560439514-4e9645039924?q=80&w=600&auto=format&fit=crop" alt="AKSARA Vol 4" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                        <span class="meeting-card-badge">Webinar</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">Kupas Tuntas Jabatan Fungsional, AKSARA Vol. 4 Bahas Penilaian Angka Kredit</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: 16 Juli 2026</p>
+                        <p class="meeting-card-desc" style="display:none;">Acara rutin seri AKSARA Vol. 4 membedah juknis dan mekanisme angka kredit jabatan fungsional kepegawaian.</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <footer>
+                Meeting App • Kantor Regional V BKN Jakarta • 2026
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- MODAL TAMBAH MEETING -->
+    <div class="meeting-modal" id="meetingModal">
+        <div class="meeting-modal-content">
+            <button type="button" class="modal-close" id="closeMeetingModal">×</button>
+
+            <div class="modal-title">
+                <div class="modal-icon">📅</div>
+                <div>
+                    <h2>Tambah Meeting Baru</h2>
+                    <p>Lengkapi informasi agenda rapat BKN</p>
+                </div>
+            </div>
+
+            <form action="/inputmeeting" method="POST" id="meetingForm">
+                <div class="modal-form-group">
+                    <label for="meetingName">Nama Meeting</label>
+                    <input type="text" id="meetingName" name="m_nama" placeholder="Masukkan Nama Meetingnya..." required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label for="meetingDescription">Deskripsi Meeting</label>
+                    <textarea id="meetingDescription" name="deskripsi" rows="3" placeholder="Masukkan deskripsi singkat meeting..."></textarea>
+                </div>
+
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label for="meetingDate">Tanggal Meeting</label>
+                        <input type="date" id="meetingDate" name="tanggal" required>
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="meetingType">Tipe Meeting</label>
+                        <select id="meetingType" name="m_tipe" required>
+                            <option value="">Pilih Tipe Meeting</option>
+                            <option value="Rapat Offline">Rapat Offline</option>
+                            <option value="Zoom">Zoom</option>
+                            <option value="Webinar">Webinar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-cancel" id="cancelMeetingModal">Batal</button>
+                    <button type="submit" class="modal-save">✓ Simpan Meeting</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VIEW DETAIL MEETING -->
+    <div class="meeting-modal" id="viewMeetingModal">
+        <div class="meeting-modal-content">
+            <button type="button" class="modal-close" onclick="closeViewModal()">×</button>
+
+            <div class="modal-title">
+                <div class="modal-icon">👁️</div>
+                <div>
+                    <h2>Detail Meeting</h2>
+                    <p>Informasi lengkap agenda rapat & unduhan berkas</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px; border-radius: 12px; overflow: hidden; height: 180px; background:#f1f5f9;">
+                <img id="viewImage" src="" alt="Meeting" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+            </div>
+
+            <div class="modal-form-group">
+                <span id="viewBadge" class="meeting-card-badge" style="position:static; display:inline-block; margin-bottom:10px;"></span>
+                <h3 id="viewTitle" style="font-size: 16px; color:#0d2b5c; font-weight:700; margin-bottom: 8px;"></h3>
+                <p id="viewDate" style="font-size: 12px; color:#64748b; margin-bottom: 14px; font-weight:600;"></p>
+                <div style="background:#f8fafc; padding: 14px; border-radius: 10px; border:1px solid #e2e8f0; margin-bottom: 16px;">
+                    <strong style="font-size: 12px; color:#334155;">Deskripsi Rapat:</strong>
+                    <p id="viewDesc" style="font-size: 13px; color:#475569; margin-top: 4px; line-height: 1.5;"></p>
+                </div>
+
+                <!-- BERKAS UNDUHAN NOTULEN & VIDEO -->
+                <div style="background:#f0f7ff; padding: 16px; border-radius: 12px; border: 1px solid #bfdbfe;">
+                    <strong style="font-size: 13px; color:#1e40af; display:block; margin-bottom: 10px;">📄 Berkas & Dokumentasi Rapat:</strong>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <a id="btnDownloadPdf" href="#" download="Notulen_Rapat_BKN.pdf" onclick="triggerPdfDownload(event)" style="flex:1; min-width:180px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; background:#2563eb; color:#ffffff; border-radius:10px; font-size:12px; font-weight:600; text-decoration:none; box-shadow: 0 4px 12px rgba(37,99,235,0.25); transition: 0.2s;">
+                            📄 Unduh Notulen (PDF)
+                        </a>
+                        <a id="btnDownloadVideo" href="#" download="Dokumentasi_Rapat_BKN.mp4" onclick="triggerVideoDownload(event)" style="flex:1; min-width:180px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; background:#059669; color:#ffffff; border-radius:10px; font-size:12px; font-weight:600; text-decoration:none; box-shadow: 0 4px 12px rgba(5,150,105,0.25); transition: 0.2s;">
+                            🎬 Unduh Video Rapat
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button type="button" class="modal-cancel" onclick="closeViewModal()" style="width:100%;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT MEETING (DILEBARKAN KANAN-KIRI) -->
+    <div class="meeting-modal" id="editMeetingModal">
+        <div class="meeting-modal-content">
+            <button type="button" class="modal-close" onclick="closeEditModal()">×</button>
+
+            <div class="modal-title">
+                <div class="modal-icon">✏️</div>
+                <div>
+                    <h2>Edit Meeting</h2>
+                    <p>Perbarui informasi agenda rapat, hasil notulen PDF & video dokumentasi</p>
+                </div>
+            </div>
+
+            <form id="editMeetingForm">
+                <div class="modal-form-group">
+                    <label for="editName">Nama Meeting</label>
+                    <input type="text" id="editName" required>
+                </div>
+
+                <div class="modal-form-group">
+                    <label for="editDescription">Deskripsi Meeting</label>
+                    <textarea id="editDescription" rows="3"></textarea>
+                </div>
+
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label for="editDate">Tanggal Meeting</label>
+                        <input type="text" id="editDate" required>
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="editType">Tipe Meeting</label>
+                        <select id="editType" required>
+                            <option value="Rapat Offline">Rapat Offline</option>
+                            <option value="Zoom">Zoom</option>
+                            <option value="Webinar">Webinar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label for="editThumbnail">Ganti Foto Thumbnail (Opsional)</label>
+                        <input type="file" id="editThumbnail" accept="image/*">
+                    </div>
+
+                    <div class="modal-form-group">
+                        <label for="editNotulenPdf">Upload Hasil Notulen Rapat (PDF)</label>
+                        <input type="file" id="editNotulenPdf" accept=".pdf">
+                    </div>
+                </div>
+
+                <div class="modal-form-group">
+                    <label for="editVideoFile">Upload Video Dokumentasi Rapat (MP4 / WebM)</label>
+                    <input type="file" id="editVideoFile" accept="video/*">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-cancel" onclick="closeEditModal()">Batal</button>
+                    <button type="submit" class="modal-save">✓ Update Meeting</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const meetingModal = document.getElementById("meetingModal");
+        const closeMeetingButton = document.getElementById("closeMeetingModal");
+        const cancelMeetingButton = document.getElementById("cancelMeetingModal");
+
+        let activeCardForEdit = null;
+        let currentActivePdfBlob = null;
+        let currentActiveVideoBlob = null;
+
+        function openMeetingModal() {
+            meetingModal.classList.add("show");
+        }
+
+        function closeMeetingModal() {
+            meetingModal.classList.remove("show");
+        }
+
+        if (closeMeetingButton) {
+            closeMeetingButton.addEventListener("click", closeMeetingModal);
+        }
+
+        if (cancelMeetingButton) {
+            cancelMeetingButton.addEventListener("click", closeMeetingModal);
+        }
+
+        meetingModal.addEventListener("click", function (event) {
+            if (event.target === meetingModal) {
+                closeMeetingModal();
+            }
+        });
+
+        // VIEW MODAL LOGIC
+        function openViewModal(button) {
+            const card = button.closest('.meeting-card');
+            const img = card.querySelector('.meeting-card-banner img').src;
+            const badge = card.querySelector('.meeting-card-badge').textContent;
+            const title = card.querySelector('.meeting-card-title').textContent;
+            const meta = card.querySelector('.meeting-card-meta').textContent;
+            const desc = card.querySelector('.meeting-card-desc') ? card.querySelector('.meeting-card-desc').textContent : 'Informasi agenda rapat BKN Regional V.';
+
+            document.getElementById('viewImage').src = img;
+            document.getElementById('viewBadge').textContent = badge;
+            document.getElementById('viewTitle').textContent = title;
+            document.getElementById('viewDate').textContent = meta;
+            document.getElementById('viewDesc').textContent = desc;
+
+            // PDF Blob / URL
+            currentActivePdfBlob = card.dataset.pdfUrl || null;
+            currentActiveVideoBlob = card.dataset.videoUrl || null;
+
+            const pdfBtn = document.getElementById('btnDownloadPdf');
+            const videoBtn = document.getElementById('btnDownloadVideo');
+
+            if (currentActivePdfBlob) {
+                pdfBtn.href = currentActivePdfBlob;
+                pdfBtn.download = `Notulen_${title.substring(0, 20)}.pdf`;
+            } else {
+                pdfBtn.href = "#";
+            }
+
+            if (currentActiveVideoBlob) {
+                videoBtn.href = currentActiveVideoBlob;
+                videoBtn.download = `Video_${title.substring(0, 20)}.mp4`;
+            } else {
+                videoBtn.href = "#";
+            }
+
+            document.getElementById('viewMeetingModal').classList.add('show');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewMeetingModal').classList.remove('show');
+        }
+
+        // TRIGGER SIMULATED DOWNLOAD IF NO FILE UPLOADED YET
+        function triggerPdfDownload(e) {
+            if (!currentActivePdfBlob) {
+                e.preventDefault();
+                const dummyContent = "BERITA ACARA & NOTULEN RAPAT BKN REGIONAL V\n\nTanggal: " + document.getElementById('viewDate').textContent + "\nAgenda: " + document.getElementById('viewTitle').textContent + "\n\nCatatan Hasil Rapat:\n1. Pembahasan poin utama agenda kerja BKN.\n2. Penetapan tindak lanjut dan rekomendasi teknis.\n\nKantor Regional V BKN Jakarta.";
+                const blob = new Blob([dummyContent], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Notulen_${document.getElementById('viewTitle').textContent.substring(0, 25)}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function triggerVideoDownload(e) {
+            if (!currentActiveVideoBlob) {
+                e.preventDefault();
+                alert('🎬 Mengunduh rekaman video rapat...');
+                const dummyContent = "DOKUMENTASI REKAMAN VIDEO RAPAT BKN REGIONAL V";
+                const blob = new Blob([dummyContent], { type: 'video/mp4' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Video_Rapat_${document.getElementById('viewTitle').textContent.substring(0, 25)}.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // EDIT MODAL LOGIC
+        function openEditModal(button) {
+            activeCardForEdit = button.closest('.meeting-card');
+
+            const badge = activeCardForEdit.querySelector('.meeting-card-badge').textContent.trim();
+            const title = activeCardForEdit.querySelector('.meeting-card-title').textContent.trim();
+            const meta = activeCardForEdit.querySelector('.meeting-card-meta').textContent.replace('📅 Tanggal:', '').trim();
+            const desc = activeCardForEdit.querySelector('.meeting-card-desc') ? activeCardForEdit.querySelector('.meeting-card-desc').textContent.trim() : '';
+
+            document.getElementById('editName').value = title;
+            document.getElementById('editDate').value = meta;
+            document.getElementById('editDescription').value = desc;
+
+            const editTypeSelect = document.getElementById('editType');
+            if (['Rapat Offline', 'Zoom', 'Webinar'].includes(badge)) {
+                editTypeSelect.value = badge;
+            } else {
+                editTypeSelect.value = 'Rapat Offline';
+            }
+
+            document.getElementById('editMeetingModal').classList.add('show');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editMeetingModal').classList.remove('show');
+            activeCardForEdit = null;
+        }
+
+        document.getElementById('editMeetingForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (!activeCardForEdit) return;
+
+            const name = document.getElementById('editName').value;
+            const date = document.getElementById('editDate').value;
+            const type = document.getElementById('editType').value;
+            const desc = document.getElementById('editDescription').value;
+            const fileInput = document.getElementById('editThumbnail');
+            const pdfInput = document.getElementById('editNotulenPdf');
+            const videoInput = document.getElementById('editVideoFile');
+
+            activeCardForEdit.querySelector('.meeting-card-title').textContent = name;
+            activeCardForEdit.querySelector('.meeting-card-badge').textContent = type;
+            activeCardForEdit.querySelector('.meeting-card-meta').textContent = `📅 Tanggal: ${date}`;
+            if (activeCardForEdit.querySelector('.meeting-card-desc')) {
+                activeCardForEdit.querySelector('.meeting-card-desc').textContent = desc;
+            }
+
+            // Save Thumbnail Photo
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    activeCardForEdit.querySelector('.meeting-card-banner img').src = event.target.result;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+
+            // Save PDF Notulen
+            if (pdfInput.files && pdfInput.files[0]) {
+                activeCardForEdit.dataset.pdfUrl = URL.createObjectURL(pdfInput.files[0]);
+            }
+
+            // Save Video Documentation
+            if (videoInput.files && videoInput.files[0]) {
+                activeCardForEdit.dataset.videoUrl = URL.createObjectURL(videoInput.files[0]);
+            }
+
+            alert('✓ Meeting, Notulen PDF, dan Video Dokumentasi berhasil diperbarui!');
+            closeEditModal();
+        });
+
+        function filterMeetings() {
+            const input = document.getElementById('searchMeeting').value.toLowerCase();
+            const cards = document.querySelectorAll('.meeting-card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('.meeting-card-title').textContent.toLowerCase();
+                const meta = card.querySelector('.meeting-card-meta').textContent.toLowerCase();
+
+                if (title.includes(input) || meta.includes(input)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // TAMBAH MEETING (AGENDA BARU SEBELUM/SAAT RAPAT BERLANGSUNG)
+        document.getElementById("meetingForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById("meetingName").value;
+            const date = document.getElementById("meetingDate").value;
+            const type = document.getElementById("meetingType").value;
+            const desc = document.getElementById("meetingDescription").value;
+
+            // Foto default saat baru dibuat
+            const defaultImgUrl = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop";
+            const formattedDate = date ? new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Hari ini';
+
+            const newCardHTML = `
+                <div class="meeting-card">
+                    <div class="meeting-card-banner">
+                        <img src="${defaultImgUrl}" alt="${name}">
+                        <span class="meeting-card-badge">${type}</span>
+                    </div>
+                    <div class="meeting-card-content">
+                        <h3 class="meeting-card-title">${name}</h3>
+                        <p class="meeting-card-meta">📅 Tanggal: ${formattedDate}</p>
+                        <p class="meeting-card-desc" style="display:none;">${desc || 'Informasi agenda rapat BKN Regional V.'}</p>
+                        <div class="meeting-card-actions">
+                            <button type="button" class="btn-card-view" onclick="openViewModal(this)">👁️ View</button>
+                            <button type="button" class="btn-card-edit" onclick="openEditModal(this)">✏️ Edit</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const grid = document.getElementById("meetingGrid");
+            grid.insertAdjacentHTML("afterbegin", newCardHTML);
+
+            alert('✓ Meeting baru berhasil ditambahkan! Anda dapat mengeklik Edit setelah rapat selesai untuk mengunggah Notulen PDF & Video.');
+            closeMeetingModal();
+            document.getElementById("meetingForm").reset();
+        });
+    </script>
+
+    <!-- MODAL KONFIRMASI LOGOUT -->
+    <div id="logoutModal" class="logout-modal-overlay">
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon">
+                ⚠️
+            </div>
+            <h3>Konfirmasi Keluar</h3>
+            <p>Apakah Anda yakin ingin keluar dari Sistem Informasi Manajemen Ruang Rapat (SIM-RAPAT BKN)?</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Batal</button>
+                <a href="/" class="btn-logout-confirm">Ya, Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showLogoutModal(event) {
+        if (event) event.preventDefault();
+        document.getElementById("logoutModal").classList.add("show");
+    }
+
+    function closeLogoutModal() {
+        document.getElementById("logoutModal").classList.remove("show");
+    }
+
+    window.addEventListener("click", function(event) {
+        const modal = document.getElementById("logoutModal");
+        if (event.target === modal) {
+            closeLogoutModal();
+        }
+    });
+    </script>
+</body>
+
+</html>

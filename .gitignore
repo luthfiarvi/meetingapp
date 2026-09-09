@@ -1,10 +1,2 @@
 node_modules/
 .env
-*.save
-*.original
-* copy.*
-public/uploads/ttd/*.png
-public/uploads/ttd/*.jpg
-public/uploads/ttd/*.jpeg
-public/uploads/ttd/*.webp
-!public/uploads/ttd/.gitkeep
