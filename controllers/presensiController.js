@@ -1,10 +1,12 @@
 import fs from "fs";
 import path from "path";
+import QRCode from "qrcode";
 import {
     createPresensi,
     getPresensiByMeeting,
     getMeetingById,
-    saveSertifikat
+    saveSertifikat,
+    getNextSertifikatNumber
 } from "../models/presensiModel.js";
 
 // Helper function: Convert Base64 signature to physical PNG file (Nama file: NIP & ID Rapat)
@@ -42,6 +44,14 @@ function saveSignatureToFile(signatureData, meeting_id, nip) {
 }
 
 // ============================================================
+// Helper: konversi bulan (1-12) ke angka Romawi
+// ============================================================
+function toRomanMonth(month) {
+    const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    return romans[(month - 1)] || String(month);
+}
+
+// ============================================================
 // Helper function: Generate file HTML sertifikat dari template
 // ============================================================
 async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingTanggal }) {
@@ -62,13 +72,12 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
             fs.mkdirSync(sertifDir, { recursive: true });
         }
 
-        // Siapkan nilai placeholder
-        const cleanNip = nip && String(nip).trim() ? String(nip).trim() : "-";
+        // ── Siapkan data peserta ──
+        const cleanNip  = nip  && String(nip).trim()  ? String(nip).trim()  : "-";
         const cleanNama = nama && String(nama).trim() ? String(nama).trim() : "Peserta";
-        const judulWebinar = meetingNama || "Webinar BKN";
-        const tahun = new Date().getFullYear();
+        const temaWebinar = meetingNama || "Webinar BKN";
 
-        // Format tanggal Indonesia
+        // ── Format tanggal Indonesia ──
         let tanggalStr = "-";
         if (meetingTanggal) {
             const d = new Date(meetingTanggal);
@@ -79,38 +88,70 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
             });
         }
 
-        // Nomor sertifikat = timestamp milisecond (unik)
+        // ── Nomor sertifikat format: [urutan]/AKSARA.ASN.05/KRV/[bulan_romawi]/[tahun] ──
+        const now         = new Date();
+        const tahun       = now.getFullYear();
+        const bulanRomawi = toRomanMonth(now.getMonth() + 1);
+        const nomorUrut   = await getNextSertifikatNumber();
+        const nomorSertifikat = `${nomorUrut}/AKSARA.ASN.05/KRV/${bulanRomawi}/${tahun}`;
+
+        // ── Nama file unik ──
         const timestamp = Date.now();
-        const nomorSertif = String(timestamp).slice(-6); // 6 digit terakhir
+        const nipClean  = cleanNip.replace(/[^a-zA-Z0-9]/g, "") || "tanpanip";
+        const fileName  = `sertif_${nipClean}_${timestamp}.html`;
 
-        // Replace semua placeholder di template
+        // ── URL publik sertifikat (untuk QR Download) ──
+        const sertifUrl     = `/uploads/sertif/${meeting_id}/${fileName}`;
+        const baseUrl       = process.env.BASE_URL || "http://localhost:3000";
+        const fullSertifUrl = `${baseUrl}${sertifUrl}`;
+
+        // ── Generate QR code: Download Link (kiri bawah) ──
+        const qrDownloadSrc = await QRCode.toDataURL(fullSertifUrl, {
+            width: 240,
+            margin: 1,
+            color: { dark: '#000000', light: '#ffffff' },
+            errorCorrectionLevel: 'M'
+        });
+
+        // ── Generate QR code: TTD Kakanreg (tengah bawah) ──
+        const ttdContent = [
+            "Ditandatangani secara elektronik oleh:",
+            "Myrna Amir, S.E., M.M.",
+            "Kepala Kantor Regional V",
+            "Badan Kepegawaian Negara",
+            `Jakarta, ${tanggalStr}`
+        ].join("\n");
+        const qrTtdSrc = await QRCode.toDataURL(ttdContent, {
+            width: 200,
+            margin: 1,
+            color: { dark: '#000000', light: '#ffffff' },
+            errorCorrectionLevel: 'M'
+        });
+
+        // ── Replace semua placeholder ──
         templateHtml = templateHtml
-            .replaceAll("{{NAMA}}", cleanNama)
-            .replaceAll("{{NIP}}", cleanNip)
-            .replaceAll("{{JUDUL}}", judulWebinar)
-            .replaceAll("{{TANGGAL}}", tanggalStr)
-            .replaceAll("{{TAHUN}}", String(tahun))
-            .replaceAll("{{NOMOR}}", nomorSertif);
+            .replaceAll("{{NAMA}}",              cleanNama)
+            .replaceAll("{{NIP}}",               cleanNip)
+            .replaceAll("{{NOMOR_SERTIFIKAT}}",  nomorSertifikat)
+            .replaceAll("{{TEMA_WEBINAR}}",      temaWebinar)
+            .replaceAll("{{TANGGAL}}",           tanggalStr)
+            .replaceAll("{{TAHUN}}",             String(tahun))
+            .replaceAll("{{QR_DOWNLOAD_SRC}}",   qrDownloadSrc)
+            .replaceAll("{{QR_TTD_SRC}}",        qrTtdSrc);
 
-        // Nama file unik: sertif_<nip_clean>_<timestamp>.html
-        const nipClean = cleanNip.replace(/[^a-zA-Z0-9]/g, "") || "tanpanip";
-        const fileName = `sertif_${nipClean}_${timestamp}.html`;
+        // ── Tulis file HTML sertifikat ──
         const filePath = path.join(sertifDir, fileName);
-
-        // Tulis file HTML
         fs.writeFileSync(filePath, templateHtml, "utf-8");
 
-        // Path relatif untuk URL publik
-        const sertifUrl = `/uploads/sertif/${meeting_id}/${fileName}`;
-
-        // Simpan ke database
+        // ── Simpan ke database ──
         await saveSertifikat({
             nama: cleanNama,
-            nip: cleanNip,
+            nip:  cleanNip,
             meeting_id,
             file_path: sertifUrl
         });
 
+        console.log(`[SERTIF] ✅ Generated: ${sertifUrl}`);
         return sertifUrl;
 
     } catch (err) {

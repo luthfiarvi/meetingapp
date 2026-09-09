@@ -173,9 +173,24 @@ export const saveSertifikat = async ({ nama, nip, meeting_id, file_path }) => {
     }
 };
 
+// ============================================================
+// Ambil nomor urut berikutnya untuk penomoran sertifikat
+// ============================================================
+export const getNextSertifikatNumber = async () => {
+    try {
+        await ensureSertifikatTable();
+        const result = await pool.query(`SELECT COUNT(*) as cnt FROM sertifikat`);
+        return parseInt(result.rows[0]?.cnt || 0) + 1;
+    } catch (err) {
+        console.warn("⚠️ [DEV MODE] PostgreSQL error in getNextSertifikatNumber:", err.message);
+        return Math.floor(Math.random() * 9000) + 1000; // fallback random
+    }
+};
+
 export default {
     createPresensi,
     getPresensiByMeeting,
     getMeetingById,
-    saveSertifikat
+    saveSertifikat,
+    getNextSertifikatNumber
 };
