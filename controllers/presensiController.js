@@ -2,7 +2,9 @@ import fs from "fs";
 import path from "path";
 import {
     createPresensi,
-    getPresensiByMeeting
+    getPresensiByMeeting,
+    getMeetingById,
+    saveSertifikat
 } from "../models/presensiModel.js";
 
 // Helper function: Convert Base64 signature to physical PNG file (Nama file: NIP & ID Rapat)
@@ -39,6 +41,83 @@ function saveSignatureToFile(signatureData, meeting_id, nip) {
     }
 }
 
+// ============================================================
+// Helper function: Generate file HTML sertifikat dari template
+// ============================================================
+async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingTanggal }) {
+    try {
+        const templatePath = path.join(process.cwd(), "public", "uploads", "sertif", "template.html");
+
+        if (!fs.existsSync(templatePath)) {
+            console.warn("[SERTIF] Template tidak ditemukan:", templatePath);
+            return null;
+        }
+
+        // Baca template
+        let templateHtml = fs.readFileSync(templatePath, "utf-8");
+
+        // Buat folder subdirektori per meeting jika belum ada
+        const sertifDir = path.join(process.cwd(), "public", "uploads", "sertif", String(meeting_id));
+        if (!fs.existsSync(sertifDir)) {
+            fs.mkdirSync(sertifDir, { recursive: true });
+        }
+
+        // Siapkan nilai placeholder
+        const cleanNip = nip && String(nip).trim() ? String(nip).trim() : "-";
+        const cleanNama = nama && String(nama).trim() ? String(nama).trim() : "Peserta";
+        const judulWebinar = meetingNama || "Webinar BKN";
+        const tahun = new Date().getFullYear();
+
+        // Format tanggal Indonesia
+        let tanggalStr = "-";
+        if (meetingTanggal) {
+            const d = new Date(meetingTanggal);
+            tanggalStr = d.toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            });
+        }
+
+        // Nomor sertifikat = timestamp milisecond (unik)
+        const timestamp = Date.now();
+        const nomorSertif = String(timestamp).slice(-6); // 6 digit terakhir
+
+        // Replace semua placeholder di template
+        templateHtml = templateHtml
+            .replaceAll("{{NAMA}}", cleanNama)
+            .replaceAll("{{NIP}}", cleanNip)
+            .replaceAll("{{JUDUL}}", judulWebinar)
+            .replaceAll("{{TANGGAL}}", tanggalStr)
+            .replaceAll("{{TAHUN}}", String(tahun))
+            .replaceAll("{{NOMOR}}", nomorSertif);
+
+        // Nama file unik: sertif_<nip_clean>_<timestamp>.html
+        const nipClean = cleanNip.replace(/[^a-zA-Z0-9]/g, "") || "tanpanip";
+        const fileName = `sertif_${nipClean}_${timestamp}.html`;
+        const filePath = path.join(sertifDir, fileName);
+
+        // Tulis file HTML
+        fs.writeFileSync(filePath, templateHtml, "utf-8");
+
+        // Path relatif untuk URL publik
+        const sertifUrl = `/uploads/sertif/${meeting_id}/${fileName}`;
+
+        // Simpan ke database
+        await saveSertifikat({
+            nama: cleanNama,
+            nip: cleanNip,
+            meeting_id,
+            file_path: sertifUrl
+        });
+
+        return sertifUrl;
+
+    } catch (err) {
+        console.error("[SERTIF] Error generating sertifikat:", err);
+        return null;
+    }
+}
 export const formPresensi = async (req, res) => {
     const { meeting_id } = req.params;
     const status = req.query.status;
@@ -96,13 +175,37 @@ export const inputPresensi = async (req, res) => {
             tanda_tangan: signatureFileName
         });
 
+        // 3. Cek tipe meeting: apakah Webinar?
+        let isWebinar = false;
+        let sertifUrl = null;
+
+        try {
+            const meeting = await getMeetingById(meeting_id);
+            if (meeting && meeting.tipe_meeting &&
+                meeting.tipe_meeting.toLowerCase().trim() === "webinar") {
+                isWebinar = true;
+                sertifUrl = await generateSertifikat({
+                    meeting_id,
+                    nama,
+                    nip,
+                    meetingNama: meeting.meeting_nama,
+                    meetingTanggal: meeting.tanggal
+                });
+            }
+        } catch (sertifErr) {
+            console.error("[SERTIF] Gagal proses sertifikat:", sertifErr);
+            // Jangan gagalkan presensi jika sertifikat error
+        }
+
         if (isAjax) {
             return res.status(200).json({
                 success: true,
                 message: "Presensi berhasil disimpan!",
                 data: {
                     nama: newPresensi?.nama || nama,
-                    waktu_presensi: newPresensi?.waktu_presensi || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                    waktu_presensi: newPresensi?.waktu_presensi || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                    isWebinar,
+                    sertifUrl
                 }
             });
         }

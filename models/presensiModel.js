@@ -1,5 +1,26 @@
 import pool from "../config/database.js";
 
+// ============================================================
+// Helper: Pastikan tabel sertifikat sudah ada di database
+// ============================================================
+async function ensureSertifikatTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS sertifikat (
+                id          SERIAL PRIMARY KEY,
+                nama        VARCHAR(255) NOT NULL,
+                nip         VARCHAR(100),
+                meeting_id  VARCHAR(100) NOT NULL,
+                file_path   VARCHAR(500) NOT NULL,
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_sertif_meeting ON sertifikat(meeting_id);
+        `);
+    } catch (err) {
+        console.warn("⚠️ Gagal memastikan tabel sertifikat:", err.message);
+    }
+}
+
 // Storage cache for local development and offline DB fallback
 const devPresensiStore = [];
 
@@ -114,7 +135,47 @@ export const getPresensiByMeeting = async (meeting_id) => {
     }
 };
 
+// ============================================================
+// Ambil data meeting berdasarkan ID (termasuk tipe_meeting)
+// ============================================================
+export const getMeetingById = async (meeting_id) => {
+    try {
+        const result = await pool.query(
+            `SELECT meeting_id, meeting_nama, tipe_meeting, tanggal
+             FROM meetings
+             WHERE meeting_id = $1
+             LIMIT 1`,
+            [meeting_id]
+        );
+        return result.rows[0] || null;
+    } catch (err) {
+        console.warn("⚠️ [DEV MODE] PostgreSQL error in getMeetingById:", err.message);
+        return null;
+    }
+};
+
+// ============================================================
+// Simpan data penerima sertifikat ke tabel sertifikat
+// ============================================================
+export const saveSertifikat = async ({ nama, nip, meeting_id, file_path }) => {
+    try {
+        await ensureSertifikatTable();
+        const result = await pool.query(
+            `INSERT INTO sertifikat (nama, nip, meeting_id, file_path)
+             VALUES ($1, $2, $3, $4)
+             RETURNING *`,
+            [nama, nip || "-", String(meeting_id), file_path]
+        );
+        return result.rows[0] || null;
+    } catch (err) {
+        console.warn("⚠️ [DEV MODE] PostgreSQL error in saveSertifikat:", err.message);
+        return null;
+    }
+};
+
 export default {
     createPresensi,
-    getPresensiByMeeting
+    getPresensiByMeeting,
+    getMeetingById,
+    saveSertifikat
 };

@@ -46,6 +46,7 @@ const modalInfoBox = document.getElementById("modalInfoBox");
 const modalInfoNama = document.getElementById("modalInfoNama");
 const modalInfoWaktu = document.getElementById("modalInfoWaktu");
 const modalBtnClose = document.getElementById("modalBtnClose");
+const btnDownloadSertif = document.getElementById("btnDownloadSertif");
 
 let modalCallback = null;
 
@@ -419,10 +420,25 @@ if (form) {
             const result = await response.json();
 
             if (response.ok && result.success) {
+                // Tangani tombol sertifikat berdasarkan isWebinar
+                if (result.data?.isWebinar && result.data?.sertifUrl) {
+                    if (btnDownloadSertif) {
+                        btnDownloadSertif.href = result.data.sertifUrl;
+                        btnDownloadSertif.style.display = "inline-flex";
+                    }
+                } else {
+                    if (btnDownloadSertif) {
+                        btnDownloadSertif.href = "#";
+                        btnDownloadSertif.style.display = "none";
+                    }
+                }
+
                 showModal({
                     type: "success",
                     title: "Presensi Berhasil!",
-                    message: "Terima kasih, data kehadiran Anda telah berhasil tercatat dalam sistem.",
+                    message: result.data?.isWebinar
+                        ? "Terima kasih! Presensi tercatat. Sertifikat keikutsertaan Webinar Anda siap diunduh."
+                        : "Terima kasih, data kehadiran Anda telah berhasil tercatat dalam sistem.",
                     nama: formData.nama,
                     waktu: result.data?.waktu_presensi || new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
                 });

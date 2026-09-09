@@ -1112,4 +1112,55 @@ body {
     }
 }
 
+/* ===================================================
+   TOMBOL UNDUH SERTIFIKAT (khusus Webinar)
+=================================================== */
+
+.modal-btn-sertif {
+    background: linear-gradient(120deg, #065f46, #059669, #10b981);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.30);
+    position: relative;
+    overflow: hidden;
+    animation: sertifPulse 2.2s ease-in-out infinite;
+    letter-spacing: 0.3px;
+}
+
+.modal-btn-sertif::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.18);
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+}
+
+.modal-btn-sertif:hover::before {
+    left: 130%;
+}
+
+.modal-btn-sertif:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(5, 150, 105, 0.42);
+    animation: none;
+    background: linear-gradient(120deg, #047857, #059669, #34d399);
+}
+
+.modal-btn-sertif:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(5, 150, 105, 0.25);
+}
+
+@keyframes sertifPulse {
+    0%, 100% {
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.30);
+    }
+    50% {
+        box-shadow: 0 8px 28px rgba(5, 150, 105, 0.55), 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+}
+
 

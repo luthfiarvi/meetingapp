@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sertifikat - {{NAMA}}</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
+      font-family: 'Georgia', serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .action-bar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-download {
+      background: #005691;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn-download:hover {
+      background: #003e68;
+    }
+    .cert-container {
+      width: 297mm;
+      height: 210mm;
+      background: #fff;
+      padding: 24px;
+      box-sizing: border-box;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    .cert-inner-border {
+      border: 5px double #0d3b66;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      position: relative;
+      background: radial-gradient(circle, #ffffff 60%, #f7f9fa 100%);
+    }
+    .cert-title {
+      font-size: 42px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #0d3b66;
+      text-transform: uppercase;
+      margin: 0;
+    }
+    .cert-subtitle {
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: #555;
+      margin-top: 8px;
+      margin-bottom: 25px;
+    }
+    .cert-presented {
+      font-size: 16px;
+      font-style: italic;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .cert-name {
+      font-size: 36px;
+      font-weight: bold;
+      color: #111;
+      border-bottom: 2px solid #0d3b66;
+      display: inline-block;
+      padding: 0 40px 6px;
+      margin-bottom: 8px;
+    }
+    .cert-nip {
+      font-size: 14px;
+      color: #555;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .cert-desc {
+      font-size: 17px;
+      color: #333;
+      max-width: 750px;
+      line-height: 1.6;
+      margin-bottom: 35px;
+    }
+    .cert-footer {
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      margin-top: 20px;
+    }
+    .signature-block {
+      text-align: center;
+      width: 200px;
+    }
+    .signature-line {
+      border-bottom: 1px solid #333;
+      margin-top: 60px;
+      margin-bottom: 6px;
+    }
+
+    /* Hilangkan tombol download saat di-print/save PDF */
+    @media print {
+      body {
+        background: none;
+      }
+      .action-bar {
+        display: none;
+      }
+      .cert-container {
+        box-shadow: none;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="action-bar">
+    <button class="btn-download" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+  </div>
+
+  <div class="cert-container">
+    <div class="cert-inner-border">
+      <h1 class="cert-title">SERTIFIKAT</h1>
+      <p class="cert-subtitle">NOMOR: BKN/WEBINAR/{{TAHUN}}/{{NOMOR}}</p>
+
+      <p class="cert-presented">Diberikan kepada:</p>
+      <div class="cert-name">{{NAMA}}</div>
+      <div class="cert-nip">NIP / NIK: {{NIP}}</div>
+
+      <p class="cert-desc">
+        Atas partisipasi aktifnya sebagai <strong>Peserta</strong> dalam kegiatan:<br>
+        <strong>"{{JUDUL}}"</strong><br>
+        yang diselenggarakan pada {{TANGGAL}}.
+      </p>
+
+      <div class="cert-footer">
+        <div class="signature-block">
+          <div>Panitia Pelaksana</div>
+          <div class="signature-line"></div>
+          <div>Ketua Panitia</div>
+        </div>
+        <div class="signature-block">
+          <div>Jakarta, {{TANGGAL}}</div>
+          <div class="signature-line"></div>
+          <div>Penyelenggara</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
