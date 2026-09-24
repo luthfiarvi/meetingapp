@@ -1,0 +1,183 @@
+<%- include('layouts/header') %>
+
+<div class="portal-container" style="max-width: 1100px; margin: 0 auto 2rem auto; padding: 0 0.5rem; width: 100%;">
+  <!-- Welcome Banner (Meeting App Theme) -->
+  <div style="background: linear-gradient(135deg, #0d2b5c 0%, #163f7a 50%, #1a56a6 100%); border-radius: 1.25rem; padding: 2.5rem 2.25rem; color: #ffffff; position: relative; overflow: hidden; box-shadow: 0 16px 36px rgba(13, 43, 92, 0.20); border-bottom: 4px solid #f59e0b; margin-bottom: 2.5rem;">
+    <!-- Animated emblem watermark in banner -->
+    <div style="position: absolute; right: -25px; bottom: -30px; width: 250px; height: 250px; opacity: 0.16; pointer-events: none; background-image: url('/logo-animasi.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; position: relative; z-index: 1;">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(245, 158, 11, 0.20); border: 1px solid rgba(245, 158, 11, 0.45); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.775rem; font-weight: 700; color: #fde68a; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem;">
+          <span style="width: 7px; height: 7px; background: #fbbf24; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #fbbf24;"></span>
+          Portal Layanan Digital Kepegawaian BKN
+        </div>
+        <h1 style="font-size: 1.85rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; letter-spacing: -0.02em; color: #ffffff;">
+          Selamat Datang, <%= user.full_name %>
+        </h1>
+        <p style="color: #cbd5e1; font-size: 0.95rem; max-width: 620px; line-height: 1.6; margin: 0;">
+          Silakan pilih modul administrasi dan pelaporan yang ingin Anda kelola hari ini untuk mendukung akuntabilitas kinerja instansi.
+        </p>
+      </div>
+
+      <a href="/profile" style="text-decoration: none; display: flex; align-items: center; gap: 1rem; background: rgba(255, 255, 255, 0.14); padding: 0.85rem 1.25rem; border-radius: 1rem; border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); transition: transform 0.2s, background 0.2s;" title="Klik untuk menyesuaikan kelengkapan data dokumen resmi">
+        <img src="<%= user.avatar_path || '/images/default_avatar.png' %>" alt="<%= user.full_name %>" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2.5px solid #f59e0b; background: #ffffff;">
+        <div>
+          <div style="font-size: 0.9rem; font-weight: 700; color: #ffffff;"><%= user.full_name %></div>
+          <div style="font-size: 0.75rem; color: #93c5fd;"><%= user.division || 'Badan Kepegawaian Negara' %></div>
+          <div style="font-size: 0.7rem; color: #fde68a; font-weight: 600; margin-top: 2px;">⚙️ Kelola Format Dokumen</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Section Title -->
+  <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+    <div>
+      <h2 style="font-size: 1.35rem; font-weight: 800; color: #102f63; margin: 0; letter-spacing: -0.01em;">Pilihan Modul Dokumen</h2>
+      <p style="font-size: 0.875rem; color: #64748b; margin: 0.25rem 0 0 0;">Pilih salah satu layanan untuk mulai membuat dokumen resmi atau kelola format kop surat</p>
+    </div>
+  </div>
+
+  <!-- Options Grid (3 Cards) -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    
+    <!-- Option 1: Pembuat Infografis -->
+    <div class="portal-card" style="background: rgba(255, 255, 255, 0.95); border-radius: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(16, 47, 99, 0.07); transition: all 0.25s ease; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+      <div style="height: 5px; background: linear-gradient(90deg, #102f63, #2563eb, #0ea5e9);"></div>
+      <div style="padding: 2rem 1.75rem; flex: 1; display: flex; flex-direction: column;">
+        
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem;">
+          <div style="width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; display: flex; align-items: center; justify-content: center; color: #1d4ed8; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);">
+            <svg style="width: 28px; height: 28px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+          </div>
+          <span style="font-size: 0.725rem; font-weight: 700; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 0.75rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.03em;">
+            ✓ Siap Digunakan
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #102f63; margin-bottom: 0.6rem;">
+          Pembuat Infografis Kinerja
+        </h3>
+        
+        <p style="font-size: 0.85rem; color: #475569; line-height: 1.65; margin-bottom: 1.25rem; flex: 1;">
+          Rancang dan cetak laporan visual kinerja harian pegawai BKN dengan format eksekutif berstandar formal.
+        </p>
+
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; border: 1px solid #f1f5f9;">
+          <div style="font-size: 0.725rem; font-weight: 700; color: #64748b; margin-bottom: 0.4rem; text-transform: uppercase;">Fitur Unggulan:</div>
+          <div style="font-size: 0.8rem; color: #334155; display: flex; flex-direction: column; gap: 0.25rem;">
+            <span>• Desain Eksekutif BKN aksen emas</span>
+            <span>• Bukti visual dokumentasi kinerja</span>
+            <span>• Ekspor PDF A4 & Gambar PNG HD</span>
+          </div>
+        </div>
+
+        <a href="/generator" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem; font-size: 0.9rem; font-weight: 700; border-radius: 0.75rem; text-decoration: none;">
+          <span>Buka Pembuat Infografis</span>
+          <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Option 2: Pembuat Notulen -->
+    <div class="portal-card" style="background: rgba(255, 255, 255, 0.95); border-radius: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(16, 47, 99, 0.07); transition: all 0.25s ease; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+      <div style="height: 5px; background: linear-gradient(90deg, #b45309, #d97706, #f59e0b);"></div>
+      <div style="padding: 2rem 1.75rem; flex: 1; display: flex; flex-direction: column;">
+        
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem;">
+          <div style="width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; display: flex; align-items: center; justify-content: center; color: #b45309; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);">
+            <svg style="width: 28px; height: 28px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <span style="font-size: 0.725rem; font-weight: 700; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 0.35rem 0.75rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.03em;">
+            ✓ Siap Digunakan
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #102f63; margin-bottom: 0.6rem;">
+          Pembuat Notulen Rapat
+        </h3>
+        
+        <p style="font-size: 0.85rem; color: #475569; line-height: 1.65; margin-bottom: 1.25rem; flex: 1;">
+          Sistem pencatatan notula resmi BKN lengkap dengan Lambang Garuda Pancasila dan kop surat Kanreg V.
+        </p>
+
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; border: 1px solid #f1f5f9;">
+          <div style="font-size: 0.725rem; font-weight: 700; color: #64748b; margin-bottom: 0.4rem; text-transform: uppercase;">Fitur Unggulan:</div>
+          <div style="font-size: 0.8rem; color: #334155; display: flex; flex-direction: column; gap: 0.25rem;">
+            <span>• Kop Resmi & Garuda Pancasila</span>
+            <span>• Ekstraksi AI Catatan & Transkrip</span>
+            <span>• Ekspor PDF A4 Tata Naskah Dinas</span>
+          </div>
+        </div>
+
+        <a href="/notulen" class="btn btn-primary w-full" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem; font-size: 0.9rem; font-weight: 700; border-radius: 0.75rem; text-decoration: none; background: linear-gradient(100deg, #0d2b5c, #163f7a, #2563eb);">
+          <span>Buka Pembuat Notulen</span>
+          <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Option 3: Kelengkapan Data Dokumen -->
+    <div class="portal-card" style="background: rgba(255, 255, 255, 0.95); border-radius: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 30px rgba(16, 47, 99, 0.07); transition: all 0.25s ease; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+      <div style="height: 5px; background: linear-gradient(90deg, #0d2b5c, #2563eb, #38bdf8);"></div>
+      <div style="padding: 2rem 1.75rem; flex: 1; display: flex; flex-direction: column;">
+        
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem;">
+          <div style="width: 54px; height: 54px; border-radius: 14px; background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe; display: flex; align-items: center; justify-content: center; color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);">
+            <svg style="width: 28px; height: 28px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </div>
+          <span style="font-size: 0.725rem; font-weight: 700; background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; padding: 0.35rem 0.75rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.03em;">
+            ⚙️ Auto-Bind Data
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #102f63; margin-bottom: 0.6rem;">
+          Kelengkapan Data Dokumen
+        </h3>
+        
+        <p style="font-size: 0.85rem; color: #475569; line-height: 1.65; margin-bottom: 1.25rem; flex: 1;">
+          Atur kop surat resmi Kanreg V BKN, alamat instansi, kota penandatanganan, dan running footer untuk auto-bind dokumen resmi.
+        </p>
+
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; border: 1px solid #f1f5f9;">
+          <div style="font-size: 0.725rem; font-weight: 700; color: #64748b; margin-bottom: 0.4rem; text-transform: uppercase;">Kelengkapan Otomatis:</div>
+          <div style="font-size: 0.8rem; color: #334155; display: flex; flex-direction: column; gap: 0.25rem;">
+            <span>• Kop Surat Resmi & Alamat Kantor</span>
+            <span>• NIP, Jabatan & Satuan Kerja</span>
+            <span>• Kota TTD & Running Footer</span>
+          </div>
+        </div>
+
+        <a href="/profile" class="btn w-full" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem; font-size: 0.9rem; font-weight: 700; border-radius: 0.75rem; text-decoration: none; background: #f0f7ff; border: 1.5px solid #2563eb; color: #1d4ed8; transition: all 0.2s;">
+          <span>Kelola Kelengkapan Data</span>
+          <svg style="width: 1.1rem; height: 1.1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Info / Quick Help -->
+  <div style="margin-top: 2.5rem; background: rgba(255, 255, 255, 0.92); border: 1px solid #bfdbfe; border-radius: 1rem; padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 6px 20px rgba(16, 47, 99, 0.05);">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <svg style="width: 24px; height: 24px; color: #2563eb; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span style="font-size: 0.875rem; color: #475569; font-weight: 500;">
+        Perlu melihat infografis yang pernah Anda buat sebelumnya? Buka menu riwayat arsip dokumen.
+      </span>
+    </div>
+    <a href="/history" style="font-size: 0.875rem; font-weight: 700; color: #2563eb; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.8rem; background: #eff6ff; border-radius: 8px; transition: all 0.2s;">
+      <span>Buka Riwayat Arsip</span>
+      <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </a>
+  </div>
+</div>
+
+<style>
+  .portal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(10, 37, 64, 0.1) !important;
+    border-color: #CBD5E1 !important;
+  }
+</style>
+
+<%- include('layouts/footer') %>

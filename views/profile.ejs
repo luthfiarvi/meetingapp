@@ -1,0 +1,477 @@
+<%- include('layouts/header', { title: 'Kelengkapan Data Notula & Infografis - BKN' }) %>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div style="max-width: 52rem; margin: 0 auto;">
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: #0A2540; margin: 0 0 0.35rem 0;">
+          Kelengkapan Data Notula & Infografis
+        </h1>
+        <p style="font-size: 0.875rem; color: #64748B; margin: 0;">
+          Kelola kop surat instansi Kanreg V BKN, data notulis/pegawai, serta footer resmi yang otomatis terikat (auto-bind) pada Notulen & Infografis.
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="/infografis" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem;">
+          <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          <span>Kembali ke Portal</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Notice Centralized Login -->
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.75rem; padding: 0.85rem 1.15rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.825rem; color: #1e40af;">
+      <span style="font-size: 1.25rem;">ℹ️</span>
+      <span>
+        <strong>Login Terpusat:</strong> Akun dan kata sandi dikelola terpusat melalui sistem utama Meeting App (Manajemen User). Laman ini khusus untuk menyesuaikan kelengkapan data dokumen otomatis (Kop Surat, Format Penandatanganan, dan Footer Notula/Infografis).
+      </span>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-error" style="background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 0.5rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+        <span>⚠️ <%= error %></span>
+      </div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="alert alert-success" style="background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; border-radius: 0.5rem; padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+        <span>✅ <%= success %></span>
+      </div>
+    <% } %>
+
+    <div class="form-panel" style="background: #ffffff; border-radius: 1rem; border: 1px solid #E2E8F0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 2rem;">
+      
+      <!-- Live Profile Badge Preview -->
+      <div style="background: linear-gradient(135deg, #071C33 0%, #0A2540 60%, #153E6B 100%); border-radius: 0.75rem; padding: 1.5rem; color: white; margin-bottom: 2rem; border-left: 5px solid #D97706; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 12px rgba(10,37,64,0.15);">
+        <div style="display: flex; align-items: center; gap: 1.25rem;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: #0A2540; overflow: hidden; border: 2px solid #F59E0B; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <img id="badge-avatar-img" src="<%= user.avatar_path || '/images/default_avatar.png' %>" alt="<%= user.full_name %>" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div>
+            <div style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em;"><%= user.full_name %></div>
+            <div style="font-size: 0.85rem; color: #FDE68A; font-weight: 600;"><%= user.division %></div>
+            <div style="font-size: 0.75rem; color: #CBD5E1;"><%= user.institution %> • NIP: <%= user.nip || '-' %></div>
+          </div>
+        </div>
+      </div>
+
+      <form action="/profile" method="POST" enctype="multipart/form-data">
+        
+        <!-- BAGIAN 1: FOTO & IDENTITAS PEGAWAI -->
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #0A2540; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.4rem; margin-bottom: 1.25rem;">
+          <span>👤</span>
+          <span>1. Identitas Pegawai (Header Notulis & Infografis)</span>
+        </div>
+
+        <!-- CONTAINER PENGATURAN FOTO PROFIL & SIZE MANUAL -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.85rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label for="avatar" class="form-label" style="margin-bottom: 0.2rem; font-weight: 700; font-size: 0.9rem; color: #0A2540;">Unggah & Atur Foto Profil</label>
+              <div style="font-size: 0.75rem; color: #64748B;">Pilih foto dari komputer, lalu gunakan penggeser di bawah untuk mengatur ukuran zoom dan posisi wajah.</div>
+            </div>
+            <div>
+              <input type="file" id="avatar" name="avatar" accept="image/*" class="form-input" style="padding: 0.4rem 0.65rem; font-size: 0.825rem; background: #ffffff;">
+            </div>
+          </div>
+
+          <input type="hidden" name="avatar_cropped" id="avatar_cropped" value="">
+
+          <!-- INTERACTIVE PHOTO SIZER / CROPPER PANEL -->
+          <div id="photo-editor-panel" style="background: #ffffff; border: 1px solid #CBD5E1; border-radius: 0.75rem; padding: 1.25rem; display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+            
+            <!-- Viewport Lingkaran Avatar -->
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+              <div id="avatar-viewport" style="width: 150px; height: 150px; border-radius: 50%; border: 3px solid #D97706; overflow: hidden; background: #0A2540; position: relative; cursor: grab; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" title="Klik dan geser foto untuk mengatur posisi">
+                <canvas id="crop-canvas" width="400" height="400" style="width: 100%; height: 100%; display: block;"></canvas>
+              </div>
+              <span style="font-size: 0.7rem; color: #64748B; font-weight: 600;">🖱️ Geser mouse / touch pada foto</span>
+            </div>
+
+            <!-- Kontrol Ukuran (Zoom) & Posisi Manual -->
+            <div style="flex-grow: 1; min-width: 260px; display: flex; flex-direction: column; gap: 0.85rem;">
+              
+              <!-- Slider 1: Ukuran / Zoom -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">🔍 Ukuran / Zoom Foto:</span>
+                  <span id="zoom-label" style="font-size: 0.75rem; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 0.15rem 0.45rem; border-radius: 0.35rem;">100%</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <button type="button" id="btn-zoom-out" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.55rem; font-size: 0.8rem; font-weight: bold;">−</button>
+                  <input type="range" id="zoom-slider" min="1" max="4" step="0.02" value="1" style="flex-grow: 1; accent-color: #2563EB; cursor: pointer;">
+                  <button type="button" id="btn-zoom-in" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.55rem; font-size: 0.8rem; font-weight: bold;">+</button>
+                </div>
+              </div>
+
+              <!-- Slider 2: Posisi Vertikal (Atas - Bawah) -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">↕️ Posisi Vertikal (Atas / Bawah):</span>
+                  <span id="pan-y-label" style="font-size: 0.75rem; color: #64748B;">0</span>
+                </div>
+                <input type="range" id="pan-y-slider" min="-150" max="150" step="1" value="0" style="width: 100%; accent-color: #2563EB; cursor: pointer;">
+              </div>
+
+              <!-- Slider 3: Posisi Horisontal (Kiri - Kanan) -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #1E293B;">↔️ Posisi Horisontal (Kiri / Kanan):</span>
+                  <span id="pan-x-label" style="font-size: 0.75rem; color: #64748B;">0</span>
+                </div>
+                <input type="range" id="pan-x-slider" min="-150" max="150" step="1" value="0" style="width: 100%; accent-color: #2563EB; cursor: pointer;">
+              </div>
+
+              <!-- Tombol Cepat (Reset & Fokus Wajah) -->
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem;">
+                <button type="button" id="btn-reset-transform" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.7rem;">
+                  ↺ Reset Ukuran & Posisi
+                </button>
+                <button type="button" id="btn-focus-face" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.7rem; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF;">
+                  👤 Fokus ke Atas / Wajah
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Preview Kecil Sinkron -->
+          <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.85rem; padding: 0.5rem 0.75rem; background: #F1F5F9; border-radius: 0.5rem; font-size: 0.75rem; color: #475569;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid #D97706; overflow: hidden; flex-shrink: 0; background: #0A2540;">
+              <img id="avatar-form-preview" src="<%= user.avatar_path || '/images/default_avatar.png' %>" alt="Preview Mini" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <span><strong>Hasil Preview:</strong> Foto di atas adalah tampilan persis yang akan otomatis tersimpan dan terpasang di header navbar serta kartu infografis.</span>
+          </div>
+
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="full_name" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Nama Lengkap & Gelar *</label>
+            <input type="text" id="full_name" name="full_name" class="form-input" value="<%= user.full_name %>" required style="font-size: 0.85rem;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="nip" class="form-label" style="font-weight: 600; font-size: 0.825rem;">NIP Pegawai</label>
+            <input type="text" id="nip" name="nip" class="form-input" value="<%= user.nip || '' %>" placeholder="1985..." style="font-size: 0.85rem;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="division" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Jabatan / Divisi Kerja *</label>
+            <input type="text" id="division" name="division" class="form-input" value="<%= user.division %>" required style="font-size: 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="institution" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Instansi / Satuan Kerja *</label>
+            <input type="text" id="institution" name="institution" class="form-input" value="<%= user.institution %>" required style="font-size: 0.85rem;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label for="logo_path" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Path / File Logo BKN</label>
+          <input type="text" id="logo_path" name="logo_path" class="form-input" value="<%= user.logo_path || '/images/Logo_Badan_Kepegawaian_Negara.png' %>" style="font-size: 0.85rem;">
+        </div>
+
+
+        <!-- BAGIAN 2: KOP SURAT KEDINASAN (HEADER NOTULEN) -->
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #0A2540; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.4rem; margin-bottom: 1.25rem;">
+          <span>🏛️</span>
+          <span>2. Kop Surat Kedinasan (Header Notulen Resmi & Cetak PDF)</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="institution_kop" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Judul Utama Kop Lembaga</label>
+          <input type="text" id="institution_kop" name="institution_kop" class="form-input" value="<%= user.institution_kop || 'BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V' %>" placeholder="BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V" style="font-size: 0.85rem; font-weight: 600;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label for="kop_address" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Alamat Kantor Lengkap (Kop Surat)</label>
+          <input type="text" id="kop_address" name="kop_address" class="form-input" value="<%= user.kop_address || 'Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730' %>" placeholder="Jalan Raya Ciracas..." style="font-size: 0.85rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label for="kop_contact" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Kontak, Faks, Website & Pos-el (Baris Bawah Kop)</label>
+          <input type="text" id="kop_contact" name="kop_contact" class="form-input" value="<%= user.kop_contact || 'Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id' %>" placeholder="Telepon..." style="font-size: 0.85rem;">
+        </div>
+
+
+        <!-- BAGIAN 3: FOOTER DOKUMEN & PENANDATANGANAN -->
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #0A2540; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.4rem; margin-bottom: 1.25rem;">
+          <span>✍️</span>
+          <span>3. Footer Dokumen & Format Tanda Tangan</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 2rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="sig_city" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Kota Penandatanganan Notula</label>
+            <input type="text" id="sig_city" name="sig_city" class="form-input" value="<%= user.sig_city || 'Jakarta' %>" placeholder="Jakarta" style="font-size: 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="running_footer" class="form-label" style="font-weight: 600; font-size: 0.825rem;">Running Footer / Catatan Kaki Dokumen</label>
+            <input type="text" id="running_footer" name="running_footer" class="form-input" value="<%= user.running_footer || 'Dokumen Resmi Kanreg V BKN' %>" placeholder="Dokumen Resmi Kanreg V BKN" style="font-size: 0.85rem;">
+          </div>
+        </div>
+
+
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <a href="/infografis" class="btn btn-secondary">Batal</a>
+          <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.75rem; font-weight: 700; font-size: 0.9rem; border-radius: 0.625rem; background: linear-gradient(135deg, #102f63, #2563eb); border: none; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);">
+            <svg style="width: 1.15rem; height: 1.15rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>✓ Simpan Kelengkapan Data Dokumen (Kop & Format)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  (function() {
+    const avatarInput = document.getElementById('avatar');
+    const avatarCroppedInput = document.getElementById('avatar_cropped');
+    const avatarFormPreview = document.getElementById('avatar-form-preview');
+    const badgeAvatarImg = document.getElementById('badge-avatar-img');
+    const canvas = document.getElementById('crop-canvas');
+    const ctx = canvas.getContext('2d');
+    const viewport = document.getElementById('avatar-viewport');
+
+    const zoomSlider = document.getElementById('zoom-slider');
+    const zoomLabel = document.getElementById('zoom-label');
+    const btnZoomIn = document.getElementById('btn-zoom-in');
+    const btnZoomOut = document.getElementById('btn-zoom-out');
+
+    const panXSlider = document.getElementById('pan-x-slider');
+    const panXLabel = document.getElementById('pan-x-label');
+    const panYSlider = document.getElementById('pan-y-slider');
+    const panYLabel = document.getElementById('pan-y-label');
+
+    const btnReset = document.getElementById('btn-reset-transform');
+    const btnFocusFace = document.getElementById('btn-focus-face');
+
+    let currentImg = new Image();
+    let isImgLoaded = false;
+    let zoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+
+    // Load initial image (user existing avatar or default)
+    const initialAvatarSrc = '<%= user.avatar_path || "/images/default_avatar.png" %>';
+    currentImg.crossOrigin = 'anonymous';
+    currentImg.onload = function() {
+      isImgLoaded = true;
+      render();
+    };
+    currentImg.src = initialAvatarSrc;
+
+    function render() {
+      if (!isImgLoaded || !currentImg.width) return;
+
+      const cw = canvas.width; // 400
+      const ch = canvas.height; // 400
+
+      ctx.clearRect(0, 0, cw, ch);
+
+      // Hitung skala dasar agar gambar menutupi kanvas (cover)
+      const baseScale = Math.max(cw / currentImg.width, ch / currentImg.height);
+      const effectiveScale = baseScale * zoom;
+
+      const drawW = currentImg.width * effectiveScale;
+      const drawH = currentImg.height * effectiveScale;
+
+      // Posisikan di tengah lalu terapkan offset pan
+      const drawX = (cw - drawW) / 2 + panX;
+      const drawY = (ch - drawH) / 2 + panY;
+
+      // Gambar foto
+      ctx.drawImage(currentImg, drawX, drawY, drawW, drawH);
+
+      // Ekspor hasil potong ke base64 untuk form submission
+      try {
+        const dataUrl = canvas.toDataURL('image/png', 0.92);
+        avatarCroppedInput.value = dataUrl;
+        if (avatarFormPreview) avatarFormPreview.src = dataUrl;
+        if (badgeAvatarImg) badgeAvatarImg.src = dataUrl;
+      } catch (e) {
+        console.warn('Canvas export warning:', e.message);
+      }
+    }
+
+    // Event Listener Input File
+    if (avatarInput) {
+      avatarInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            currentImg = new Image();
+            currentImg.onload = () => {
+              isImgLoaded = true;
+              // Reset zoom & pan saat file baru dipilih
+              zoom = 1.0;
+              panX = 0;
+              panY = 0;
+              syncControls();
+              render();
+            };
+            currentImg.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    function syncControls() {
+      zoomSlider.value = zoom;
+      zoomLabel.textContent = Math.round(zoom * 100) + '%';
+      panXSlider.value = panX;
+      panXLabel.textContent = Math.round(panX);
+      panYSlider.value = panY;
+      panYLabel.textContent = Math.round(panY);
+    }
+
+    // Kontrol Zoom
+    if (zoomSlider) {
+      zoomSlider.addEventListener('input', () => {
+        zoom = parseFloat(zoomSlider.value);
+        zoomLabel.textContent = Math.round(zoom * 100) + '%';
+        render();
+      });
+    }
+
+    if (btnZoomIn) {
+      btnZoomIn.addEventListener('click', () => {
+        zoom = Math.min(4.0, zoom + 0.25);
+        syncControls();
+        render();
+      });
+    }
+
+    if (btnZoomOut) {
+      btnZoomOut.addEventListener('click', () => {
+        zoom = Math.max(1.0, zoom - 0.25);
+        syncControls();
+        render();
+      });
+    }
+
+    // Kontrol Pan X & Y
+    if (panXSlider) {
+      panXSlider.addEventListener('input', () => {
+        panX = parseInt(panXSlider.value, 10);
+        panXLabel.textContent = panX;
+        render();
+      });
+    }
+
+    if (panYSlider) {
+      panYSlider.addEventListener('input', () => {
+        panY = parseInt(panYSlider.value, 10);
+        panYLabel.textContent = panY;
+        render();
+      });
+    }
+
+    // Reset
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        zoom = 1.0;
+        panX = 0;
+        panY = 0;
+        syncControls();
+        render();
+      });
+    }
+
+    // Fokus Wajah (Preset cepat untuk foto potret/badan penuh)
+    if (btnFocusFace) {
+      btnFocusFace.addEventListener('click', () => {
+        zoom = 2.2;
+        panY = 90; // Menggeser foto ke bawah agar kepala/wajah berada di tengah lingkaran
+        panX = 0;
+        syncControls();
+        render();
+      });
+    }
+
+    // Interaktivitas Drag Mouse / Touch pada Lingkaran Avatar
+    let isDragging = false;
+    let startMouseX = 0;
+    let startMouseY = 0;
+    let startPanX = 0;
+    let startPanY = 0;
+
+    if (viewport) {
+      viewport.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        startPanX = panX;
+        startPanY = panY;
+        viewport.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startMouseX;
+        const dy = e.clientY - startMouseY;
+        
+        // Konversi skala gerak mouse (viewport 150px ke kanvas 400px)
+        panX = Math.max(-150, Math.min(150, startPanX + dx * (400 / 150)));
+        panY = Math.max(-150, Math.min(150, startPanY + dy * (400 / 150)));
+
+        syncControls();
+        render();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          viewport.style.cursor = 'grab';
+        }
+      });
+
+      // Touch events untuk smartphone/tablet
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startMouseX = e.touches[0].clientX;
+          startMouseY = e.touches[0].clientY;
+          startPanX = panX;
+          startPanY = panY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchmove', (e) => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - startMouseX;
+        const dy = e.touches[0].clientY - startMouseY;
+
+        panX = Math.max(-150, Math.min(150, startPanX + dx * (400 / 150)));
+        panY = Math.max(-150, Math.min(150, startPanY + dy * (400 / 150)));
+
+        syncControls();
+        render();
+      }, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        isDragging = false;
+      });
+    }
+
+    // Pastikan base64 diekspor saat form disubmit
+    const form = viewport.closest('form');
+    if (form) {
+      form.addEventListener('submit', () => {
+        render();
+      });
+    }
+  })();
+</script>
+
+<%- include('layouts/footer') %>

@@ -1,0 +1,347 @@
+<%- include('layouts/header') %>
+<link rel="stylesheet" href="/css/notulen.css">
+
+<div class="notulen-workspace">
+  <!-- Left Panel: Form & AI Smart Assistant -->
+  <div class="notulen-form-panel">
+    <div class="notulen-form-header">
+      <div>
+        <div style="font-size: 0.75rem; font-weight: 700; color: #D97706; text-transform: uppercase; letter-spacing: 0.05em;">
+          Tata Naskah Kedinasan
+        </div>
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #0A2540; margin: 0;">
+          Editor Notula Rapat BKN
+        </h2>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="button" id="btnSaveNotulen" class="btn btn-primary btn-sm" style="font-size: 0.8rem; padding: 0.45rem 0.85rem;">
+          💾 Simpan
+        </button>
+      </div>
+    </div>
+
+    <div class="notulen-form-body">
+      <!-- AI Smart Assistant Box -->
+      <div style="background: linear-gradient(135deg, #071C33 0%, #0A2540 100%); border-radius: 0.65rem; padding: 1.15rem; color: #fff; margin-bottom: 1.5rem; border-left: 4px solid #D97706;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span style="font-size: 1rem;">✨</span>
+            <span style="font-size: 0.85rem; font-weight: 700; color: #FBBF24;">AI Smart Notulis BKN</span>
+          </div>
+          <span style="font-size: 0.7rem; background: rgba(217, 119, 6, 0.3); border: 1px solid rgba(217, 119, 6, 0.5); padding: 0.15rem 0.5rem; border-radius: 9999px; color: #FDE68A;">
+            Ekstraksi Otomatis
+          </span>
+        </div>
+        <p style="font-size: 0.775rem; color: #94A3B8; margin-bottom: 0.75rem; line-height: 1.4;">
+          Tempelkan transkrip rekaman, atau unggah file transkrip dokumen langsung. AI akan menyusun judul, agenda, peserta, uraian sesi, tindak lanjut, dan kesimpulan ke format resmi.
+        </p>
+
+        <!-- Upload File Transkrip Box -->
+        <div style="margin-bottom: 0.75rem; background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255, 255, 255, 0.25); border-radius: 6px; padding: 0.5rem 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #CBD5E1;">
+            <span>📎</span>
+            <span>Unggah Dokumen Transkrip (</span>
+            <span style="color: #FBBF24; font-family: monospace;">.docx, .txt, .md</span>
+            <span>)</span>
+          </div>
+          <label class="btn btn-secondary btn-sm" style="margin: 0; font-size: 0.725rem; padding: 0.25rem 0.65rem; cursor: pointer; background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">
+            <span id="transcriptFileStatusText">Pilih File</span>
+            <input type="file" id="transcriptFileInput" accept=".docx,.txt,.md" style="display: none;">
+          </label>
+        </div>
+
+        <textarea id="aiTranscriptInput" class="form-input" style="background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); color: #fff; font-size: 0.8rem; min-height: 80px; margin-bottom: 0.75rem;" placeholder="Contoh: Rapat BKN Menyapa ASN tanggal 10 September 2026 jam 09.00-11.30 WIB via Zoom membahas implementasi SIMATA dan MyASN..."></textarea>
+        <button type="button" id="btnAiProcess" class="btn btn-secondary w-full" style="font-size: 0.8rem; font-weight: 700; background: #ffffff; color: #0A2540; border: none; padding: 0.55rem;">
+          ⚡ Proses & Ekstrak Notulen dengan AI
+        </button>
+      </div>
+
+      <!-- Formulir Manual Section 1: Header & Metadata -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #0A2540; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem; text-transform: uppercase;">
+          1. Identitas & Pelaksanaan Kegiatan
+        </div>
+
+        <!-- Judul Notula (Tandai Merah) -->
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Tema / Judul Kegiatan Rapat (Notula):</span>
+            <span style="font-size: 0.7rem; color: #DC2626; font-weight: 600;">*Dapat Diedit Manual</span>
+          </label>
+          <textarea id="notulaTitle" class="form-input" style="min-height: 54px; font-weight: 600; font-size: 0.85rem;" placeholder="Contoh: BKN MENYAPA ASN : Penguatan Implementasi Manajemen Talenta melalui SIMATA dan MyASN"></textarea>
+        </div>
+
+        <!-- Waktu & Tanggal (Tandai Ungu) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.85rem;">
+          <div class="form-group">
+            <label class="form-label">
+              <span>Tanggal Pembuatan:</span>
+              <span style="font-size: 0.68rem; color: #7C3AED; display: block;">*Otomatis Hari Ini</span>
+            </label>
+            <input type="date" id="notulaDate" class="form-input" style="font-size: 0.825rem;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <span>Waktu / Jam:</span>
+              <span style="font-size: 0.68rem; color: #64748B; display: block;">*Kustomisasi Jam</span>
+            </label>
+            <input type="text" id="notulaTime" class="form-input" placeholder="09.00 – 11.30 WIB" style="font-size: 0.825rem;">
+          </div>
+        </div>
+
+        <!-- Tempat Pelaksanaan Rapat -->
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label">Tempat Rapat / Pertemuan:</label>
+          <select id="notulaPlace" class="form-input" style="font-size: 0.825rem; margin-bottom: 0.4rem;">
+            <option value="Daring melalui Zoom Meeting">1. Daring melalui Zoom Meeting (Sesuai Contoh)</option>
+            <option value="Di Tempat">2. Di Tempat (Luring di Kantor / Ruang Rapat)</option>
+            <option value="custom">3. Tulis Tempat Lainnya...</option>
+          </select>
+          <input type="text" id="notulaCustomPlace" class="form-input" placeholder="Tuliskan nama ruangan / platform rapat..." style="font-size: 0.825rem; display: none;">
+        </div>
+      </div>
+
+      <!-- Formulir Manual Section 2: Agenda Kegiatan -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">2. Agenda Kegiatan</span>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addListItem('agenda')">+ Tambah Agenda</button>
+        </div>
+        <div id="agendaContainer"></div>
+      </div>
+
+      <!-- Formulir Manual Section 3: Peserta / Unsur yang Hadir -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">3. Peserta / Unsur yang Hadir</span>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addListItem('attendees')">+ Tambah Peserta</button>
+        </div>
+        <div id="attendeesContainer"></div>
+      </div>
+
+      <!-- Formulir Manual Section 4: Uraian Kegiatan (Subseksi Jalannya Rapat) -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">4. Uraian Kegiatan & Paparan</span>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addActivitySection()">+ Tambah Sesi Paparan</button>
+        </div>
+        <div id="activitiesContainer"></div>
+      </div>
+
+      <!-- Formulir Manual Section 5: Pokok Tindak Lanjut -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">5. Pokok Tindak Lanjut</span>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addListItem('actionItems')">+ Tambah Tindak Lanjut</button>
+        </div>
+        <div id="actionItemsContainer"></div>
+      </div>
+
+      <!-- Formulir Manual Section 6: Kesimpulan -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">6. Kesimpulan Rapat</span>
+          <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addListItem('conclusions')">+ Tambah Kesimpulan</button>
+        </div>
+        <div id="conclusionsContainer"></div>
+      </div>
+
+      <!-- Formulir Manual Section 7: Penutup & Notulis -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #0A2540; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem; text-transform: uppercase;">
+          7. Penutup & Notulis
+        </div>
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label">Teks Narasi Penutup:</label>
+          <textarea id="notulaClosing" class="form-input" style="min-height: 60px; font-size: 0.825rem;"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label">Nama Notulis:</label>
+            <input type="text" id="notulisName" class="form-input" style="font-size: 0.825rem;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jabatan Notulis:</label>
+            <input type="text" id="notulisRole" class="form-input" style="font-size: 0.825rem;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulir Manual Section 8: Bukti Kegiatan / Dokumentasi Foto (Posisikan di Bawah Penutup) -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 0.35rem; margin-bottom: 0.85rem;">
+          <div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: #0A2540; text-transform: uppercase;">8. Bukti Kegiatan / Foto (Bawah Penutup)</span>
+            <span style="font-size: 0.7rem; color: #64748B; display: block;">Dokumentasi visual ditempatkan langsung di bawah penutup</span>
+          </div>
+          <label class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.25rem 0.6rem; cursor: pointer; margin: 0;">
+            <span>+ Unggah Foto</span>
+            <input type="file" id="documentationFileInput" accept="image/*" style="display: none;">
+          </label>
+        </div>
+        <div id="documentationPhotosContainer" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right Panel: Live BKN Document Preview -->
+  <div class="notulen-preview-panel">
+    <!-- Toolbar Aksi Preview -->
+    <div class="preview-toolbar">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; display: inline-block;"></span>
+        <span style="font-size: 0.85rem; font-weight: 700; color: #0A2540;">Pratinjau Dokumen Cetak Resmi BKN</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button type="button" id="btnExportDocx" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.825rem; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+          <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Unduh Word (.docx)</span>
+        </button>
+        <button type="button" id="btnPrintNotulen" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 600; font-size: 0.825rem;">
+          <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          <span>Cetak / PDF A4</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Official BKN Paper Sheet (Sesuai Template PDF Contoh) -->
+    <div class="notula-paper" id="notulaPaper">
+      
+      <!-- Kop Surat Resmi dengan Lambang Garuda Pancasila -->
+      <div class="notula-kop">
+        <img src="/images/garuda_pancasila.png" alt="Lambang Garuda Pancasila" class="notula-garuda">
+        <div class="notula-kop-title">
+          <%= (typeof user !== 'undefined' && user.institution_kop) ? user.institution_kop : 'BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V' %>
+        </div>
+        <div class="notula-kop-address">
+          <%= (typeof user !== 'undefined' && user.kop_address) ? user.kop_address : 'Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730' %><br>
+          <%= (typeof user !== 'undefined' && user.kop_contact) ? user.kop_contact : 'Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id' %>
+        </div>
+        <div class="notula-kop-divider"></div>
+      </div>
+
+      <!-- Judul Notula & Metadata Pelaksanaan -->
+      <div class="notula-title-block">
+        <div class="notula-main-title">NOTULA</div>
+        <div class="notula-sub-title" id="previewTitle">
+          (<%= initialData.title %>)
+        </div>
+        <div class="notula-meta-line" id="previewDateTime">
+          <%= initialData.formattedDate %>, Waktu: <%= initialData.meetingTime %>
+        </div>
+        <div class="notula-meta-line" id="previewPlace">
+          Tempat: <%= initialData.meetingPlace %>
+        </div>
+      </div>
+
+      <!-- 1. Agenda Kegiatan -->
+      <div class="notula-box-header">
+        AGENDA KEGIATAN
+      </div>
+      <ul class="notula-list" id="previewAgendaList">
+        <% (initialData.agenda || []).forEach(function(item) { %>
+          <li><%= item %></li>
+        <% }); %>
+      </ul>
+
+      <!-- 2. Peserta / Unsur yang Hadir -->
+      <div class="notula-section-heading">
+        PESERTA / UNSUR YANG HADIR
+      </div>
+      <ul class="notula-list" id="previewAttendeesList">
+        <% (initialData.attendees || []).forEach(function(item) { %>
+          <li><%= item %></li>
+        <% }); %>
+      </ul>
+
+      <!-- 3. Uraian Kegiatan -->
+      <div class="notula-section-heading" style="margin-top: 2rem;">
+        URAIAN KEGIATAN
+      </div>
+      <div id="previewActivitiesContainer">
+        <% (initialData.activities || []).forEach(function(act) { %>
+          <div style="margin-bottom: 1.25rem;">
+            <div class="notula-subsection-title"><%= act.sectionTitle %></div>
+            <ul class="notula-list">
+              <% (act.points || []).forEach(function(pt) { %>
+                <li><%= pt %></li>
+              <% }); %>
+            </ul>
+          </div>
+        <% }); %>
+      </div>
+
+      <!-- 4. Pokok Tindak Lanjut -->
+      <div class="notula-section-heading" style="margin-top: 2rem;">
+        POKOK TINDAK LANJUT
+      </div>
+      <ul class="notula-list" id="previewActionList">
+        <% (initialData.actionItems || []).forEach(function(item) { %>
+          <li><%= item %></li>
+        <% }); %>
+      </ul>
+
+      <!-- 5. Kesimpulan -->
+      <div class="notula-section-heading" style="margin-top: 2rem;">
+        KESIMPULAN
+      </div>
+      <ul class="notula-list" id="previewConclusionsList">
+        <% (initialData.conclusions || []).forEach(function(item) { %>
+          <li><%= item %></li>
+        <% }); %>
+      </ul>
+
+      <!-- 6. Penutup -->
+      <div class="notula-section-heading" style="margin-top: 2rem;">
+        PENUTUP
+      </div>
+      <p style="text-align: justify; margin-bottom: 2rem; line-height: 1.5; font-size: 10.5pt;" id="previewClosing">
+        <%= initialData.closingText %>
+      </p>
+
+      <!-- BUKTI GIAT / DOKUMENTASI KEGIATAN (LANGSUNG DIBAWAH PENUTUP & DIATAS TANDA TANGAN) -->
+      <div id="previewEvidenceSection" style="margin-top: 2rem; margin-bottom: 2rem; <%= (initialData.documentationPhotos && initialData.documentationPhotos.length > 0) ? '' : 'display: none;' %>">
+        <div class="notula-section-heading" style="margin-bottom: 1rem;">
+          DOKUMENTASI / BUKTI KEGIATAN
+        </div>
+        <div id="previewEvidenceGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          <% (initialData.documentationPhotos || []).forEach(function(photo) { %>
+            <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
+              <img src="<%= photo.url %>" alt="<%= photo.caption || 'Bukti Kegiatan' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
+              <% if (photo.caption) { %>
+                <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;"><%= photo.caption %></div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- 7. Tanda Tangan Notulis (Rata Kanan) -->
+      <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; page-break-inside: avoid;">
+        <div class="notula-signature-block">
+          <div class="notula-sig-date" id="previewSigDate"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= initialData.formattedDate.includes(',') ? initialData.formattedDate.split(',')[1].trim() : initialData.formattedDate %></div>
+          <div class="notula-sig-role">Notulis,</div>
+          <div class="notula-sig-name" id="previewSigName"><%= initialData.notulisName || (typeof user !== 'undefined' ? user.full_name : '') %></div>
+          <div class="notula-sig-division" id="previewSigRole"><%= initialData.notulisRole || (typeof user !== 'undefined' ? user.division : '') %></div>
+        </div>
+        <div style="clear: both;"></div>
+      </div>
+
+      <!-- Running Footer Cetak -->
+      <div class="notula-running-footer">
+        <span id="runningTitle">Notula <%= initialData.title %></span>
+        <span><%= (typeof user !== 'undefined' && user.running_footer) ? user.running_footer : 'Dokumen Resmi Kanreg V BKN' %></span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  window.initialNotulenData = <%- JSON.stringify(initialData) %>;
+  window.todayFormattedString = "<%= typeof todayFormatted !== 'undefined' ? todayFormatted : '' %>";
+</script>
+<script src="/js/notulen.js"></script>
+
+<%- include('layouts/footer') %>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Hadir - <%= (meeting && meeting.meeting_nama) ? meeting.meeting_nama : 'Meeting ' + meeting_id %> | BKN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+            background: #e2e8f0;
+            color: #000000;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Top Action Bar (Hanya tampil di layar monitor) */
+        .no-print-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0d2b5c;
+            color: #ffffff;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .no-print-toolbar .brand-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .no-print-toolbar .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: #ffffff;
+        }
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #ffffff;
+        }
+        .btn-download:hover {
+            background: #047857;
+        }
+
+        /* Paper Layout: Standar A4 */
+        .paper-container {
+            max-width: 210mm;
+            margin: 20px auto 40px;
+            background: #ffffff;
+            padding: 20mm 15mm 20mm 15mm;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            min-height: 297mm;
+        }
+
+        /* Header Kop Surat BKN */
+        .kop-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding-bottom: 12px;
+            border-bottom: 3px double #000000;
+            margin-bottom: 16px;
+        }
+
+        .kop-logo {
+            width: 65px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .kop-text {
+            text-align: center;
+        }
+
+        .kop-instansi-1 {
+            font-size: 14pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .kop-instansi-2 {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .kop-alamat {
+            font-size: 8.5pt;
+            color: #222222;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+
+        /* Judul Dokumen */
+        .doc-title-block {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .doc-main-title {
+            font-size: 13pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Metadata Meeting */
+        .meta-table {
+            width: 100%;
+            margin-bottom: 16px;
+            font-size: 9.5pt;
+            border-collapse: collapse;
+        }
+
+        .meta-table td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+
+        .meta-label {
+            width: 24%;
+            font-weight: bold;
+        }
+
+        .meta-colon {
+            width: 2%;
+            text-align: center;
+        }
+
+        .meta-val {
+            width: 74%;
+        }
+
+        /* Tabel Presensi Formal (Sesuai format foto user) */
+        .presensi-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+            margin-top: 10px;
+            margin-bottom: 24px;
+        }
+
+        .presensi-table th {
+            border: 1px solid #000000;
+            padding: 8px 6px;
+            background-color: #f1f5f9;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .presensi-table td {
+            border: 1px solid #000000;
+            padding: 6px 8px;
+            vertical-align: middle;
+        }
+
+        .col-no {
+            width: 8%;
+            text-align: center;
+        }
+
+        .col-nip {
+            width: 28%;
+            text-align: center;
+            font-family: monospace, Arial, sans-serif;
+            font-size: 9.5pt;
+        }
+
+        .col-nama {
+            width: 36%;
+            text-align: left;
+        }
+
+        .col-ttd {
+            width: 28%;
+            text-align: center;
+            padding: 4px !important;
+        }
+
+        .sig-img {
+            max-height: 48px;
+            max-width: 130px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Bagian Tanda Tangan Penyelenggara */
+        .sign-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 25px;
+            page-break-inside: avoid;
+        }
+
+        .sign-box {
+            width: 240px;
+            text-align: center;
+            font-size: 10pt;
+        }
+
+        .sign-space {
+            height: 65px;
+        }
+
+        /* Print Media Styles */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print-toolbar {
+                display: none !important;
+            }
+
+            .paper-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 10mm 15mm !important;
+                box-shadow: none !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 10mm 15mm;
+            }
+
+            .presensi-table tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR (HANYA LAYAR MONITOR) -->
+    <div class="no-print-toolbar">
+        <div class="brand-info">
+            <span style="font-size: 18px;">📋</span>
+            <div>
+                <strong style="font-size: 14px;">Daftar Hadir Resmi Pertemuan / Rapat</strong>
+                <div style="font-size: 11px; opacity: 0.85;"><%= (meeting && meeting.meeting_nama) ? meeting.meeting_nama : 'Meeting #' + meeting_id %></div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <a href="/daftar-presensi/<%= meeting_id %>" class="action-btn btn-back">
+                ← Kembali
+            </a>
+            <button type="button" class="action-btn btn-print" onclick="window.print()">
+                🖨️ Cetak / Print (A4)
+            </button>
+            <button type="button" class="action-btn btn-download" id="btnDownloadPdfAuto" onclick="downloadAsPdf()">
+                📥 Unduh PDF Otomatis
+            </button>
+        </div>
+    </div>
+
+    <!-- SHEET KERTAS A4 -->
+    <div class="paper-container" id="presensiPaper">
+
+        <!-- KOP SURAT BKN -->
+        <div class="kop-header">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <div class="kop-instansi-1">BADAN KEPEGAWAIAN NEGARA</div>
+                <div class="kop-instansi-2">KANTOR REGIONAL V JAKARTA</div>
+                <div class="kop-alamat">
+                    Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, DKI Jakarta 13730<br>
+                    Telepon (021) 87721084 - 87721085 | Laman: jakarta.bkn.go.id
+                </div>
+            </div>
+        </div>
+
+        <!-- JUDUL DOKUMEN -->
+        <div class="doc-title-block">
+            <h1 class="doc-main-title">DAFTAR HADIR PESERTA RAPAT</h1>
+        </div>
+
+        <!-- METADATA MEETING -->
+        <table class="meta-table">
+            <tr>
+                <td class="meta-label">Nama Kegiatan / Rapat</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-val"><strong><%= (meeting && meeting.meeting_nama) ? meeting.meeting_nama : '-' %></strong></td>
+            </tr>
+            <tr>
+                <td class="meta-label">Hari / Tanggal</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-val"><%= formattedTanggal %></td>
+            </tr>
+            <tr>
+                <td class="meta-label">Tipe / Media Pertemuan</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-val"><%= (meeting && meeting.tipe_meeting) ? meeting.tipe_meeting : 'Rapat Kedinasan' %></td>
+            </tr>
+            <% if (meeting && meeting.deskripsi) { %>
+            <tr>
+                <td class="meta-label">Agenda / Pembahasan</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-val"><%= meeting.deskripsi %></td>
+            </tr>
+            <% } %>
+            <tr>
+                <td class="meta-label">Jumlah Peserta Hadir</td>
+                <td class="meta-colon">:</td>
+                <td class="meta-val"><strong><%= dataPresensi.length %></strong> Orang</td>
+            </tr>
+        </table>
+
+        <!-- TABEL PRESENSI FORMAT SESUAI FOTO -->
+        <table class="presensi-table">
+            <thead>
+                <tr>
+                    <th class="col-no">NO</th>
+                    <th class="col-nip">NIP/NIK</th>
+                    <th class="col-nama">Nama</th>
+                    <th class="col-ttd">TTD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (dataPresensi && dataPresensi.length > 0) { %>
+                    <% dataPresensi.forEach((peserta, idx) => { %>
+                        <tr>
+                            <td class="col-no"><%= idx + 1 %>.</td>
+                            <td class="col-nip"><%= peserta.nip || '-' %></td>
+                            <td class="col-nama">
+                                <div style="font-weight: bold; color: #000;"><%= peserta.nama %></div>
+                                <% if (peserta.jabatan || peserta.instansi) { %>
+                                    <div style="font-size: 8pt; color: #444; margin-top: 2px;">
+                                        <%= [peserta.jabatan, peserta.instansi].filter(Boolean).join(' • ') %>
+                                    </div>
+                                <% } %>
+                            </td>
+                            <td class="col-ttd">
+                                <% if (peserta.tanda_tangan) { %>
+                                    <img 
+                                        src="<%= peserta.tanda_tangan.startsWith('/') ? peserta.tanda_tangan : '/uploads/ttd/' + peserta.tanda_tangan %>" 
+                                        alt="TTD <%= peserta.nama %>" 
+                                        class="sig-img"
+                                    >
+                                <% } else { %>
+                                    <span style="font-size: 8pt; color: #888; font-style: italic;">(Tanpa Tanda Tangan)</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 24px; font-style: italic; color: #666;">
+                            Belum ada peserta yang melakukan presensi pada rapat ini.
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- TANDA TANGAN PENYELENGGARA / NOTULIS -->
+        <div class="sign-section">
+            <div class="sign-box">
+                <div>Jakarta, <%= todayFormatted %></div>
+                <div style="font-weight: bold; margin-top: 4px;">Penyelenggara / Notulis Rapat,</div>
+                <div class="sign-space"></div>
+                <div style="font-weight: bold; text-decoration: underline;">( .................................................... )</div>
+                <div style="font-size: 9pt; color: #333; margin-top: 2px;">NIP. .................................................</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function downloadAsPdf() {
+            const btn = document.getElementById('btnDownloadPdfAuto');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Menyiapkan Dokumen PDF...';
+            btn.disabled = true;
+
+            const element = document.getElementById('presensiPaper');
+            const filename = 'Daftar_Presensi_<%= (meeting && meeting.meeting_nama ? meeting.meeting_nama.replace(/[^a-zA-Z0-9]/g, "_") : "Meeting_" + meeting_id) %>.pdf';
+
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("Gagal generate PDF:", err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                window.print();
+            });
+        }
+    </script>
+</body>
+</html>

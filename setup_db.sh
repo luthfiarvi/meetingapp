@@ -58,9 +58,31 @@ CREATE TABLE IF NOT EXISTS presensi (
   waktu_presensi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabel request zoom meeting (Layanan Tim Sidigi)
+CREATE TABLE IF NOT EXISTS zoom_requests (
+  id SERIAL PRIMARY KEY,
+  nip VARCHAR(50) NOT NULL,
+  nama_pemohon VARCHAR(150),
+  divisi VARCHAR(150),
+  judul_rapat VARCHAR(255) NOT NULL,
+  tanggal_pengajuan DATE DEFAULT CURRENT_DATE,
+  tanggal_rapat DATE NOT NULL,
+  waktu_mulai TIME,
+  waktu_selesai TIME,
+  keterangan TEXT,
+  status VARCHAR(30) DEFAULT 'menunggu',
+  zoom_link TEXT,
+  meeting_id VARCHAR(100),
+  passcode VARCHAR(100),
+  catatan_admin TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Index agar query lebih cepat
 CREATE INDEX IF NOT EXISTS idx_presensi_rapat ON presensi(id_rapat);
 CREATE INDEX IF NOT EXISTS idx_presensi_nip ON presensi(nip);
+CREATE INDEX IF NOT EXISTS idx_zoom_nip ON zoom_requests(nip);
+CREATE INDEX IF NOT EXISTS idx_zoom_status ON zoom_requests(status);
 
 SQL
 

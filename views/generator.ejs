@@ -1,0 +1,384 @@
+<%- include('layouts/header', { title: 'Generator Infografis BKN - Panel Otomatis' }) %>
+
+<div class="max-w-7xl mx-auto">
+  <div class="generator-layout">
+    
+    <!-- LEFT PANEL: Form Generator -->
+    <div class="form-panel">
+      
+      <!-- Top Action Bar -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: #0A2540;">Formulir Laporan Harian</h2>
+          <p style="font-size: 0.8125rem; color: #64748B;">Identitas pegawai terisi otomatis dari sesi login.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" id="btn-save" class="btn btn-primary btn-sm">
+            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            <span>Simpan</span>
+          </button>
+          <button type="button" id="btn-download-png" class="btn btn-secondary btn-sm" style="background: #0F172A; color: #FFFFFF; border-color: #0F172A;">
+            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Unduh PNG HD</span>
+          </button>
+          <button type="button" id="btn-print" class="btn btn-secondary btn-sm" onclick="window.print()">
+            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            <span>Cetak / PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <form id="infographicForm">
+        <input type="hidden" id="doc_id" value="<%= initialData && initialData.id ? initialData.id : '' %>">
+
+        <!-- AI SINGLE-INPUT ASSISTANT CARD -->
+        <div style="background: linear-gradient(135deg, #0A2540 0%, #163e69 100%); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.5rem; color: #FFFFFF; border: 1px solid #1E40AF; box-shadow: 0 4px 12px rgba(10, 37, 64, 0.15);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="background: #D97706; color: #FFFFFF; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <svg style="width: 0.85rem; height: 0.85rem;" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                AI Smart Assistant
+              </span>
+              <span style="font-size: 0.85rem; font-weight: 700; color: #FDE68A;">Penyusun Infografis Otomatis (1 Kolom)</span>
+            </div>
+            <button type="button" id="btn-ai-sample" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #FFFFFF; font-size: 0.725rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 0.375rem; cursor: pointer;">
+              📋 Isi Contoh Catatan
+            </button>
+          </div>
+
+          <p style="font-size: 0.775rem; color: #CBD5E1; margin-bottom: 0.75rem; line-height: 1.4;">
+            Cukup ketik atau tempel rangkuman seluruh aktivitas dan capaian Anda di bawah ini. Sistem AI akan secara cerdas membedah metrik, pilar kegiatan, dan tabel matriks secara instan.
+          </p>
+
+          <textarea id="ai_raw_input" class="form-textarea" rows="4" placeholder="Tuliskan catatan laporan harian bebas di sini... Contoh: Hari ini menyelesaikan modul autentikasi pegawai Kanreg V, mengintegrasikan auto-binding profil pengguna, dan membenahi navbar logo BKN. Menyelesaikan 28 tiket layanan kepegawaian dengan SLA 14 menit, performa efisiensi sistem 99.4%, dan progres capaian sprint sebesar 88%." style="background: rgba(255, 255, 255, 0.95); color: #0F172A; border-radius: 0.5rem; font-size: 0.8125rem; margin-bottom: 0.75rem; resize: vertical;"></textarea>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div id="ai-status" style="font-size: 0.75rem; color: #FDE68A; display: flex; align-items: center; gap: 0.35rem;">
+              <span>💡 AI siap menganalisis catatan harian Anda.</span>
+            </div>
+            <button type="button" id="btn-ai-generate" class="btn btn-success btn-sm" style="font-size: 0.8125rem; padding: 0.45rem 1rem; background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; color: #0A2540; font-weight: 700; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4);">
+              <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>✨ Susun Infografis dengan AI</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 1: PROFIL & METADATA PEGAWAI (AUTO-BIND FROM SESSION) -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge-meta">
+                <svg style="width: 0.85rem; height: 0.85rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                Auto-Binding Profil Sesi
+              </span>
+              <span style="font-size: 0.75rem; color: #64748B;">(Terisi otomatis dari akun Anda)</span>
+            </div>
+            <button type="button" id="btn-toggle-meta" class="btn btn-secondary btn-sm" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">
+              ✏️ Buka Kunci / Edit Meta
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label for="meta_nama" class="form-label" style="font-size: 0.75rem;">Nama Pegawai</label>
+              <input type="text" id="meta_nama" class="form-input meta-field" value="<%= defaultMeta.nama %>" readonly>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label for="meta_divisi" class="form-label" style="font-size: 0.75rem;">Jabatan / Divisi</label>
+              <input type="text" id="meta_divisi" class="form-input meta-field" value="<%= defaultMeta.divisi %>" readonly>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label for="meta_instansi" class="form-label" style="font-size: 0.75rem;">Instansi / Satuan Kerja</label>
+              <input type="text" id="meta_instansi" class="form-input meta-field" value="<%= defaultMeta.instansi %>" readonly>
+            </div>
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label for="meta_nip" class="form-label" style="font-size: 0.75rem;">NIP Pegawai</label>
+              <input type="text" id="meta_nip" class="form-input meta-field" value="<%= defaultMeta.nip || '-' %>" readonly>
+              <input type="hidden" id="meta_mentor" value="">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="meta_logo" class="form-label" style="font-size: 0.75rem;">URL Logo Instansi</label>
+            <input type="text" id="meta_logo" class="form-input meta-field" value="<%= defaultMeta.logo %>" readonly>
+            <input type="hidden" id="meta_avatar" value="<%= defaultMeta.avatar || '/images/default_avatar.png' %>">
+          </div>
+        </div>
+
+        <!-- SECTION 2: KONTEN HARIAN (JUDUL & TANGGAL) -->
+        <div class="section-header">
+          <span class="section-title">
+            <svg style="width: 1.1rem; height: 1.1rem; color: #2563EB;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            1. Konten Pokok Laporan
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem;">
+          <div class="form-group">
+            <label for="report_title" class="form-label">Judul Laporan Infografis *</label>
+            <input type="text" id="report_title" class="form-input" value="<%= initialData.reportTitle %>" required>
+          </div>
+          <div class="form-group">
+            <label for="report_date" class="form-label">Tanggal Laporan *</label>
+            <input type="date" id="report_date" class="form-input" value="<%= initialData.reportDate %>" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="report_subtitle" class="form-label">Subjudul / Instansi</label>
+          <input type="text" id="report_subtitle" class="form-input" value="<%= initialData.reportSubtitle %>">
+        </div>
+
+        <!-- SECTION 3: 2 KOLOM PILAR AKTIVITAS -->
+        <div class="section-header" style="margin-top: 1.5rem;">
+          <span class="section-title">
+            <svg style="width: 1.1rem; height: 1.1rem; color: #D97706;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            2. Pilar Aktivitas & Program Prioritas
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;" id="pillars-input-container">
+          <% (initialData.pillars || []).forEach((p, pIdx) => { %>
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 0.75rem;" class="pillar-input-box" data-pidx="<%= pIdx %>">
+              <label class="form-label" style="font-size: 0.75rem;">Judul Pilar <%= pIdx + 1 %></label>
+              <input type="text" class="form-input pillar-title-input" value="<%= p.title %>" style="margin-bottom: 0.5rem;">
+              
+              <div class="pillar-items-list" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <% (p.items || []).forEach((item, iIdx) => { %>
+                  <div style="display: flex; gap: 0.35rem; align-items: center;" class="pillar-item-row">
+                    <input type="text" class="form-input pillar-item-text" value="<%= item %>" placeholder="Aktivitas...">
+                    <button type="button" class="btn btn-secondary btn-sm btn-del-item" style="color: #DC2626; padding: 0.25rem 0.4rem;">✕</button>
+                  </div>
+                <% }) %>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm btn-add-item w-full" style="font-size: 0.7rem; margin-top: 0.5rem;">
+                + Tambah Poin Aktivitas
+              </button>
+            </div>
+          <% }) %>
+        </div>
+
+        <!-- SECTION 4: TABEL MATRIKS KOMPONEN -->
+        <div class="section-header" style="margin-top: 1.5rem;">
+          <span class="section-title">
+            <svg style="width: 1.1rem; height: 1.1rem; color: #7C3AED;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            3. Tabel Matriks Komponen & Progres
+          </span>
+          <button type="button" id="btn-add-table-row" class="btn btn-secondary btn-sm" style="font-size: 0.725rem;">
+            + Tambah Baris
+          </button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; font-size: 0.75rem; border-collapse: collapse;" id="input-matrix-table">
+            <thead>
+              <tr style="background: #F1F5F9; border-bottom: 1px solid #CBD5E1;">
+                <th style="padding: 0.5rem; text-align: left;">Komponen / Pekerjaan</th>
+                <th style="padding: 0.5rem; text-align: left; width: 100px;">Status</th>
+                <th style="padding: 0.5rem; text-align: left; width: 70px;">Target</th>
+                <th style="padding: 0.5rem; text-align: left;">Keterangan</th>
+                <th style="padding: 0.5rem; width: 35px;"></th>
+              </tr>
+            </thead>
+            <tbody id="table-rows-container">
+              <% (initialData.tableRows || []).forEach((r, rIdx) => { %>
+                <tr style="border-bottom: 1px solid #E2E8F0;" class="matrix-input-row">
+                  <td style="padding: 0.35rem;">
+                    <input type="text" class="form-input row-komponen" value="<%= r.komponen %>" placeholder="Komponen">
+                  </td>
+                  <td style="padding: 0.35rem;">
+                    <select class="form-input row-status">
+                      <option value="Selesai" <%= r.status === 'Selesai' ? 'selected' : '' %>>Selesai</option>
+                      <option value="Berjalan" <%= r.status === 'Berjalan' ? 'selected' : '' %>>Berjalan</option>
+                      <option value="Tertunda" <%= r.status === 'Tertunda' ? 'selected' : '' %>>Tertunda</option>
+                    </select>
+                  </td>
+                  <td style="padding: 0.35rem;">
+                    <input type="text" class="form-input row-target" value="<%= r.target %>" placeholder="100%">
+                  </td>
+                  <td style="padding: 0.35rem;">
+                    <input type="text" class="form-input row-ket" value="<%= r.ket %>" placeholder="Catatan">
+                  </td>
+                  <td style="padding: 0.35rem; text-align: center;">
+                    <button type="button" class="btn btn-secondary btn-sm btn-del-row" style="color: #DC2626; padding: 0.2rem 0.4rem;">✕</button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SECTION 4: BUKTI VISUAL & DOKUMENTASI KEGIATAN -->
+        <div class="section-header" style="margin-top: 1.5rem;">
+          <span class="section-title">
+            <svg style="width: 1.1rem; height: 1.1rem; color: #0284C7;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            4. Bukti Visual & Dokumentasi Kegiatan
+          </span>
+          <button type="button" id="btn-add-evidence" class="btn btn-secondary btn-sm" style="font-size: 0.725rem;">
+            + Tambah Foto Dokumentasi
+          </button>
+        </div>
+
+        <div id="evidence-inputs-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <% (initialData.visualEvidence || []).forEach((ev, evIdx) => { %>
+            <div class="evidence-input-row" data-idx="<%= evIdx %>" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 0.75rem; display: flex; gap: 0.75rem; align-items: center;">
+              <div style="width: 70px; height: 55px; border-radius: 0.375rem; overflow: hidden; background: #E2E8F0; flex-shrink: 0; border: 1px solid #CBD5E1; display: flex; align-items: center; justify-content: center;">
+                <img class="evidence-thumb" src="<%= ev.url %>" alt="Thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.35rem;">
+                <input type="file" class="form-input evidence-file-input" accept="image/*" style="font-size: 0.725rem; padding: 0.25rem 0.4rem;">
+                <input type="hidden" class="evidence-url-input" value="<%= ev.url %>">
+                <input type="text" class="form-input evidence-caption-input" placeholder="Keterangan foto kegiatan (misal: Rapat Koordinasi ASN)" value="<%= ev.caption || '' %>">
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm btn-del-evidence" style="color: #DC2626; padding: 0.35rem 0.5rem;">✕</button>
+            </div>
+          <% }) %>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- RIGHT PANEL: Live Interactive Preview -->
+    <div class="preview-panel">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;" class="no-print">
+        <div style="font-size: 0.8125rem; font-weight: 700; color: #0A2540; display: flex; align-items: center; gap: 0.4rem;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);"></span>
+          Live Preview Kartu Infografis (Standar BKN)
+        </div>
+        <div style="font-size: 0.725rem; color: #64748B;">
+          Otomatis diperbarui saat Anda mengetik
+        </div>
+      </div>
+
+      <!-- THE INFOGRAPHIC CANVAS (Print & Export Target) -->
+      <div class="infographic-canvas" id="infographicPreview">
+        
+        <!-- Header Section -->
+        <div class="info-header">
+          <div class="info-header-top">
+            <div class="info-brand">
+              <img id="pv-logo" src="<%= defaultMeta.logo %>" alt="Logo BKN">
+              <div class="info-brand-text">
+                <h1 id="pv-title"><%= initialData.reportTitle %></h1>
+                <p id="pv-subtitle"><%= initialData.reportSubtitle %></p>
+              </div>
+            </div>
+            <div class="info-date-badge" id="pv-date-badge">
+              <%= initialData.formattedDate || 'Kamis, 10 September 2026' %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identity Bar (Pre-filled from req.user) -->
+        <div class="info-meta-bar">
+          <div class="meta-user-info">
+            <div class="meta-avatar" id="pv-avatar" style="overflow: hidden; padding: 0;">
+              <img id="pv-avatar-img" src="<%= defaultMeta.avatar || '/images/default_avatar.png' %>" alt="<%= defaultMeta.nama %>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            </div>
+            <div class="meta-details">
+              <div class="meta-name" id="pv-nama"><%= defaultMeta.nama %></div>
+              <div class="meta-role" id="pv-divisi"><%= defaultMeta.divisi %></div>
+              <div class="meta-nip"><span id="pv-instansi"><%= defaultMeta.instansi %></span></div>
+            </div>
+          </div>
+          <div class="meta-mentor-box">
+            <div class="label">NIP Pegawai:</div>
+            <div class="value" id="pv-nip"><%= defaultMeta.nip || '-' %></div>
+          </div>
+        </div>
+
+        <!-- Body Section -->
+        <div class="info-body">
+
+          <!-- 2 Pillars -->
+          <div>
+            <div class="info-section-heading">Pilar Aktivitas & Program Prioritas</div>
+            <div class="info-pillars-grid" id="pv-pillars">
+              <% (initialData.pillars || []).forEach(p => { %>
+                <div class="pillar-card">
+                  <div class="pillar-title"><%= p.title %></div>
+                  <ul class="pillar-list">
+                    <% (p.items || []).forEach(item => { %>
+                      <li class="pillar-item"><%= item %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Component Matrix Table -->
+          <div>
+            <div class="info-section-heading">Matriks Implementasi Komponen Sistem</div>
+            <div class="info-table-container">
+              <table class="info-table">
+                <thead>
+                  <tr>
+                    <th>Komponen Pekerjaan</th>
+                    <th>PIC / Penanggung Jawab</th>
+                    <th>Status</th>
+                    <th>Target</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="pv-table-rows">
+                  <% (initialData.tableRows || []).forEach(r => { %>
+                    <tr>
+                      <td style="font-weight: 600;"><%= r.komponen %></td>
+                      <td><%= defaultMeta.nama %></td>
+                      <td>
+                        <span class="badge-status <%= (r.status || '').toLowerCase() %>"><%= r.status %></span>
+                      </td>
+                      <td style="font-weight: 600;"><%= r.target %></td>
+                      <td><%= r.ket %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Visual Evidence Gallery Section -->
+          <div id="pv-evidence-section" style="<%= (initialData.visualEvidence && initialData.visualEvidence.length > 0) ? '' : 'display: none;' %>">
+            <div class="info-section-heading">Dokumentasi & Bukti Visual Pelaksanaan Kegiatan</div>
+            <div class="info-evidence-grid" id="pv-evidence-grid">
+              <% (initialData.visualEvidence || []).forEach(ev => { %>
+                <div class="evidence-card">
+                  <div class="evidence-img-box">
+                    <img src="<%= ev.url %>" alt="<%= ev.caption || 'Bukti Visual' %>">
+                  </div>
+                  <div class="evidence-caption"><%= ev.caption || 'Dokumentasi Kegiatan' %></div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- Institutional Seal Footer -->
+          <div class="info-footer-seal">
+            <div class="seal-verified">
+              <svg style="width: 1.15rem; height: 1.15rem;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+              <span>DOKUMEN RESMI BKN • TERVERIFIKASI SISTEM ELEKTRONIK</span>
+            </div>
+            <div class="doc-authority">
+              Kantor Regional V Badan Kepegawaian Negara • <span>Format Laporan Sah</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Notification Toast -->
+<div id="toast"></div>
+
+<!-- HTML2Canvas for High-Res PNG Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="/js/generator.js"></script>
+
+<%- include('layouts/footer') %>

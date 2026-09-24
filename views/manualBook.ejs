@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Book & Panduan Pengguna | Meeting App BKN</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .manual-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        /* Top Banner Hero */
+        .manual-hero-card {
+            background: linear-gradient(135deg, #0d2b5c 0%, #174f99 60%, #2563eb 100%);
+            border-radius: 20px;
+            padding: 2.2rem 2.5rem;
+            color: #ffffff;
+            box-shadow: 0 15px 35px rgba(13, 43, 92, 0.18);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .manual-hero-card::after {
+            content: "";
+            position: absolute;
+            right: -30px;
+            bottom: -40px;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-left h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hero-left p {
+            color: #bfdbfe;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-width: 620px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        .btn-print-doc {
+            background: #ffffff;
+            color: #102f63;
+            border: none;
+            padding: 0.75rem 1.4rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+        }
+
+        .btn-print-doc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+            background: #f8fafc;
+        }
+
+        /* Quick Search & Nav Tabs */
+        .manual-nav-bar {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 4px 16px rgba(13, 43, 92, 0.04);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 20px;
+            z-index: 90;
+            backdrop-filter: blur(8px);
+        }
+
+        .search-manual-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .search-manual-wrap input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.4rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-manual-wrap input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .nav-pills {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            overflow-x: auto;
+        }
+
+        .nav-pill-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 0.9rem;
+            border-radius: 9px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-pill-btn:hover {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+        /* Module Section Cards */
+        .manual-section {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 2rem 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 20px rgba(13, 43, 92, 0.05);
+            scroll-margin-top: 90px;
+            position: relative;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .section-icon-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #1d4ed8;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.12);
+        }
+
+        .section-title-wrap h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.015em;
+        }
+
+        .section-title-wrap span {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-weight: 500;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .role-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .role-all {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .role-admin {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Step by Step Grid */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.25rem 1.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: all 0.2s;
+        }
+
+        .step-card:hover {
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .step-num-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            width: fit-content;
+        }
+
+        .step-card h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1.35;
+        }
+
+        .step-card p {
+            font-size: 0.835rem;
+            color: #475569;
+            line-height: 1.55;
+        }
+
+        .feature-callout {
+            background: #eff6ff;
+            border-left: 4.5px solid #2563eb;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #1e40af;
+            line-height: 1.55;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-callout.warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .feature-callout.success {
+            background: #f0fdf4;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        .callout-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Workflow diagram box */
+        .workflow-box {
+            background: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .flow-step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.4rem;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .flow-step-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #2563eb;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.15);
+        }
+
+        .flow-step-title {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .flow-step-desc {
+            font-size: 0.72rem;
+            color: #64748b;
+            line-height: 1.35;
+        }
+
+        .flow-arrow {
+            color: #94a3b8;
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        /* FAQ Accordion items */
+        .faq-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .faq-question {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            background: #f8fafc;
+            transition: background 0.2s;
+        }
+
+        .faq-question:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .faq-answer {
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.6;
+            border-top: 1px solid #e2e8f0;
+            display: none;
+            background: #ffffff;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+        }
+
+        .faq-item.open .faq-question {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        /* Print formatting */
+        @media print {
+            .sidebar, .manual-nav-bar, .hero-actions, .topbar-right-only {
+                display: none !important;
+            }
+            .dashboard {
+                display: block !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            .manual-container {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            .manual-section {
+                box-shadow: none !important;
+                border: 1px solid #000 !important;
+                page-break-inside: avoid;
+            }
+            .manual-hero-card {
+                background: #0d2b5c !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .manual-hero-card {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1.5rem;
+            }
+            .manual-container {
+                padding: 1rem;
+            }
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
+            .flow-arrow {
+                display: none;
+            }
+        }
+
+        /* ==============================================================
+           VIDEO TUTORIAL HUB & INTERACTIVE PLAYER
+           ============================================================== */
+        .video-hub-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(13, 43, 92, 0.07);
+            position: relative;
+            scroll-margin-top: 90px;
+        }
+
+        .video-hub-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .video-hub-grid {
+            display: grid;
+            grid-template-columns: 1.55fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 960px) {
+            .video-hub-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Player Box */
+        .video-player-frame {
+            background: #0b1329;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(11, 19, 41, 0.28);
+            border: 1px solid #1e293b;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-topbar {
+            background: #111c38;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1e2e4a;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-green { background: #10b981; }
+
+        .video-stage {
+            position: relative;
+            background: linear-gradient(135deg, #090e1a 0%, #0d1b33 100%);
+            min-height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .video-cover-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.2) 0%, rgba(9, 14, 26, 0.94) 80%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+            z-index: 5;
+            transition: opacity 0.3s;
+        }
+
+        .play-btn-circle {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 0 0 10px rgba(37, 99, 235, 0.25), 0 8px 24px rgba(37, 99, 235, 0.4);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1rem;
+        }
+
+        .play-btn-circle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 0 14px rgba(37, 99, 235, 0.35), 0 12px 28px rgba(37, 99, 235, 0.6);
+        }
+
+        /* Controls */
+        .video-control-bar {
+            background: #0f182e;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-top: 1px solid #1e293b;
+        }
+
+        .btn-ctrl {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.15rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-ctrl:hover {
+            color: #ffffff;
+            background: #1e293b;
+        }
+
+        .progress-bar-wrap {
+            flex: 1;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 9999px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            width: 0%;
+            transition: width 0.15s linear;
+        }
+
+        /* Playlist */
+        .video-playlist-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .playlist-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .playlist-card:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateX(3px);
+        }
+
+        .playlist-card.active {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+        }
+
+        .playlist-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        .playlist-card.active .playlist-thumb {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- ANIMASI EMBLEM BKN BACKGROUND -->
+        <div class="bubble bubble-top-right"></div>
+        <div class="bubble bubble-bottom-left"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-info">
+                    <div class="brand-logo">
+                        <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                    </div>
+                    <div class="brand-text">
+                        <h2>Meeting App</h2>
+                        <span>BKN Regional V</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-sidebar-toggle" id="btnSidebarToggle" title="Kecilkan Sidebar (Perluas Tampilan Tengah)" onclick="toggleSidebar()">
+                    <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="menu">
+                <a href="/dashboard" class="menu-item" data-tooltip="Dashboard">
+                    <span>🏠</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/manajemenuser" class="menu-item" data-tooltip="Manajemen User">
+                    <span>👥</span>
+                    <span>Manajemen User</span>
+                </a>
+                <% } %>
+
+                <a href="/manajemenmeeting" class="menu-item" data-tooltip="Manajemen Meeting">
+                    <span>📋</span>
+                    <span>Manajemen Meeting</span>
+                </a>
+
+                <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
+                    <span>📹</span>
+                    <span>Request Zoom</span>
+                </a>
+
+                <a href="/infografis" class="menu-item" data-tooltip="App Infografis">
+                    <span>📊</span>
+                    <span>App Infografis</span>
+                </a>
+
+                <!-- MENU MANUAL BOOK -->
+                <a href="/manual-book" class="menu-item active" data-tooltip="Manual Book">
+                    <span>📖</span>
+                    <span>Manual Book</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="help-box">
+                    <span class="help-icon">?</span>
+                    <div>
+                        <strong>Butuh bantuan?</strong>
+                        <p>Hubungi administrator sistem.</p>
+                    </div>
+                </div>
+
+                <a href="/" class="logout" onclick="showLogoutModal(event)">
+                    <span>↪</span>
+                    Keluar
+                </a>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOPBAR / PROFILE -->
+            <header class="topbar-right-only">
+                <div class="profile">
+                    <div class="notification">
+                        🔔
+                        <span></span>
+                    </div>
+
+                    <div class="profile-info">
+                        <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
+                        <small><%= (typeof user !== 'undefined' && user && user.role) ? user.role.toUpperCase() : "PENGGUNA SISTEM" %></small>
+                    </div>
+
+                    <div class="avatar" title="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
+                        <img src="<%= (typeof user !== 'undefined' && user && user.avatar_path) ? user.avatar_path : '/images/default_avatar.png' %>" alt="Avatar">
+                    </div>
+                </div>
+            </header>
+
+            <div class="manual-container">
+
+                <!-- 1. HERO CARD -->
+                <div class="manual-hero-card">
+                    <div class="hero-left">
+                        <h1><span>📖</span> Manual Book & Panduan Sistem</h1>
+                        <p>
+                            Dokumentasi panduan lengkap bagi seluruh pegawai dan administrator mengenai alur kerja sistem <strong>Meeting App BKN</strong>, integrasi Zoom/Webinar, presensi digital ber-QR Code, hingga forum interaktif Slido BKN.
+                        </p>
+                    </div>
+                    <div class="hero-actions">
+                        <a href="#section-video" class="btn-print-doc" style="background: #eff6ff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe;">
+                            <span>🎬</span> Tonton Video Panduan
+                        </a>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <a href="/manual-book/pdf/user" target="_blank" class="btn-print-doc" style="background: #ffffff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka & Cetak PDF Buku Panduan Khusus Pegawai / User">
+                                <span>📘</span> Cetak PDF Panduan User
+                            </a>
+                            <a href="/manual-book/pdf/admin" target="_blank" class="btn-print-doc" style="background: #fef2f2; color: #b91c1c; text-decoration: none; border: 1.5px solid #fecaca; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka & Cetak PDF Buku Pedoman Khusus Administrator Tim Sidigi">
+                                <span>📕</span> Cetak PDF Panduan Admin
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. STICKY NAV & SEARCH BAR -->
+                <div class="manual-nav-bar">
+                    <div class="search-manual-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="manualSearch" placeholder="Cari topik atau modul panduan..." oninput="filterManualCards(this.value)">
+                    </div>
+                    <div class="nav-pills">
+                        <a href="#section-video" class="nav-pill-btn" style="background: #2563eb; color: #ffffff; border-color: #2563eb;">🎬 Video Tutorial</a>
+                        <a href="#section-workflow" class="nav-pill-btn">⚡ Alur Utama</a>
+                        <a href="#section-meeting" class="nav-pill-btn">📋 Kelola Meeting</a>
+                        <a href="#section-zoom" class="nav-pill-btn">📹 Request Zoom</a>
+                        <a href="#section-presensi" class="nav-pill-btn">✍️ Presensi & Sertifikat</a>
+                        <a href="#section-slido" class="nav-pill-btn">💬 Slido Q&A</a>
+                        <a href="#section-faq" class="nav-pill-btn">❓ FAQ</a>
+                    </div>
+                </div>
+
+                <!-- ==============================================================
+                     PUSAT VIDEO TUTORIAL & SIMULASI PRAKTIK INTERAKTIF
+                     ============================================================== -->
+                <section class="video-hub-card" id="section-video">
+                    <div class="video-hub-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb;">
+                                🎬
+                            </div>
+                            <div>
+                                <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #0f172a;">Pusat Video Tutorial & Panduan Praktik</h2>
+                                <span style="color: #64748b; font-size: 0.85rem;">Pilih modul di sebelah kanan untuk memutar demonstrasi alur kerja sistem.</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 0.75rem; font-weight: 800; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 0.35rem 0.75rem; border-radius: 9999px;">
+                                ✓ 6 Modul Lengkap
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="video-hub-grid">
+                        <!-- KOLOM KIRI: VIDEO PLAYER -->
+                        <div>
+                            <div class="video-player-frame">
+                                <div class="video-topbar">
+                                    <div class="window-dots">
+                                        <div class="window-dot dot-red"></div>
+                                        <div class="window-dot dot-yellow"></div>
+                                        <div class="window-dot dot-green"></div>
+                                    </div>
+                                    <div id="videoTopTitle" style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;">
+                                        1. Pengajuan Zoom Meeting & Webinar
+                                    </div>
+                                    <div id="videoModeBadge" style="font-size: 0.7rem; color: #60a5fa; background: rgba(37,99,235,0.2); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600;">
+                                        ⚡ Simulasi BKN
+                                    </div>
+                                </div>
+
+                                <!-- VIDEO STAGE -->
+                                <div class="video-stage" id="videoStage">
+                                    <!-- HTML5 Video element (jika user memutar file MP4) -->
+                                    <video id="realHtml5Video" style="display: none; width: 100%; height: 100%; object-fit: contain;" controls></video>
+
+                                    <!-- SIMULASI VISUAL INTERAKTIF -->
+                                    <div id="simulatedScreen" style="width: 100%; height: 100%; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 0.75rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                                <span id="simIcon" style="font-size: 1.5rem;">📹</span>
+                                                <div>
+                                                    <div id="simHeading" style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">Form Request Zoom Meeting</div>
+                                                    <div id="simSubtitle" style="font-size: 0.75rem; color: #94a3b8;">Langkah 1 dari 4: Pengisian Data Rapat</div>
+                                                </div>
+                                            </div>
+                                            <span id="simStepPill" style="font-size: 0.72rem; font-weight: 700; background: #2563eb; color: #ffffff; padding: 0.25rem 0.65rem; border-radius: 6px;">
+                                                Langkah 1
+                                            </span>
+                                        </div>
+
+                                        <!-- KARTU VISUAL UTAMA SIMULASI -->
+                                        <div id="simContentBox" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.25rem; margin: 1rem 0; backdrop-filter: blur(8px);">
+                                            <div id="simMainText" style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.4;">
+                                                Mengisi Form Pengajuan Zoom
+                                            </div>
+                                            <p id="simDescText" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 1rem;">
+                                                Pegawai membuka menu Request Zoom, lalu mengisi Judul Rapat, Tanggal, Jam, dan memilih jenis Rapat Biasa atau Webinar.
+                                            </p>
+                                            <div id="simActionPreview" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #38bdf8; font-family: monospace; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>👉</span> <span id="simActionText">Input: "Rapat Koordinasi Layanan Kepegawaian BKN"</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- FOOTER STATUS SIMULASI -->
+                                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
+                                            <span>Sistem: <strong style="color: #10b981;">Online & Terhubung</strong></span>
+                                            <span id="simHint">Tekan tombol ▶ Play di bawah untuk memutar simulasi</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- COVER OVERLAY SEBELUM PLAY -->
+                                    <div class="video-cover-overlay" id="videoCover">
+                                        <div class="play-btn-circle" onclick="startVideoPlay()">
+                                            ▶
+                                        </div>
+                                        <h3 id="coverTitle" style="color: #ffffff; font-size: 1.25rem; font-weight: 800; margin: 0 0 0.4rem;">
+                                            1. Panduan Pengajuan Zoom Meeting & Webinar
+                                        </h3>
+                                        <p id="coverDesc" style="color: #94a3b8; font-size: 0.85rem; max-width: 420px; margin: 0 0 1rem; line-height: 1.4;">
+                                            Tata cara permohonan lisensi Zoom ke Tim Sidigi, pengisian formulir, hingga penerbitan tautan resmi.
+                                        </p>
+                                        <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.78rem; color: #cbd5e1;">
+                                            <span>⏱️ Durasi: <strong id="coverDuration">01:45</strong></span>
+                                            <span>•</span>
+                                            <span>🎯 4 Langkah Utama</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CONTROLS -->
+                                <div class="video-control-bar">
+                                    <button type="button" class="btn-ctrl" id="btnPlayPause" onclick="togglePlayPause()" title="Play / Pause">
+                                        ▶
+                                    </button>
+                                    <button type="button" class="btn-ctrl" onclick="restartVideo()" title="Ulangi dari Awal">
+                                        🔄
+                                    </button>
+                                    <div class="progress-bar-wrap" onclick="seekVideo(event)">
+                                        <div class="progress-bar-fill" id="progressBarFill"></div>
+                                    </div>
+                                    <span id="videoTimeText" style="font-size: 0.75rem; color: #94a3b8; font-family: monospace; white-space: nowrap;">
+                                        00:00 / 01:45
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- RINGKASAN LANGKAH CEPAT DI BAWAH PLAYER -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+                                    <strong style="font-size: 0.85rem; color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
+                                        <span>📝</span> Rangkuman Langkah Cepat Topik Ini:
+                                    </strong>
+                                    <button type="button" onclick="triggerFileInput()" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+                                        📁 Putar File MP4 Sendiri
+                                    </button>
+                                    <input type="file" id="localVideoUploader" accept="video/mp4,video/webm" style="display: none;" onchange="handleLocalVideo(event)">
+                                </div>
+                                <div id="quickStepsList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.78rem; color: #475569;">
+                                    <!-- Diisi secara dinamis via JavaScript sesuai playlist aktif -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KOLOM KANAN: PLAYLIST VIDEO -->
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                                <span>Daftar Video Panduan (6 Topik)</span>
+                                <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Klik untuk memilih</span>
+                            </div>
+
+                            <div class="video-playlist-container" id="videoPlaylist">
+                                <!-- Item 1 -->
+                                <div class="playlist-card active" onclick="selectVideo(0)">
+                                    <div class="playlist-thumb">📹</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            1. Pengajuan Zoom & Webinar
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:45 • Request Zoom & Status
+                                        </div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: #2563eb; font-weight: 700;">▶</span>
+                                </div>
+
+                                <!-- Item 2 -->
+                                <div class="playlist-card" onclick="selectVideo(1)">
+                                    <div class="playlist-thumb">🛡️</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            2. Approval Admin Sidigi
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:15 • Verifikasi & Terbitkan Link
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Item 3 -->
+                                <div class="playlist-card" onclick="selectVideo(2)">
+                                    <div class="playlist-thumb">✍️</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            3. Presensi & Tanda Tangan
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:20 • Absensi Digital & E-Sertifikat
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Item 4 -->
+                                <div class="playlist-card" onclick="selectVideo(3)">
+                                    <div class="playlist-thumb">📋</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            4. Manajemen Ruang Rapat
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:30 • Kalender & Rapat Fisik
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Item 5 -->
+                                <div class="playlist-card" onclick="selectVideo(4)">
+                                    <div class="playlist-thumb">📄</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            5. Notulen & Cetak Rekap PDF
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:10 • Risalah & Berita Acara
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Item 6 -->
+                                <div class="playlist-card" onclick="selectVideo(5)">
+                                    <div class="playlist-thumb">💬</div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 0.2rem;">
+                                            6. Slido BKN (Kuis & Q&A)
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b;">
+                                            ⏱️ 01:25 • Tanya Jawab Live Audiens
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. SECTION: ALUR UTAMA SISTEM -->
+                <section class="manual-section" id="section-workflow">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">⚡</div>
+                            <div>
+                                <h2>Alur Utama Sistem Meeting App</h2>
+                                <span>Gambaran siklus kerja aplikasi dari pengajuan rapat hingga selesai.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Semua Pengguna</span>
+                    </div>
+
+                    <div class="workflow-box">
+                        <div class="workflow-steps">
+                            <div class="flow-step-item">
+                                <div class="flow-step-icon">1</div>
+                                <span class="flow-step-title">Ajukan Zoom</span>
+                                <span class="flow-step-desc">User pilih rapat biasa / webinar</span>
+                            </div>
+                            <span class="flow-arrow">➔</span>
+                            <div class="flow-step-item">
+                                <div class="flow-step-icon">2</div>
+                                <span class="flow-step-title">Approval Sidigi</span>
+                                <span class="flow-step-desc">Admin terbitkan link & ruang kuis</span>
+                            </div>
+                            <span class="flow-arrow">➔</span>
+                            <div class="flow-step-item">
+                                <div class="flow-step-icon">3</div>
+                                <span class="flow-step-title">Sinkron Otomatis</span>
+                                <span class="flow-step-desc">Masuk ke Manajemen Meeting</span>
+                            </div>
+                            <span class="flow-arrow">➔</span>
+                            <div class="flow-step-item">
+                                <div class="flow-step-icon">4</div>
+                                <span class="flow-step-title">Presensi Publik</span>
+                                <span class="flow-step-desc">Peserta absen tanpa login & sertifikat</span>
+                            </div>
+                            <span class="flow-arrow">➔</span>
+                            <div class="flow-step-item">
+                                <div class="flow-step-icon">5</div>
+                                <span class="flow-step-title">Forum Slido</span>
+                                <span class="flow-step-desc">Q&A interaktif & polling live</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. SECTION: MANAJEMEN MEETING -->
+                <section class="manual-section" id="section-meeting">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">📋</div>
+                            <div>
+                                <h2>1. Panduan Manajemen Meeting</h2>
+                                <span>Melihat jadwal, mendaftarkan rapat baru, dan mengelola dokumen rapat.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Pegawai & Admin</span>
+                    </div>
+
+                    <div class="step-grid">
+                        <div class="step-card">
+                            <span class="step-num-pill">Langkah 1</span>
+                            <h3>Melihat Daftar & Jadwal Rapat</h3>
+                            <p>Buka menu <strong>Manajemen Meeting</strong> di sidebar. Anda dapat melihat kartu-kartu rapat yang aktif, jadwal rapat hari ini, serta riwayat rapat yang telah selesai.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Langkah 2</span>
+                            <h3>Melihat Detail & Tautan Rapat</h3>
+                            <p>Klik tombol <strong>"Lihat Detail"</strong> pada kartu rapat untuk melihat informasi lengkap, tautan Zoom resmi, passcode, dan tombol pembagian link ke peserta.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Langkah 3</span>
+                            <h3>Akses Forum Slido Q&A Webinar</h3>
+                            <p>Khusus rapat yang bertipe <strong>Webinar</strong>, modal View Detail akan menyediakan tombol ungu <strong>"Forum Q&A & Kuis Webinar (Slido BKN)"</strong> yang langsung membuka ruang interaktif.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Langkah 4</span>
+                            <h3>Rekap Presensi Peserta</h3>
+                            <p>Klik tombol <strong>"📝 Lihat Presensi"</strong> pada kartu rapat untuk melihat daftar nama peserta yang hadir beserta tanda tangan digital dan opsi cetak format PDF Berita Acara.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-callout">
+                        <span class="callout-icon">💡</span>
+                        <div>
+                            <strong>Tips Notulen Rapat:</strong> Anda dapat mengunggah file notulen resmi (PDF) pada form edit rapat agar dapat diunduh kembali oleh peserta rapat yang membutuhkan bahan risalah.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. SECTION: REQUEST ZOOM & APPROVAL -->
+                <section class="manual-section" id="section-zoom">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">📹</div>
+                            <div>
+                                <h2>2. Panduan Pengajuan Akun Zoom</h2>
+                                <span>Prosedur permohonan penggunaan akun Zoom resmi Kantor Regional V BKN.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Semua Unit Kerja</span>
+                    </div>
+
+                    <div class="step-grid">
+                        <div class="step-card">
+                            <span class="step-num-pill">Pengajuan</span>
+                            <h3>Mengisi Formulir Request Zoom</h3>
+                            <p>Buka menu <strong>Request Zoom</strong>. Isi judul rapat, tanggal, jam mulai & selesai, perkiraan jumlah peserta, serta pilih <strong>Tipe Rapat</strong> (Rapat Biasa atau Webinar).</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Persetujuan</span>
+                            <h3>Proses Verifikasi Tim Sidigi</h3>
+                            <p>Permohonan Anda akan berstatus <em>"Menunggu"</em> dan diverifikasi oleh Administrator Tim Kerja Sidigi agar jadwal ruang Zoom tidak bentrok.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Tautan Resmi</span>
+                            <h3>Penerbitan Link Zoom & Ruang Kuis</h3>
+                            <p>Setelah disetujui, link Zoom resmi dan passcode akan otomatis muncul pada kartu status Anda, sekaligus otomatis disinkronkan ke daftar Manajemen Meeting.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-callout success">
+                        <span class="callout-icon">🎯</span>
+                        <div>
+                            <strong>Otomatisasi Tipe Webinar:</strong> Jika memilih tipe Webinar, sistem secara otomatis menerbitkan tautan <strong>Slido BKN Q&A</strong> (`/webinar-quiz/zoom-{id}`) yang langsung siap disebarkan ke audiens!
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. SECTION: PRESENSI & TANDA TANGAN -->
+                <section class="manual-section" id="section-presensi">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">✍️</div>
+                            <div>
+                                <h2>3. Panduan Presensi & Sertifikat Digital</h2>
+                                <span>Mekanisme absensi peserta umum dan pembuatan e-sertifikat otomatis.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Terbuka Untuk Umum</span>
+                    </div>
+
+                    <div class="step-grid">
+                        <div class="step-card">
+                            <span class="step-num-pill">Tanpa Login</span>
+                            <h3>Bebas Akses Tanpa Perlu Akun</h3>
+                            <p>Tautan presensi (`/presensi/:meeting_id`) <strong>terbuka untuk umum</strong>. Peserta webinar dari luar BKN ataupun ribuan audiens Zoom dapat langsung mengisi nama tanpa harus membuat akun.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Tanda Tangan</span>
+                            <h3>Gores Kanvas atau Upload Gambar</h3>
+                            <p>Peserta dapat menandatangani langsung di layar HP/touchscreen menggunakan tab <em>"✍️ Gores Canvas"</em> atau mengunggah file foto tanda tangan lewat tab <em>"📁 Unggah Gambar"</em>.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Sertifikat</span>
+                            <h3>Unduh E-Sertifikat Otomatis</h3>
+                            <p>Khusus rapat bertipe Webinar, setelah tombol <em>"Kirim Presensi"</em> diklik, modal sukses akan otomatis memunculkan tombol <strong>"📜 Unduh Sertifikat"</strong> lengkap dengan QR Code verifikasi resmi.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-callout warning">
+                        <span class="callout-icon">🔒</span>
+                        <div>
+                            <strong>Keamanan Rekap Kehadiran:</strong> Formulir pengisian presensi terbuka untuk umum, namun <strong>rekap presensi dan unduh PDF rekap</strong> hanya bisa diakses oleh pegawai/admin BKN yang telah login.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. SECTION: SLIDO Q&A WEBINAR -->
+                <section class="manual-section" id="section-slido">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">💬</div>
+                            <div>
+                                <h2>4. Panduan Forum Slido Q&A Webinar</h2>
+                                <span>Interaksi tanya jawab langsung antara audiens webinar dan narasumber.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Audiens & Narasumber</span>
+                    </div>
+
+                    <div class="step-grid">
+                        <div class="step-card">
+                            <span class="step-num-pill">Bagi Audiens</span>
+                            <h3>Mengajukan Pertanyaan</h3>
+                            <p>Tuliskan nama Anda atau aktifkan switch <strong>"🔒 Kirim Anonim"</strong> jika ingin menjaga kerahasiaan identitas. Tuliskan pertanyaan dan gunakan <em>Chips Topik Cepat</em> untuk menandai materi.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Dukungan</span>
+                            <h3>Tombol Upvote Vertikal (▲ Setuju)</h3>
+                            <p>Audiens dapat menekan tombol upvote vertikal di sebelah kanan kartu untuk mendukung pertanyaan rekan lain agar naik ke tab <strong>"🔥 Populer"</strong>.</p>
+                        </div>
+                        <div class="step-card">
+                            <span class="step-num-pill">Bagi Pemateri</span>
+                            <h3>Menjawab Pertanyaan Resmi</h3>
+                            <p>Pembuat rapat / narasumber yang sedang login akan memiliki tombol <strong>"💬 Jawab Pertanyaan"</strong> dan dapat mengirimkan jawaban resmi yang berlabel hijau perisai terverifikasi.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. SECTION: FAQ & BANTUAN -->
+                <section class="manual-section" id="section-faq">
+                    <div class="section-header">
+                        <div class="section-title-wrap">
+                            <div class="section-icon-badge">❓</div>
+                            <div>
+                                <h2>5. Tanya Jawab & Kendala Umum (FAQ)</h2>
+                                <span>Solusi praktis jika menghadapi kendala selama menggunakan sistem.</span>
+                            </div>
+                        </div>
+                        <span class="role-badge role-all">Pusat Bantuan</span>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Apakah peserta luar BKN harus memiliki akun untuk mengisi presensi?</span>
+                            <span>▾</span>
+                        </div>
+                        <div class="faq-answer">
+                            <strong>Tidak perlu.</strong> Laman presensi telah dirancang agar terbuka bagi seluruh peserta umum tanpa perlu login, sehingga memudahkan saat webinar dihadiri oleh ribuan peserta dari berbagai instansi.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Mengapa tombol sertifikat tidak muncul setelah presensi?</span>
+                            <span>▾</span>
+                        </div>
+                        <div class="faq-answer">
+                            Tombol unduh sertifikat hanya aktif secara otomatis untuk rapat yang didaftarkan bertipe <strong>Webinar</strong>. Untuk rapat koordinasi internal biasa, sertifikat tidak diterbitkan secara default.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Bagaimana cara narasumber menjawab pertanyaan di Slido?</span>
+                            <span>▾</span>
+                        </div>
+                        <div class="faq-answer">
+                            Pastikan narasumber atau pembuat rapat telah login ke akun Meeting App BKN terlebih dahulu sebelum membuka tautan Slido Webinar. Tombol <em>"💬 Jawab Pertanyaan"</em> dan <em>"✏️ Edit"</em> akan otomatis aktif.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question" onclick="toggleFaq(this)">
+                            <span>Siapa yang harus dihubungi jika jadwal Zoom mendesak?</span>
+                            <span>▾</span>
+                        </div>
+                        <div class="faq-answer">
+                            Silakan menghubungi Administrator <strong>Tim Kerja Sistem Informasi & Digitalisasi (Sidigi)</strong> Kantor Regional V BKN Jakarta melalui kontak resmi internal.
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="footer-bottom-center">
+                <p>Meeting App • Kantor Regional V BKN Jakarta • 2026</p>
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- SCRIPT INTERAKSI MANUAL BOOK & VIDEO HUB -->
+    <script>
+        // DATA 6 MODUL VIDEO & SIMULASI
+        const VIDEO_MODULES = [
+            {
+                id: 1,
+                title: "1. Pengajuan Zoom Meeting & Webinar",
+                icon: "📹",
+                durationSec: 105,
+                durationText: "01:45",
+                desc: "Tata cara permohonan lisensi Zoom ke Tim Sidigi, pengisian formulir, hingga penerbitan tautan resmi.",
+                steps: [
+                    { title: "Buka Menu Request Zoom", desc: "Masuk ke sidebar dan pilih menu Request Zoom. Formulir otomatis terisi nama & NIP pemohon.", action: '👉 Klik menu "Request Zoom" di sidebar' },
+                    { title: "Isi Rincian Jadwal & Tipe", desc: "Tentukan judul rapat, tanggal, jam mulai–selesai, serta pilih Tipe Kegiatan (Rapat Biasa atau Webinar).", action: '👉 Pilih tipe "Webinar" untuk fitur Kuis Slido' },
+                    { title: "Kirimkan Permohonan", desc: "Klik tombol Kirim Permohonan. Sistem akan meneruskan data ke antrean Tim Sidigi.", action: '👉 Klik "Kirim Permohonan Zoom"' },
+                    { title: "Pantau Status Permohonan", desc: "Klik kartu pada panel Status Permohonan Saya untuk melihat detail link resmi jika telah disetujui.", action: '👉 Klik kartu permohonan untuk membuka tautan' }
+                ],
+                quickSteps: [
+                    "1. Buka formulir Request Zoom",
+                    "2. Tentukan jam & tipe rapat",
+                    "3. Klik Kirim Permohonan",
+                    "4. Pantau kartu status permohonan"
+                ]
+            },
+            {
+                id: 2,
+                title: "2. Persetujuan Admin Tim Sidigi",
+                icon: "🛡️",
+                durationSec: 75,
+                durationText: "01:15",
+                desc: "Verifikasi ketersediaan ruang rapat Zoom dan penerbitan Meeting ID serta Passcode resmi.",
+                steps: [
+                    { title: "Akses Tab Admin", desc: "Administrator membuka tab 'Kelola Permohonan Masuk' di halaman Request Zoom.", action: '👉 Buka tab "Kelola Permohonan Masuk"' },
+                    { title: "Tinjau Data Rapat", desc: "Periksa jadwal pengajuan agar tidak tumpang tindih dengan agenda divisi lain.", action: '👉 Klik tombol biru "Setujui Permohonan"' },
+                    { title: "Masukkan Kredensial Zoom", desc: "Ketik URL Zoom lengkap, Meeting ID, Passcode, dan catatan konfirmasi.", action: '👉 Input link: https://bkn.zoom.us/j/...' },
+                    { title: "Terbitkan Tautan", desc: "Klik Simpan & Terbitkan. Status pemohon otomatis berubah 'Disetujui' dan tersinkron ke Manajemen Meeting.", action: '👉 Link Zoom & Slido otomatis aktif!' }
+                ],
+                quickSteps: [
+                    "1. Buka tab Kelola Masuk",
+                    "2. Klik Setujui Permohonan",
+                    "3. Masukkan ID & Passcode Zoom",
+                    "4. Klik Terbitkan Link"
+                ]
+            },
+            {
+                id: 3,
+                title: "3. Presensi Online & Tanda Tangan Digital",
+                icon: "✍️",
+                durationSec: 80,
+                durationText: "01:20",
+                desc: "Mekanisme pengisian absensi peserta tanpa login dan pembuatan e-sertifikat otomatis.",
+                steps: [
+                    { title: "Buka Link Presensi", desc: "Peserta membuka tautan presensi via link meeting atau memindai QR Code di layar.", action: '👉 Buka link: /presensi/:meeting_id' },
+                    { title: "Isi Identitas Lengkap", desc: "Masukkan Nama Lengkap, NIP (atau tanda '-' bagi umum), serta Asal Instansi/Divisi.", action: '👉 Ketik Nama, NIP, & Instansi' },
+                    { title: "Goreskan Tanda Tangan", desc: "Tarik goresan tanda tangan digital di kotak canvas layar HP / touchscreen laptop.", action: '👉 Tanda tangan langsung di canvas' },
+                    { title: "Simpan & Unduh Sertifikat", desc: "Klik Kirim Presensi. Khusus webinar, tombol Unduh Sertifikat otomatis muncul!", action: '👉 Klik "📜 Unduh E-Sertifikat"' }
+                ],
+                quickSteps: [
+                    "1. Scan QR / buka link presensi",
+                    "2. Masukkan data diri peserta",
+                    "3. Tanda tangan di canvas",
+                    "4. Dapatkan bukti hadir & sertifikat"
+                ]
+            },
+            {
+                id: 4,
+                title: "4. Manajemen Meeting & Ruang Rapat",
+                icon: "📋",
+                durationSec: 90,
+                durationText: "01:30",
+                desc: "Pengelolaan jadwal rapat fisik/hybrid, pemilihan ruang rapat kantor, dan monitoring agenda harian.",
+                steps: [
+                    { title: "Buka Manajemen Meeting", desc: "Lihat ringkasan jadwal rapat hari ini, ruang terpakai, dan kalender kegiatan BKN.", action: '👉 Buka menu "Manajemen Meeting"' },
+                    { title: "Klik Buat Rapat Baru", desc: "Tentukan nama kegiatan, waktu, pimpinan rapat, dan pilih ruang rapat fisik kantor.", action: '👉 Pilih Ruang Rapat & Tanggal' },
+                    { title: "Bagikan Tautan ke Peserta", desc: "Salin link rapat atau tampilkan QR Code presensi di layar proyektor ruang rapat.", action: '👉 Klik tombol "Salin Tautan Presensi"' },
+                    { title: "Monitor Daftar Kehadiran", desc: "Klik tombol '📝 Lihat Presensi' untuk memantau peserta yang sudah mengisi absensi secara real-time.", action: '👉 Rekap kehadiran otomatis terbarui' }
+                ],
+                quickSteps: [
+                    "1. Buka menu Manajemen Meeting",
+                    "2. Jadwalkan rapat & ruangan",
+                    "3. Tampilkan QR Code absensi",
+                    "4. Pantau kehadiran peserta"
+                ]
+            },
+            {
+                id: 5,
+                title: "5. Notulen Rapat & Cetak Rekap PDF",
+                icon: "📄",
+                durationSec: 70,
+                durationText: "01:10",
+                desc: "Dokumentasi hasil rapat, pengunggahan foto kegiatan, serta pencetakan berita acara resmi ber-tanda tangan.",
+                steps: [
+                    { title: "Pilih Rapat Selesai", desc: "Buka kartu rapat yang telah selesai dilaksanakan, lalu klik tombol 'Lihat Detail'.", action: '👉 Buka detail rapat' },
+                    { title: "Tuliskan Notulen Rapat", desc: "Ketik poin kesepakatan dan hasil keputusan rapat pada form catatan notulen.", action: '👉 Tulis risalah rapat penting' },
+                    { title: "Unggah Dokumentasi Foto", desc: "Pilih foto dokumentasi suasana rapat untuk disimpan sebagai arsip visual.", action: '👉 Upload foto dokumentasi' },
+                    { title: "Cetak Rekap Berita Acara", desc: "Klik tombol 'Cetak PDF / Ekspor Excel' untuk mengunduh daftar hadir bertanda tangan lengkap.", action: '👉 Unduh Berita Acara PDF resmi' }
+                ],
+                quickSteps: [
+                    "1. Buka detail rapat selesai",
+                    "2. Simpan risalah & notulen",
+                    "3. Unggah foto arsip rapat",
+                    "4. Cetak Berita Acara & presensi"
+                ]
+            },
+            {
+                id: 6,
+                title: "6. Slido BKN (Kuis & Forum Q&A)",
+                icon: "💬",
+                durationSec: 85,
+                durationText: "01:25",
+                desc: "Interaksi tanya jawab live webinar, pemungutan suara (voting), dan respon narasumber terverifikasi.",
+                steps: [
+                    { title: "Buka Ruang Slido BKN", desc: "Peserta membuka link `/webinar-quiz/zoom-:id` yang dibagikan panitia di room chat Zoom.", action: '👉 Buka tautan ruang Slido BKN' },
+                    { title: "Kirim Pertanyaan Peserta", desc: "Ketik pertanyaan dan opsi switch '🔒 Kirim Anonim' jika ingin merahasiakan nama.", action: '👉 Ajukan pertanyaan materi webinar' },
+                    { title: "Dukung Pertanyaan (Upvote)", desc: "Klik tombol panah atas (▲) untuk mendukung pertanyaan penting agar naik ke tab Populer.", action: '👉 Tekan tombol Upvote vertikal' },
+                    { title: "Jawaban Resmi Narasumber", desc: "Narasumber login ke sistem dan memberikan jawaban yang berlabel perisai hijau resmi.", action: '👉 Jawaban narasumber terverifikasi terbit' }
+                ],
+                quickSteps: [
+                    "1. Masuk ruang Slido via link",
+                    "2. Ajukan pertanyaan audiens",
+                    "3. Upvote pertanyaan teratas",
+                    "4. Tampilkan jawaban narasumber"
+                ]
+            }
+        ];
+
+        let activeVideoIdx = 0;
+        let isPlaying = false;
+        let simCurrentStep = 0;
+        let simTimer = null;
+        let simSecondsElapsed = 0;
+        let isLocalMp4Mode = false;
+
+        function updateVideoUI() {
+            const mod = VIDEO_MODULES[activeVideoIdx];
+            document.getElementById('videoTopTitle').innerText = mod.title;
+            document.getElementById('coverTitle').innerText = mod.title;
+            document.getElementById('coverDesc').innerText = mod.desc;
+            document.getElementById('coverDuration').innerText = mod.durationText;
+            document.getElementById('videoTimeText').innerText = `00:00 / ${mod.durationText}`;
+            document.getElementById('progressBarFill').style.width = '0%';
+
+            // Render Quick Steps list
+            const stepsListEl = document.getElementById('quickStepsList');
+            stepsListEl.innerHTML = mod.quickSteps.map(step => `
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 0.45rem 0.65rem; border-radius: 8px; display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="color: #10b981; font-weight: 800;">✓</span>
+                    <span style="font-weight: 600;">${step}</span>
+                </div>
+            `).join('');
+
+            // Update Simulation view
+            renderSimulationStep(0);
+        }
+
+        function renderSimulationStep(stepIdx) {
+            const mod = VIDEO_MODULES[activeVideoIdx];
+            const step = mod.steps[stepIdx];
+            if (!step) return;
+
+            document.getElementById('simIcon').innerText = mod.icon;
+            document.getElementById('simHeading').innerText = mod.title;
+            document.getElementById('simSubtitle').innerText = `Langkah ${stepIdx + 1} dari ${mod.steps.length}: ${step.title}`;
+            document.getElementById('simStepPill').innerText = `Langkah ${stepIdx + 1}`;
+            document.getElementById('simMainText').innerText = step.title;
+            document.getElementById('simDescText').innerText = step.desc;
+            document.getElementById('simActionText').innerText = step.action;
+        }
+
+        function selectVideo(index) {
+            pauseVideo();
+            activeVideoIdx = index;
+            isLocalMp4Mode = false;
+
+            // Reset video tag
+            const html5Video = document.getElementById('realHtml5Video');
+            html5Video.pause();
+            html5Video.style.display = 'none';
+            document.getElementById('simulatedScreen').style.display = 'flex';
+            document.getElementById('videoCover').style.display = 'flex';
+            document.getElementById('videoCover').style.opacity = '1';
+            document.getElementById('videoModeBadge').innerText = '⚡ Simulasi BKN';
+
+            // Update playlist active card
+            const cards = document.querySelectorAll('.playlist-card');
+            cards.forEach((c, idx) => {
+                if (idx === index) {
+                    c.classList.add('active');
+                } else {
+                    c.classList.remove('active');
+                }
+            });
+
+            simSecondsElapsed = 0;
+            simCurrentStep = 0;
+            updateVideoUI();
+        }
+
+        function startVideoPlay() {
+            document.getElementById('videoCover').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('videoCover').style.display = 'none';
+            }, 300);
+            playVideo();
+        }
+
+        function playVideo() {
+            if (isLocalMp4Mode) {
+                const vid = document.getElementById('realHtml5Video');
+                vid.play();
+                isPlaying = true;
+                document.getElementById('btnPlayPause').innerText = '⏸';
+                return;
+            }
+
+            isPlaying = true;
+            document.getElementById('btnPlayPause').innerText = '⏸';
+
+            const mod = VIDEO_MODULES[activeVideoIdx];
+            const stepDuration = Math.floor(mod.durationSec / mod.steps.length);
+
+            clearInterval(simTimer);
+            simTimer = setInterval(() => {
+                simSecondsElapsed++;
+
+                // Hitung step sekarang
+                const nextStep = Math.min(Math.floor(simSecondsElapsed / stepDuration), mod.steps.length - 1);
+                if (nextStep !== simCurrentStep) {
+                    simCurrentStep = nextStep;
+                    renderSimulationStep(simCurrentStep);
+                }
+
+                // Update progress bar
+                const percent = Math.min((simSecondsElapsed / mod.durationSec) * 100, 100);
+                document.getElementById('progressBarFill').style.width = percent + '%';
+
+                // Update time text
+                const m = Math.floor(simSecondsElapsed / 60);
+                const s = simSecondsElapsed % 60;
+                const curTimeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                document.getElementById('videoTimeText').innerText = `${curTimeStr} / ${mod.durationText}`;
+
+                // Selesai
+                if (simSecondsElapsed >= mod.durationSec) {
+                    pauseVideo();
+                    simSecondsElapsed = 0;
+                    simCurrentStep = 0;
+                    document.getElementById('videoCover').style.display = 'flex';
+                    document.getElementById('videoCover').style.opacity = '1';
+                }
+            }, 1000);
+        }
+
+        function pauseVideo() {
+            isPlaying = false;
+            document.getElementById('btnPlayPause').innerText = '▶';
+            clearInterval(simTimer);
+
+            if (isLocalMp4Mode) {
+                const vid = document.getElementById('realHtml5Video');
+                vid.pause();
+            }
+        }
+
+        function togglePlayPause() {
+            if (document.getElementById('videoCover').style.display !== 'none') {
+                startVideoPlay();
+                return;
+            }
+
+            if (isPlaying) {
+                pauseVideo();
+            } else {
+                playVideo();
+            }
+        }
+
+        function restartVideo() {
+            pauseVideo();
+            simSecondsElapsed = 0;
+            simCurrentStep = 0;
+            document.getElementById('progressBarFill').style.width = '0%';
+            renderSimulationStep(0);
+            const mod = VIDEO_MODULES[activeVideoIdx];
+            document.getElementById('videoTimeText').innerText = `00:00 / ${mod.durationText}`;
+
+            if (isLocalMp4Mode) {
+                const vid = document.getElementById('realHtml5Video');
+                vid.currentTime = 0;
+            }
+
+            playVideo();
+        }
+
+        function seekVideo(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            const mod = VIDEO_MODULES[activeVideoIdx];
+
+            if (isLocalMp4Mode) {
+                const vid = document.getElementById('realHtml5Video');
+                if (vid.duration) {
+                    vid.currentTime = pos * vid.duration;
+                }
+                return;
+            }
+
+            simSecondsElapsed = Math.floor(pos * mod.durationSec);
+            const stepDuration = Math.floor(mod.durationSec / mod.steps.length);
+            simCurrentStep = Math.min(Math.floor(simSecondsElapsed / stepDuration), mod.steps.length - 1);
+            renderSimulationStep(simCurrentStep);
+
+            const percent = Math.min((simSecondsElapsed / mod.durationSec) * 100, 100);
+            document.getElementById('progressBarFill').style.width = percent + '%';
+        }
+
+        function triggerFileInput() {
+            document.getElementById('localVideoUploader').click();
+        }
+
+        function handleLocalVideo(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            pauseVideo();
+            isLocalMp4Mode = true;
+
+            const fileUrl = URL.createObjectURL(file);
+            const vid = document.getElementById('realHtml5Video');
+            vid.src = fileUrl;
+            vid.style.display = 'block';
+
+            document.getElementById('simulatedScreen').style.display = 'none';
+            document.getElementById('videoCover').style.display = 'none';
+            document.getElementById('videoModeBadge').innerText = '📹 MP4 File';
+            document.getElementById('videoTopTitle').innerText = 'File Lokal: ' + file.name;
+
+            vid.play();
+            isPlaying = true;
+            document.getElementById('btnPlayPause').innerText = '⏸';
+
+            vid.ontimeupdate = () => {
+                if (vid.duration) {
+                    const percent = (vid.currentTime / vid.duration) * 100;
+                    document.getElementById('progressBarFill').style.width = percent + '%';
+                    const curM = Math.floor(vid.currentTime / 60);
+                    const curS = Math.floor(vid.currentTime % 60);
+                    const durM = Math.floor(vid.duration / 60);
+                    const durS = Math.floor(vid.duration % 60);
+                    document.getElementById('videoTimeText').innerText = 
+                        `${String(curM).padStart(2, '0')}:${String(curS).padStart(2, '0')} / ${String(durM).padStart(2, '0')}:${String(durS).padStart(2, '0')}`;
+                }
+            };
+        }
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            updateVideoUI();
+        });
+
+        function showLogoutModal(e) {
+            e.preventDefault();
+            if (confirm("Apakah Anda yakin ingin keluar dari sistem Meeting App?")) {
+                window.location.href = "/logout";
+            }
+        }
+    </script>
+    <script src="/js/sidebar.js"></script>
+</body>
+
+</html>

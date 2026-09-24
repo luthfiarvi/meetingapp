@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= room.title %> • Slido Q&A Webinar BKN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-ring: rgba(37, 99, 235, 0.15);
+            --navy-deep: #091a36;
+            --navy-surface: #0f274e;
+            --navy-card: #15325e;
+            --emerald: #059669;
+            --emerald-bg: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --amber: #d97706;
+            --amber-bg: #fffbeb;
+            --amber-border: #fde68a;
+            --rose: #e11d48;
+            --rose-bg: #fff1f2;
+            --bg-page: #f4f7fb;
+            --card-bg: #ffffff;
+            --border-light: #e2e8f0;
+            --border-subtle: #cbd5e1;
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.04);
+            --shadow-card: 0 10px 30px -4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(226, 232, 240, 0.7);
+            --shadow-elevated: 0 16px 36px -6px rgba(37, 99, 235, 0.12), 0 0 0 1px rgba(191, 219, 254, 0.6);
+            --radius-card: 20px;
+            --radius-btn: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 8%, rgba(37, 99, 235, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.06) 0%, transparent 45%),
+                linear-gradient(180deg, #f8fafc 0%, #eef3f9 100%);
+            background-attachment: fixed;
+            overflow-y: scroll;
+        }
+
+        /* Sleek Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* ---------------------------------
+           1. APP NAVBAR HEADER
+        --------------------------------- */
+        .app-navbar {
+            background: linear-gradient(135deg, #071938 0%, #0d2752 50%, #112e60 100%);
+            color: white;
+            padding: 0.85rem 1.25rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 4px 20px rgba(7, 25, 56, 0.2);
+        }
+
+        .navbar-container {
+            max-width: 760px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand-cluster {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo-wrap {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            flex-shrink: 0;
+            transition: transform 0.2s;
+        }
+
+        .brand-logo-wrap:hover {
+            transform: scale(1.05);
+        }
+
+        .brand-logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .brand-meta h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .brand-badge-pill {
+            font-size: 0.65rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            color: #071938;
+            padding: 0.18rem 0.55rem;
+            border-radius: 9999px;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 6px rgba(56, 189, 248, 0.3);
+        }
+
+        .brand-meta p {
+            font-size: 0.735rem;
+            color: #93c5fd;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            background: rgba(239, 68, 68, 0.18);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            color: #fca5a5;
+            padding: 0.35rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+            user-select: none;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 50%;
+            border: 2px solid #ef4444;
+            animation: radarPulse 1.8s infinite;
+        }
+
+        @keyframes radarPulse {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(2.3); opacity: 0; }
+        }
+
+        /* ---------------------------------
+           2. MAIN CONTAINER & HERO CARD
+        --------------------------------- */
+        .page-main {
+            max-width: 760px;
+            margin: 1.4rem auto 4rem;
+            padding: 0 1.1rem;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.35rem;
+        }
+
+        .hero-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            padding: 1.5rem 1.65rem;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            background-image: 
+                radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 0% 100%, rgba(99, 102, 241, 0.03) 0%, transparent 50%);
+        }
+
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4.5px;
+            background: linear-gradient(90deg, #2563eb 0%, #6366f1 45%, #ec4899 85%, #f59e0b 100%);
+        }
+
+        .hero-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #1d4ed8;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 0.28rem 0.75rem;
+            border-radius: 9999px;
+        }
+
+        .hero-tag span {
+            font-size: 0.85rem;
+        }
+
+        .hero-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-title);
+            line-height: 1.3;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border-light);
+        }
+
+        .hero-meta-chips {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .hero-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.32rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .chip-date {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #e2e8f0;
+        }
+
+        .chip-room {
+            background: #f5f3ff;
+            color: #6d28d9;
+            border-color: #ddd6fe;
+        }
+
+        .chip-count {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .btn-copy-link {
+            background: #ffffff;
+            border: 1.5px solid var(--border-subtle);
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.4rem 0.85rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-copy-link:hover {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #93c5fd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+
+        .btn-copy-link:active {
+            transform: scale(0.98);
+        }
+
+        /* ---------------------------------
+           3. QUESTION COMPOSER CARD
+        --------------------------------- */
+        .composer-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            padding: 1.5rem 1.65rem;
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            transition: box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .composer-card:focus-within {
+            box-shadow: var(--shadow-elevated);
+            border-color: #93c5fd;
+        }
+
+        .composer-header {
+            margin-bottom: 1.1rem;
+        }
+
+        .composer-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--navy-deep);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.015em;
+        }
+
+        .composer-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+
+        .field-group {
+            margin-bottom: 0.9rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .name-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .name-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .input-styled {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-btn);
+            font-size: 0.885rem;
+            color: var(--text-title);
+            background: #ffffff;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
+        }
+
+        .input-styled.with-icon {
+            padding-left: 2.5rem;
+        }
+
+        .input-styled:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3.5px var(--primary-ring);
+            background: #ffffff;
+        }
+
+        /* Custom Toggle Switch Pill for Anonymous Mode */
+        .anonim-toggle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            background: #f8fafc;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-btn);
+            padding: 0.55rem 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .anonim-toggle-pill:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .anonim-toggle-pill.active {
+            background: #eff6ff;
+            color: var(--primary-dark);
+            border-color: #93c5fd;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Modern Custom Switch */
+        .switch-track {
+            width: 34px;
+            height: 18px;
+            background: #cbd5e1;
+            border-radius: 9999px;
+            position: relative;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .switch-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        .anonim-toggle-pill.active .switch-track {
+            background: var(--primary);
+        }
+
+        .anonim-toggle-pill.active .switch-thumb {
+            transform: translateX(16px);
+        }
+
+        .anonim-text-cluster {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .anonim-toggle-pill.active .anonim-text-cluster {
+            color: var(--primary-dark);
+        }
+
+        /* Textarea Wrapper & Quick Prompts */
+        .textarea-box {
+            position: relative;
+        }
+
+        textarea.input-styled {
+            min-height: 105px;
+            resize: vertical;
+            line-height: 1.55;
+            padding-bottom: 2rem;
+        }
+
+        .char-counter {
+            position: absolute;
+            right: 12px;
+            bottom: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        /* Quick Suggestion Chips */
+        .quick-prompts-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .quick-prompt-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .chip-prompt {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.22rem 0.6rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chip-prompt:hover {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #bfdbfe;
+        }
+
+        /* Composer Footer & Submit Button */
+        .composer-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .helper-text {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+        }
+
+        .btn-submit-main {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.6rem;
+            border-radius: var(--radius-btn);
+            font-size: 0.925rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            width: 100%;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+            filter: brightness(1.04);
+        }
+
+        .btn-submit-main:active {
+            transform: scale(0.985);
+        }
+
+        .btn-submit-main:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ---------------------------------
+           4. FEED HEADER & FILTER BAR
+        --------------------------------- */
+        .feed-control-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .feed-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .feed-heading h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-title);
+            letter-spacing: -0.015em;
+        }
+
+        .count-pill {
+            font-size: 0.74rem;
+            font-weight: 800;
+            color: var(--primary);
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+        }
+
+        .host-badge-active {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #ede9fe;
+            color: #5b21b6;
+            border: 1px solid #c4b5fd;
+            padding: 0.25rem 0.7rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        /* Segmented Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 0.35rem;
+            background: #e2e8f0;
+            padding: 0.28rem;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        .filter-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.45rem 0.85rem;
+            border-radius: 9px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .filter-tab-btn:hover {
+            color: #1e293b;
+        }
+
+        .filter-tab-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+            font-weight: 800;
+        }
+
+        .tab-count-sub {
+            background: rgba(100, 116, 139, 0.15);
+            font-size: 0.68rem;
+            padding: 0.08rem 0.42rem;
+            border-radius: 9999px;
+        }
+
+        .filter-tab-btn.active .tab-count-sub {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* ---------------------------------
+           5. QUESTION CARDS (SLIDO ARCHITECTURE)
+        --------------------------------- */
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.15rem;
+        }
+
+        .qa-item-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            padding: 1.35rem 1.45rem;
+            box-shadow: var(--shadow-card);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+        }
+
+        .qa-item-card:hover {
+            box-shadow: var(--shadow-elevated);
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        .qa-item-card.answered-glow {
+            border-color: #a7f3d0;
+            background: linear-gradient(180deg, #ffffff 0%, #fafffc 100%);
+            box-shadow: 0 10px 28px -4px rgba(16, 185, 129, 0.08), 0 0 0 1px rgba(167, 243, 208, 0.6);
+        }
+
+        /* Left/Center Content Area */
+        .qa-card-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .qa-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+
+        .avatar-initial {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+            border: 2px solid #ffffff;
+        }
+
+        .author-text {
+            min-width: 0;
+        }
+
+        .author-text .name {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-title);
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .author-text .subtext {
+            font-size: 0.725rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-badges-right {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-shrink: 0;
+        }
+
+        .status-chip {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.25rem 0.7rem;
+            border-radius: 9999px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .chip-answered {
+            background: var(--emerald-bg);
+            color: #047857;
+            border: 1px solid var(--emerald-border);
+        }
+
+        .chip-pending {
+            background: var(--amber-bg);
+            color: #b45309;
+            border: 1px solid var(--amber-border);
+        }
+
+        .qa-question-text {
+            font-size: 0.975rem;
+            color: #1e293b;
+            line-height: 1.6;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        /* Right Column: Slido Vertical Upvote Button */
+        .qa-upvote-column {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-upvote-slido {
+            background: #f8fafc;
+            border: 1.5px solid var(--border-subtle);
+            color: #475569;
+            border-radius: 12px;
+            padding: 0.65rem 0.85rem;
+            min-width: 58px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-upvote-slido:hover {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #93c5fd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-upvote-slido:active {
+            transform: scale(0.94);
+        }
+
+        .btn-upvote-slido.voted {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: #ffffff;
+            border-color: #1d4ed8;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        }
+
+        .upvote-icon {
+            font-size: 1rem;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-upvote-slido:hover .upvote-icon {
+            transform: translateY(-2px);
+        }
+
+        .upvote-count {
+            font-size: 0.95rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .upvote-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.85;
+        }
+
+        /* Official Answer Box */
+        .official-answer-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 1px solid #bbf7d0;
+            border-left: 4.5px solid var(--emerald);
+            border-radius: 14px;
+            padding: 0.9rem 1.15rem;
+            margin-top: 0.25rem;
+        }
+
+        .answer-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.45rem;
+            font-size: 0.76rem;
+            font-weight: 800;
+            color: #047857;
+            gap: 0.5rem;
+        }
+
+        .answer-badge-cluster {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .answer-card-body {
+            font-size: 0.9rem;
+            color: #14532d;
+            line-height: 1.55;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        /* Host Controls Toolbar */
+        .qa-host-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.35rem;
+            padding-top: 0.65rem;
+            border-top: 1px dashed var(--border-light);
+        }
+
+        .btn-host-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+        }
+
+        .btn-answer-primary {
+            background: #eff6ff;
+            color: var(--primary);
+            border-color: #bfdbfe;
+        }
+
+        .btn-answer-primary:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-delete-danger {
+            background: var(--rose-bg);
+            color: var(--rose);
+            border-color: #fecdd3;
+        }
+
+        .btn-delete-danger:hover {
+            background: var(--rose);
+            color: white;
+        }
+
+        /* Host Composer Form */
+        .host-composer-box {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 1.1rem;
+            margin-top: 0.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .host-composer-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .btn-send-answer-now {
+            background: var(--emerald);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.15rem;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-send-answer-now:hover {
+            background: #047857;
+        }
+
+        .btn-cancel-mini {
+            background: #ffffff;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 0.95rem;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-cancel-mini:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        /* ---------------------------------
+           6. EMPTY STATE & UTILITIES
+        --------------------------------- */
+        .empty-placeholder {
+            text-align: center;
+            padding: 3.8rem 1.75rem;
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            border: 2px dashed #cbd5e1;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-icon-bubble {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+        }
+
+        .empty-placeholder h4 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 0.35rem;
+        }
+
+        .empty-placeholder p {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            max-width: 420px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Toast Notification */
+        .toast-notif {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            background: #091a36;
+            color: #ffffff;
+            padding: 0.85rem 1.6rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 9999;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .toast-notif.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------------------------------
+           7. RESPONSIVE DESIGN (MOBILE)
+        --------------------------------- */
+        @media (max-width: 640px) {
+            .app-navbar {
+                padding: 0.75rem 1rem;
+            }
+            .hero-card, .composer-card {
+                padding: 1.25rem 1.25rem;
+                border-radius: 16px;
+            }
+            .hero-title {
+                font-size: 1.25rem;
+            }
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .anonim-toggle-pill {
+                justify-content: center;
+            }
+            .composer-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .qa-item-card {
+                padding: 1.15rem 1.15rem;
+                gap: 0.85rem;
+            }
+            .btn-upvote-slido {
+                min-width: 50px;
+                padding: 0.5rem 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR HEADER -->
+    <header class="app-navbar">
+        <div class="navbar-container">
+            <div class="brand-cluster">
+                <div class="brand-logo-wrap">
+                    <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                </div>
+                <div class="brand-meta">
+                    <h1>Slido BKN <span class="brand-badge-pill">Q&A LIVE</span></h1>
+                    <p>Kantor Regional V BKN Jakarta</p>
+                </div>
+            </div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span>LIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN PAGE CONTAINER -->
+    <main class="page-main">
+
+        <!-- 1. WEBINAR TITLE & INFO CARD -->
+        <section class="hero-card">
+            <div class="hero-top-row">
+                <div class="hero-tag">
+                    <span>🎯</span> SESI TANYA JAWAB INTERAKTIF
+                </div>
+                <button type="button" class="btn-copy-link" id="btnCopyLink" onclick="copyForumLink()">
+                    <span>🔗</span> <span id="copyLinkText">Salin Tautan</span>
+                </button>
+            </div>
+
+            <h2 class="hero-title"><%= room.title %></h2>
+
+            <div class="hero-meta-row">
+                <div class="hero-meta-chips">
+                    <span class="hero-chip chip-date">
+                        <span>📅</span> <%= room.dateStr || "Webinar Berlangsung" %>
+                    </span>
+                    <span class="hero-chip chip-room">
+                        <span>🏷️</span> Ruang: #<%= room.roomId %>
+                    </span>
+                    <span class="hero-chip chip-count">
+                        <span>💬</span> <span id="chipTotalCount"><%= questions ? questions.length : 0 %></span> Pertanyaan
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. QUESTION COMPOSER CARD -->
+        <section class="composer-card">
+            <div class="composer-header">
+                <h3 class="composer-title">
+                    <span>✍️</span> Ajukan Pertanyaan ke Narasumber
+                </h3>
+                <p class="composer-subtitle">
+                    Pertanyaan Anda akan langsung tampil di forum dan dapat dijawab oleh pemateri selama webinar berlangsung.
+                </p>
+            </div>
+
+            <form id="askForm" onsubmit="submitQuestion(event)">
+                <div class="field-group">
+                    <div class="input-row">
+                        <div class="name-input-wrapper">
+                            <span class="name-input-icon">👤</span>
+                            <input type="text" id="askName" class="input-styled with-icon" 
+                                placeholder="Nama Lengkap / Instansi Anda..." 
+                                value="<%= (typeof user !== 'undefined' && user) ? (user.full_name || user.username) : '' %>">
+                        </div>
+
+                        <!-- Custom Toggle Switch Pill -->
+                        <div class="anonim-toggle-pill" id="anonimLabel" onclick="toggleAnonimMode()">
+                            <div class="switch-track">
+                                <div class="switch-thumb"></div>
+                            </div>
+                            <div class="anonim-text-cluster">
+                                <span>🔒</span>
+                                <span id="anonimStatusText">Kirim Anonim</span>
+                            </div>
+                            <input type="checkbox" id="checkAnonim" style="display: none;">
+                        </div>
+                    </div>
+                    <input type="hidden" id="askInstansi" value="<%= (typeof user !== 'undefined' && user) ? (user.division || user.institution || '') : '' %>">
+                </div>
+
+                <div class="field-group">
+                    <div class="textarea-box">
+                        <textarea id="askQuestion" class="input-styled" 
+                            placeholder="Tuliskan pertanyaan Anda di sini secara jelas, santun, dan relevan dengan materi webinar..." 
+                            maxlength="500"
+                            oninput="updateCharCount(this)"
+                            required></textarea>
+                        <span class="char-counter" id="charCounter">0 / 500</span>
+                    </div>
+
+                    <!-- Quick Suggestion Prompts -->
+                    <div class="quick-prompts-bar">
+                        <span class="quick-prompt-label">Topik Cepat:</span>
+                        <button type="button" class="chip-prompt" onclick="insertPromptPrefix('[Materi] ')">📌 Materi</button>
+                        <button type="button" class="chip-prompt" onclick="insertPromptPrefix('[Regulasi] ')">⚖️ Regulasi BKN</button>
+                        <button type="button" class="chip-prompt" onclick="insertPromptPrefix('[Kendala] ')">⚠️ Kendala Teknis</button>
+                        <button type="button" class="chip-prompt" onclick="insertPromptPrefix('[Saran] ')">💡 Saran & Masukan</button>
+                    </div>
+                </div>
+
+                <div class="composer-footer">
+                    <span class="helper-text">
+                        <span>💡</span> Terbuka untuk seluruh peserta webinar tanpa kewajiban login.
+                    </span>
+                    <button type="submit" id="btnSubmitQ" class="btn-submit-main">
+                        <span>Kirim Pertanyaan 🚀</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 3. FEED HEADER & FILTER CONTROLS -->
+        <div class="feed-control-bar">
+            <div class="feed-heading">
+                <h3>💬 Pertanyaan Audiens</h3>
+                <span class="count-pill" id="questionCountBadge"><%= questions ? questions.length : 0 %></span>
+                <% if (typeof canAnswer !== 'undefined' && canAnswer) { %>
+                    <span class="host-badge-active">
+                        <span>🎙️</span> Mode Pemateri Aktif
+                    </span>
+                <% } %>
+            </div>
+
+            <div class="filter-tabs">
+                <button type="button" class="filter-tab-btn active" id="tabAll" onclick="applyFeedFilter('all', this)">
+                    Semua <span class="tab-count-sub" id="countTabAll"><%= questions ? questions.length : 0 %></span>
+                </button>
+                <button type="button" class="filter-tab-btn" id="tabPending" onclick="applyFeedFilter('pending', this)">
+                    Menunggu <span class="tab-count-sub" id="countTabPending">0</span>
+                </button>
+                <button type="button" class="filter-tab-btn" id="tabAnswered" onclick="applyFeedFilter('answered', this)">
+                    Terjawab <span class="tab-count-sub" id="countTabAnswered">0</span>
+                </button>
+                <button type="button" class="filter-tab-btn" id="tabPopular" onclick="applyFeedFilter('popular', this)">
+                    🔥 Populer
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. FEED LIST -->
+        <div class="qa-list" id="qaFeedList">
+            <% if (questions && questions.length > 0) { %>
+                <% questions.forEach(q => { %>
+                    <% 
+                        const isAns = !!q.is_answered;
+                        const initial = (q.nama_penanya || "P").charAt(0).toUpperCase();
+                        // Vibrant gradients for user avatars
+                        const gradients = [
+                            'linear-gradient(135deg, #2563eb, #38bdf8)',
+                            'linear-gradient(135deg, #7c3aed, #a855f7)',
+                            'linear-gradient(135deg, #059669, #34d399)',
+                            'linear-gradient(135deg, #d97706, #fbbf24)',
+                            'linear-gradient(135deg, #0284c7, #38bdf8)',
+                            'linear-gradient(135deg, #db2777, #f472b6)'
+                        ];
+                        const charCode = initial.charCodeAt(0) || 0;
+                        const avatarGrad = gradients[charCode % gradients.length];
+                    %>
+                    <div class="qa-item-card <%= isAns ? 'answered-glow' : '' %>" id="qCard-<%= q.id %>" data-answered="<%= isAns %>" data-upvotes="<%= q.upvotes || 0 %>">
+                        
+                        <!-- Left: Main Question Content -->
+                        <div class="qa-card-content">
+                            <div class="qa-card-top">
+                                <div class="author-info">
+                                    <div class="avatar-initial" style="background: <%= avatarGrad %>;">
+                                        <%= initial %>
+                                    </div>
+                                    <div class="author-text">
+                                        <div class="name"><%= q.nama_penanya || "Peserta Webinar" %></div>
+                                        <div class="subtext"><%= q.instansi || (q.sumber === 'zoom_chat' ? 'Dari Chat Zoom' : 'Peserta Webinar') %></div>
+                                    </div>
+                                </div>
+
+                                <div class="card-badges-right">
+                                    <% if (isAns) { %>
+                                        <span class="status-chip chip-answered">✓ Terjawab</span>
+                                    <% } else { %>
+                                        <span class="status-chip chip-pending">⏳ Menunggu</span>
+                                    <% } %>
+                                </div>
+                            </div>
+
+                            <div class="qa-question-text">
+                                <%= q.pertanyaan %>
+                            </div>
+
+                            <% if (isAns && q.jawaban) { %>
+                                <div class="official-answer-card" id="answerBox-<%= q.id %>">
+                                    <div class="answer-card-header">
+                                        <div class="answer-badge-cluster">
+                                            <span>🛡️</span>
+                                            <span>Jawaban Resmi Narasumber (<%= q.dijawab_oleh || "Pemateri BKN" %>):</span>
+                                        </div>
+                                        <% if (typeof canAnswer !== 'undefined' && canAnswer) { %>
+                                            <button type="button" class="btn-host-action btn-answer-primary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="toggleAnswerForm('<%= q.id %>')">
+                                                ✏️ Edit
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                    <div class="answer-card-body" id="answerDisplay-<%= q.id %>">
+                                        <%= q.jawaban %>
+                                    </div>
+                                </div>
+                            <% } else { %>
+                                <div class="official-answer-card" id="answerBox-<%= q.id %>" style="display: none;">
+                                    <div class="answer-card-header">
+                                        <div class="answer-badge-cluster">
+                                            <span>🛡️</span>
+                                            <span id="answerBy-<%= q.id %>">Jawaban Resmi Narasumber:</span>
+                                        </div>
+                                        <% if (typeof canAnswer !== 'undefined' && canAnswer) { %>
+                                            <button type="button" class="btn-host-action btn-answer-primary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="toggleAnswerForm('<%= q.id %>')">
+                                                ✏️ Edit
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                    <div class="answer-card-body" id="answerDisplay-<%= q.id %>"></div>
+                                </div>
+                            <% } %>
+
+                            <!-- Host Controls Bar -->
+                            <% if (typeof canAnswer !== 'undefined' && canAnswer) { %>
+                                <div class="qa-host-controls">
+                                    <button type="button" class="btn-host-action btn-answer-primary" id="btnToggleAns-<%= q.id %>" onclick="toggleAnswerForm('<%= q.id %>')">
+                                        <%= isAns ? '✏️ Edit Jawaban' : '💬 Jawab Pertanyaan' %>
+                                    </button>
+                                    <button type="button" class="btn-host-action btn-delete-danger" title="Hapus pertanyaan ini" onclick="deleteQuestion('<%= q.id %>')">
+                                        🗑️ Hapus
+                                    </button>
+                                </div>
+
+                                <div id="answerForm-<%= q.id %>" class="host-composer-box" style="display: none;">
+                                    <div class="host-composer-top">
+                                        <span>✍️ Tuliskan Jawaban Resmi Narasumber:</span>
+                                        <button type="button" onclick="toggleAnswerForm('<%= q.id %>')" style="background:none; border:none; color:#64748b; font-size:18px; cursor:pointer;">&times;</button>
+                                    </div>
+                                    <textarea id="answerInput-<%= q.id %>" class="input-styled" style="min-height: 85px; margin-bottom: 8px; font-size: 13px;" placeholder="Tuliskan jawaban penjelasan Anda secara lengkap..."><%= q.jawaban || '' %></textarea>
+                                    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                        <button type="button" class="btn-cancel-mini" onclick="toggleAnswerForm('<%= q.id %>')">Batal</button>
+                                        <button type="button" class="btn-send-answer-now" id="btnSubmitAns-<%= q.id %>" onclick="submitAnswer('<%= q.id %>')">
+                                            Simpan Jawaban ✓
+                                        </button>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <!-- Right: Slido-style Vertical Upvote Button -->
+                        <div class="qa-upvote-column">
+                            <button type="button" class="btn-upvote-slido" id="btnUpvote-<%= q.id %>" onclick="upvoteQuestion('<%= q.id %>')">
+                                <span class="upvote-icon">▲</span>
+                                <span class="upvote-count" id="voteCount-<%= q.id %>"><%= q.upvotes || 0 %></span>
+                                <span class="upvote-label">Setuju</span>
+                            </button>
+                        </div>
+
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="empty-placeholder" id="qaEmptyBox">
+                    <div class="empty-icon-bubble">💬</div>
+                    <h4>Belum Ada Pertanyaan Masuk</h4>
+                    <p>Jadilah peserta pertama yang mengajukan pertanyaan kepada narasumber pada sesi tanya jawab webinar ini!</p>
+                </div>
+            <% } %>
+        </div>
+
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotif" class="toast-notif">
+        <span id="toastIcon">✓</span>
+        <span id="toastMsg">Tautan berhasil disalin!</span>
+    </div>
+
+    <script>
+        const ROOM_ID = "<%= room.roomId %>";
+        const CAN_ANSWER = <%= (typeof canAnswer !== 'undefined' && canAnswer) ? 'true' : 'false' %>;
+        const CURRENT_USER_NAME = "<%= (typeof user !== 'undefined' && user) ? (user.full_name || user.username) : 'Narasumber BKN' %>";
+        let currentFilter = 'all';
+
+        // Initial setup for filter counters
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTabBadges();
+        });
+
+        function showToast(msg, icon = '✓') {
+            const toast = document.getElementById('toastNotif');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').innerText = icon;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3200);
+        }
+
+        function copyForumLink() {
+            const btn = document.getElementById('btnCopyLink');
+            const textEl = document.getElementById('copyLinkText');
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Tautan ruang Q&A berhasil disalin ke clipboard!');
+                if (textEl) textEl.innerText = 'Tersalin! ✓';
+                if (btn) btn.style.borderColor = '#22c55e';
+                setTimeout(() => {
+                    if (textEl) textEl.innerText = 'Salin Tautan';
+                    if (btn) btn.style.borderColor = '';
+                }, 2200);
+            }).catch(() => {
+                showToast('Gagal menyalin tautan.', '⚠️');
+            });
+        }
+
+        function toggleAnonimMode() {
+            const check = document.getElementById('checkAnonim');
+            const pill = document.getElementById('anonimLabel');
+            const nameInput = document.getElementById('askName');
+            const textEl = document.getElementById('anonimStatusText');
+            if (!check || !nameInput) return;
+
+            check.checked = !check.checked;
+
+            if (check.checked) {
+                pill.classList.add('active');
+                nameInput.dataset.savedVal = nameInput.value;
+                nameInput.value = 'Peserta Rapat (Anonim)';
+                nameInput.readOnly = true;
+                nameInput.style.backgroundColor = '#f1f5f9';
+                nameInput.style.color = '#94a3b8';
+                if (textEl) textEl.innerText = 'Anonim Aktif';
+            } else {
+                pill.classList.remove('active');
+                nameInput.value = nameInput.dataset.savedVal || '';
+                nameInput.readOnly = false;
+                nameInput.style.backgroundColor = '#ffffff';
+                nameInput.style.color = '#0f172a';
+                if (textEl) textEl.innerText = 'Kirim Anonim';
+            }
+        }
+
+        function updateCharCount(textarea) {
+            const counter = document.getElementById('charCounter');
+            if (!counter) return;
+            const len = textarea.value.length;
+            counter.innerText = `${len} / 500`;
+            if (len > 450) {
+                counter.style.color = '#ef4444';
+            } else {
+                counter.style.color = '#94a3b8';
+            }
+        }
+
+        function insertPromptPrefix(prefix) {
+            const textarea = document.getElementById('askQuestion');
+            if (!textarea) return;
+            if (!textarea.value.startsWith(prefix)) {
+                textarea.value = prefix + textarea.value;
+            }
+            textarea.focus();
+            updateCharCount(textarea);
+        }
+
+        async function submitQuestion(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitQ');
+            const checkAnonim = document.getElementById('checkAnonim');
+            const isAnonim = checkAnonim ? checkAnonim.checked : false;
+
+            let nameInput = document.getElementById('askName');
+            let rawName = nameInput ? nameInput.value.trim() : '';
+            let name = isAnonim ? 'Peserta Rapat (Anonim)' : (rawName || 'Peserta Webinar');
+            let instansi = document.getElementById('askInstansi') ? document.getElementById('askInstansi').value.trim() : '';
+            const question = document.getElementById('askQuestion').value.trim();
+
+            if (!question) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Mengirimkan Pertanyaan... ⏳</span>';
+
+            try {
+                const res = await fetch(`/webinar-quiz/${ROOM_ID}/tanya`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ nama_penanya: name, instansi, pertanyaan: question, is_anonim: isAnonim })
+                });
+
+                const json = await res.json();
+                if (json.success) {
+                    showToast('Pertanyaan Anda berhasil diajukan ke forum!');
+                    document.getElementById('askQuestion').value = '';
+                    updateCharCount(document.getElementById('askQuestion'));
+                    refreshRoomData();
+                } else {
+                    showToast(json.message || 'Gagal mengirim pertanyaan.', '⚠️');
+                }
+            } catch (err) {
+                showToast('Terjadi gangguan jaringan.', '⚠️');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Kirim Pertanyaan 🚀</span>';
+            }
+        }
+
+        async function upvoteQuestion(qId) {
+            const btn = document.getElementById('btnUpvote-' + qId);
+            const countEl = document.getElementById('voteCount-' + qId);
+            if (!btn) return;
+
+            // Optimistic UI update
+            const currentVotes = parseInt(countEl ? countEl.innerText : 0) || 0;
+            if (countEl) countEl.innerText = currentVotes + 1;
+            btn.classList.add('voted');
+
+            try {
+                const res = await fetch(`/webinar-quiz/${ROOM_ID}/like/${qId}`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const json = await res.json();
+                if (json.success && json.upvotes !== undefined) {
+                    if (countEl) countEl.innerText = json.upvotes;
+                    const card = document.getElementById('qCard-' + qId);
+                    if (card) card.dataset.upvotes = json.upvotes;
+                    showToast('Dukungan pertanyaan dicatat! 👍');
+                }
+            } catch (e) {}
+        }
+
+        function toggleAnswerForm(qId) {
+            const form = document.getElementById('answerForm-' + qId);
+            if (!form) return;
+            if (form.style.display === 'none' || !form.style.display) {
+                form.style.display = 'block';
+                const txt = document.getElementById('answerInput-' + qId);
+                if (txt) txt.focus();
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        async function submitAnswer(qId) {
+            const input = document.getElementById('answerInput-' + qId);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) {
+                showToast('Tuliskan teks jawaban terlebih dahulu!', '⚠️');
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitAns-' + qId);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Menyimpan...';
+            }
+
+            try {
+                const res = await fetch('/api/webinar-quiz/answer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: qId,
+                        roomId: ROOM_ID,
+                        jawaban: text,
+                        dijawab_oleh: CURRENT_USER_NAME
+                    })
+                });
+
+                const json = await res.json();
+                if (json.success) {
+                    showToast('Jawaban resmi berhasil disimpan!');
+                    toggleAnswerForm(qId);
+                    refreshRoomData();
+                } else {
+                    showToast(json.message || 'Gagal menyimpan jawaban.', '⚠️');
+                }
+            } catch (err) {
+                showToast('Gagal menghubungi server.', '⚠️');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Simpan Jawaban ✓';
+                }
+            }
+        }
+
+        async function deleteQuestion(qId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus pertanyaan ini?')) return;
+
+            try {
+                const res = await fetch('/api/webinar-quiz/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ id: qId })
+                });
+
+                const json = await res.json();
+                if (json.success) {
+                    showToast('Pertanyaan berhasil dihapus!');
+                    const card = document.getElementById('qCard-' + qId);
+                    if (card) card.remove();
+                    refreshRoomData();
+                } else {
+                    showToast(json.message || 'Gagal menghapus pertanyaan.', '⚠️');
+                }
+            } catch (err) {
+                showToast('Gagal menghubungi server.', '⚠️');
+            }
+        }
+
+        function updateTabBadges() {
+            const cards = Array.from(document.querySelectorAll('.qa-item-card'));
+            const total = cards.length;
+            let answered = 0;
+            let pending = 0;
+
+            cards.forEach(c => {
+                if (c.dataset.answered === 'true') {
+                    answered++;
+                } else {
+                    pending++;
+                }
+            });
+
+            const elAll = document.getElementById('countTabAll');
+            const elPend = document.getElementById('countTabPending');
+            const elAns = document.getElementById('countTabAnswered');
+
+            if (elAll) elAll.innerText = total;
+            if (elPend) elPend.innerText = pending;
+            if (elAns) elAns.innerText = answered;
+        }
+
+        function applyFeedFilter(filterType, btn) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const cards = Array.from(document.querySelectorAll('.qa-item-card'));
+            const feed = document.getElementById('qaFeedList');
+
+            if (filterType === 'popular') {
+                // Urutkan berdasarkan upvotes terbanyak
+                cards.sort((a, b) => {
+                    const vA = parseInt(a.dataset.upvotes || 0);
+                    const vB = parseInt(b.dataset.upvotes || 0);
+                    return vB - vA;
+                });
+                cards.forEach(c => {
+                    c.style.display = 'flex';
+                    feed.appendChild(c);
+                });
+            } else {
+                cards.forEach(card => {
+                    const isAns = card.dataset.answered === 'true';
+                    if (filterType === 'all') {
+                        card.style.display = 'flex';
+                    } else if (filterType === 'pending') {
+                        card.style.display = !isAns ? 'flex' : 'none';
+                    } else if (filterType === 'answered') {
+                        card.style.display = isAns ? 'flex' : 'none';
+                    }
+                });
+            }
+        }
+
+        // AUTO REFRESH FEED DATA
+        async function refreshRoomData() {
+            try {
+                // Jangan me-refresh jika pemateri sedang aktif mengetik di textarea
+                const active = document.activeElement;
+                if (active && active.classList && active.classList.contains('input-styled') && active.tagName === 'TEXTAREA') {
+                    return;
+                }
+
+                const res = await fetch(`/webinar-quiz/${ROOM_ID}/data`);
+                const json = await res.json();
+                if (!json.success || !json.data) return;
+
+                const { questions } = json.data;
+                const feed = document.getElementById('qaFeedList');
+                const badgeTotal = document.getElementById('questionCountBadge');
+                const chipTotal = document.getElementById('chipTotalCount');
+
+                const totalCount = questions ? questions.length : 0;
+                if (badgeTotal) badgeTotal.innerText = totalCount;
+                if (chipTotal) chipTotal.innerText = totalCount;
+
+                if (questions && questions.length > 0) {
+                    const openForms = {};
+                    document.querySelectorAll('.host-composer-box').forEach(f => {
+                        const id = f.id.replace('answerForm-', '');
+                        if (f.style.display !== 'none') {
+                            const val = document.getElementById('answerInput-' + id)?.value;
+                            openForms[id] = val || '';
+                        }
+                    });
+
+                    const gradients = [
+                        'linear-gradient(135deg, #2563eb, #38bdf8)',
+                        'linear-gradient(135deg, #7c3aed, #a855f7)',
+                        'linear-gradient(135deg, #059669, #34d399)',
+                        'linear-gradient(135deg, #d97706, #fbbf24)',
+                        'linear-gradient(135deg, #0284c7, #38bdf8)',
+                        'linear-gradient(135deg, #db2777, #f472b6)'
+                    ];
+
+                    feed.innerHTML = questions.map(q => {
+                        const isAns = !!q.is_answered;
+                        const initial = (q.nama_penanya || "P").charAt(0).toUpperCase();
+                        const charCode = initial.charCodeAt(0) || 0;
+                        const avatarGrad = gradients[charCode % gradients.length];
+
+                        return `
+                        <div class="qa-item-card ${isAns ? 'answered-glow' : ''}" id="qCard-${q.id}" data-answered="${isAns}" data-upvotes="${q.upvotes || 0}">
+                            
+                            <div class="qa-card-content">
+                                <div class="qa-card-top">
+                                    <div class="author-info">
+                                        <div class="avatar-initial" style="background: ${avatarGrad};">
+                                            ${initial}
+                                        </div>
+                                        <div class="author-text">
+                                            <div class="name">${escapeHtml(q.nama_penanya || "Peserta Webinar")}</div>
+                                            <div class="subtext">${escapeHtml(q.instansi || (q.sumber === 'zoom_chat' ? 'Dari Chat Zoom' : 'Peserta Webinar'))}</div>
+                                        </div>
+                                    </div>
+                                    <div class="card-badges-right">
+                                        ${isAns 
+                                            ? '<span class="status-chip chip-answered">✓ Terjawab</span>' 
+                                            : '<span class="status-chip chip-pending">⏳ Menunggu</span>'
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="qa-question-text">
+                                    ${escapeHtml(q.pertanyaan)}
+                                </div>
+
+                                ${isAns && q.jawaban ? `
+                                    <div class="official-answer-card" id="answerBox-${q.id}">
+                                        <div class="answer-card-header">
+                                            <div class="answer-badge-cluster">
+                                                <span>🛡️</span>
+                                                <span>Jawaban Resmi Narasumber (${escapeHtml(q.dijawab_oleh || "Pemateri BKN")}):</span>
+                                            </div>
+                                            ${CAN_ANSWER ? `<button type="button" class="btn-host-action btn-answer-primary" style="padding: 2px 8px; font-size: 0.7rem;" onclick="toggleAnswerForm('${q.id}')">✏️ Edit</button>` : ''}
+                                        </div>
+                                        <div class="answer-card-body" id="answerDisplay-${q.id}">
+                                            ${escapeHtml(q.jawaban)}
+                                        </div>
+                                    </div>
+                                ` : ''}
+
+                                ${CAN_ANSWER ? `
+                                    <div class="qa-host-controls">
+                                        <button type="button" class="btn-host-action btn-answer-primary" id="btnToggleAns-${q.id}" onclick="toggleAnswerForm('${q.id}')">
+                                            ${isAns ? '✏️ Edit Jawaban' : '💬 Jawab Pertanyaan'}
+                                        </button>
+                                        <button type="button" class="btn-host-action btn-delete-danger" title="Hapus pertanyaan ini" onclick="deleteQuestion('${q.id}')">
+                                            🗑️ Hapus
+                                        </button>
+                                    </div>
+
+                                    <div id="answerForm-${q.id}" class="host-composer-box" style="display: ${openForms[q.id] !== undefined ? 'block' : 'none'};">
+                                        <div class="host-composer-top">
+                                            <span>✍️ Tuliskan Jawaban Resmi Narasumber:</span>
+                                            <button type="button" onclick="toggleAnswerForm('${q.id}')" style="background:none; border:none; color:#64748b; font-size:18px; cursor:pointer;">&times;</button>
+                                        </div>
+                                        <textarea id="answerInput-${q.id}" class="input-styled" style="min-height: 85px; margin-bottom: 8px; font-size: 13px;" placeholder="Tuliskan jawaban penjelasan Anda secara lengkap...">${openForms[q.id] !== undefined ? escapeHtml(openForms[q.id]) : escapeHtml(q.jawaban || '')}</textarea>
+                                        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                            <button type="button" class="btn-cancel-mini" onclick="toggleAnswerForm('${q.id}')">Batal</button>
+                                            <button type="button" class="btn-send-answer-now" id="btnSubmitAns-${q.id}" onclick="submitAnswer('${q.id}')">
+                                                Simpan Jawaban ✓
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="qa-upvote-column">
+                                <button type="button" class="btn-upvote-slido" id="btnUpvote-${q.id}" onclick="upvoteQuestion('${q.id}')">
+                                    <span class="upvote-icon">▲</span>
+                                    <span class="upvote-count" id="voteCount-${q.id}">${q.upvotes || 0}</span>
+                                    <span class="upvote-label">Setuju</span>
+                                </button>
+                            </div>
+
+                        </div>
+                        `;
+                    }).join('');
+
+                    updateTabBadges();
+
+                    if (currentFilter !== 'all') {
+                        applyFeedFilter(currentFilter, null);
+                    }
+                } else {
+                    feed.innerHTML = `
+                        <div class="empty-placeholder" id="qaEmptyBox">
+                            <div class="empty-icon-bubble">💬</div>
+                            <h4>Belum Ada Pertanyaan Masuk</h4>
+                            <p>Jadilah peserta pertama yang mengajukan pertanyaan kepada narasumber pada sesi tanya jawab webinar ini!</p>
+                        </div>
+                    `;
+                    updateTabBadges();
+                }
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Auto poll update every 6 seconds
+        setInterval(refreshRoomData, 6000);
+    </script>
+</body>
+</html>

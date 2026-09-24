@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sertifikat - ashbdhasbdjsha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      min-height: 100vh;
+      font-family: 'Montserrat', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ========================
+       TOP ACTION TOOLBAR
+    ======================== */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      background: #ffffff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .action-bar-label {
+      font-size: 13.5px;
+      color: #475569;
+      font-weight: 500;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #166534, #15803d);
+      color: #ffffff;
+      border: none;
+      padding: 9px 24px;
+      font-size: 13.5px;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+      transition: all 0.2s ease;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-print:hover {
+      background: linear-gradient(135deg, #14532d, #166534);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(22, 101, 52, 0.4);
+    }
+
+    /* ========================
+       CERTIFICATE CONTAINER
+       A4 Landscape: 297mm x 210mm
+    ======================== */
+    .cert-page {
+      width: 297mm;
+      height: 210mm;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      background-color: #f7f5ef;
+      background-image:
+        url('/images/bg-sertifikat.png'),
+        url('../../images/bg-sertifikat.png'),
+        url('../../../images/bg-sertifikat.png');
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Hide broken or unreplaced placeholder images cleanly */
+    img[src*="{{"],
+    img:not([src]),
+    img[src=""] {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    /* ========================
+       CERTIFICATE CONTENT OVERLAY
+    ======================== */
+    .cert-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* 1. SERTIFIKAT */
+    .cert-title-container {
+      position: absolute;
+      top: 23.2%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .cert-title {
+      font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+      font-size: 11.6mm;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      line-height: 1;
+    }
+
+    .cert-title .title-black {
+      color: #151515;
+    }
+
+    .cert-title .title-gold {
+      color: #ad832d;
+    }
+
+    /* Diamond Divider Line */
+    .diamond-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1.6mm auto 0;
+      width: 78mm;
+      position: relative;
+    }
+
+    .diamond-divider::before,
+    .diamond-divider::after {
+      content: "";
+      flex: 1;
+      height: 0.35mm;
+      background: linear-gradient(90deg, transparent, #c7a14e 30%, #b88f34 100%);
+    }
+
+    .diamond-divider::after {
+      background: linear-gradient(90deg, #b88f34 0%, #c7a14e 70%, transparent);
+    }
+
+    .diamond-divider .diamond {
+      color: #ad832d;
+      font-size: 2.5mm;
+      line-height: 1;
+      padding: 0 1.8mm;
+      transform: scale(0.9);
+    }
+
+    /* 2. NOMOR SERTIFIKAT */
+    .cert-nomor {
+      position: absolute;
+      top: 31.6%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-size: 3.7mm;
+      font-weight: 600;
+      color: #1a1a1a;
+      letter-spacing: 0.02em;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 3. DIBERIKAN KEPADA : */
+    .cert-kepada {
+      position: absolute;
+      top: 34.6%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-size: 3.5mm;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: 0.08em;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 4. NAMA PESERTA */
+    .cert-nama {
+      position: absolute;
+      top: 39.8%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-size: 8.8mm;
+      font-weight: 500;
+      color: #000000;
+      letter-spacing: 0.01em;
+      text-align: center;
+      white-space: nowrap;
+      max-width: 80%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 5. GOLD LINE BELOW NAME */
+    .cert-line-below-name {
+      position: absolute;
+      top: 45.6%;
+      left: 12%;
+      right: 12%;
+      height: 0.4mm;
+      background: linear-gradient(90deg, transparent, #b88f34 8%, #d4af37 50%, #b88f34 92%, transparent);
+    }
+
+    /* 6. SEBAGAI PESERTA */
+    .cert-sebagai {
+      position: absolute;
+      top: 48.0%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 4.8mm;
+      font-weight: 700;
+      color: #0a0a0a;
+      letter-spacing: 0.22em;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* 7. WEBINAR DESCRIPTION */
+    .cert-desc-container {
+      position: absolute;
+      top: 52.8%;
+      left: 8%;
+      right: 8%;
+      text-align: center;
+    }
+
+    .cert-desc-intro {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 3.7mm;
+      font-style: italic;
+      font-weight: 700;
+      color: #111111;
+      line-height: 1.35;
+      display: block;
+      margin-bottom: 0.5mm;
+    }
+
+    .cert-desc-tema {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 4.0mm;
+      font-style: italic;
+      font-weight: 700;
+      color: #000000;
+      text-transform: uppercase;
+      line-height: 1.35;
+      display: block;
+      letter-spacing: 0.01em;
+      margin: 0.4mm auto;
+      max-width: 92%;
+    }
+
+    .cert-desc-sub {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 3.4mm;
+      font-weight: 400;
+      color: #111111;
+      line-height: 1.35;
+      display: block;
+      margin-top: 0.7mm;
+    }
+
+    .cert-desc-penyelenggara {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 3.6mm;
+      color: #111111;
+      display: block;
+      margin-top: 0.3mm;
+    }
+
+    .cert-desc-penyelenggara strong {
+      font-weight: 700;
+    }
+
+    /* Small divider below penyelenggara */
+    .bottom-divider {
+      margin: 1.4mm auto 0;
+      width: 68mm;
+    }
+
+    /* 8. TANGGAL & INSTANSI */
+    .cert-tanggal-container {
+      position: absolute;
+      top: 71.6%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    .cert-tanggal-container p {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 3.7mm;
+      color: #111111;
+      font-weight: 400;
+    }
+
+    /* ========================
+       QR CODES OVERLAY
+       Exact pixel overlay on bg-sertifikat.png
+    ======================== */
+
+    /* QR Download — Bottom Left (between Monas & Rumah Adat) */
+    .cert-qr-download-box {
+      position: absolute;
+      left: 11.72%;
+      top: 73.61%;
+      width: 7.71%;
+      height: 11.44%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cert-qr-download-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 0.5mm;
+    }
+
+    /* Electronic Signature & Center QR (Bottom center-right) */
+    .cert-ttd-info {
+      position: absolute;
+      right: calc(100% - 53.42% + 2.2mm);
+      top: 88.0%;
+      display: flex;
+      align-items: center;
+      gap: 1.4mm;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .cert-ttd-icon {
+      width: 3.6mm;
+      height: 3.6mm;
+      flex-shrink: 0;
+    }
+
+    .cert-ttd-texts {
+      display: flex;
+      flex-direction: column;
+      font-family: 'Montserrat', Arial, sans-serif;
+      line-height: 1.25;
+    }
+
+    .cert-ttd-lbl {
+      font-size: 1.8mm;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .cert-ttd-name {
+      font-size: 2.05mm;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .cert-qr-ttd-box {
+      position: absolute;
+      left: 53.42%;
+      top: 86.22%;
+      width: 6.45%;
+      height: 9.53%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cert-qr-ttd-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #ffffff;
+      padding: 0.4mm;
+    }
+
+    /* ========================
+       PRINT RULES
+    ======================== */
+    @media print {
+      body {
+        background: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .cert-page {
+        box-shadow: none !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        page-break-inside: avoid !important;
+        margin: 0 auto !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP ACTION BAR -->
+  <div class="action-bar">
+    <span class="action-bar-label">📜 Sertifikat: ashbdhasbdjsha</span>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      Cetak / Simpan PDF
+    </button>
+  </div>
+
+  <!-- CERTIFICATE CONTAINER -->
+  <div class="cert-page">
+
+    <!-- ALL TEXT & OVERLAY -->
+    <div class="cert-content">
+
+      <!-- 1. SERTIFIKAT -->
+      <div class="cert-title-container">
+        <div class="cert-title">
+          <span class="title-black">SERTI</span><span class="title-gold">FIKAT</span>
+        </div>
+        <div class="diamond-divider">
+          <span class="diamond">◆</span>
+        </div>
+      </div>
+
+      <!-- 2. NOMOR SERTIFIKAT -->
+      <div class="cert-nomor">7/AKSARA.ASN.05/KRV/IX/2026</div>
+
+      <!-- 3. DIBERIKAN KEPADA : -->
+      <div class="cert-kepada">DIBERIKAN KEPADA :</div>
+
+      <!-- 4. NAMA PESERTA -->
+      <div class="cert-nama">ashbdhasbdjsha</div>
+
+      <!-- 5. GOLD UNDERLINE BELOW NAME -->
+      <div class="cert-line-below-name"></div>
+
+      <!-- 6. SEBAGAI PESERTA -->
+      <div class="cert-sebagai">SEBAGAI PESERTA</div>
+
+      <!-- 7. WEBINAR DESCRIPTION -->
+      <div class="cert-desc-container">
+        <span class="cert-desc-intro">Akselerasi Kompetensi dan Sinergi ASN (AKSARA) Vol. 5 dengan tema</span>
+        <span class="cert-desc-tema">asd354rdefgt</span>
+        <span class="cert-desc-sub">yang diselenggarakan secara daring, selama 2 Jam Pelajaran ( JP )</span>
+        <span class="cert-desc-penyelenggara">oleh <strong>Kantor Regional V BKN</strong></span>
+        <div class="diamond-divider bottom-divider">
+          <span class="diamond">◆</span>
+        </div>
+      </div>
+
+      <!-- 8. TANGGAL & INSTANSI -->
+      <div class="cert-tanggal-container">
+        <p>Jakarta, 16 September 2026</p>
+        <p>Kantor Regional V</p>
+        <p>Badan Kepegawaian Negara</p>
+      </div>
+
+      <!-- 9. QR DOWNLOAD (Bottom Left) -->
+      <div class="cert-qr-download-box">
+        <img src="data:image/png;base64,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" alt="QR Download Sertifikat">
+      </div>
+
+      <!-- 10. ELECTRONIC SIGNATURE & QR (Bottom Center-Right) -->
+      <div class="cert-ttd-info">
+        <!-- BSrE Verification Shield Icon -->
+        <svg class="cert-ttd-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="11" fill="#0284c7"/>
+          <path d="M12 5.5L7.5 7.8V12C7.5 15.3 9.4 18.2 12 19C14.6 18.2 16.5 15.3 16.5 12V7.8L12 5.5Z" fill="#38bdf8"/>
+          <path d="M10 12.2L11.4 13.6L14.4 10.6" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="cert-ttd-texts">
+          <span class="cert-ttd-lbl">Ditandatangani secara elektronik oleh:</span>
+          <span class="cert-ttd-name">Myrna Amir, S.E., M.M</span>
+        </div>
+      </div>
+      <div class="cert-qr-ttd-box">
+        <img src="data:image/png;base64,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" alt="QR Tanda Tangan Digital">
+      </div>
+
+    </div><!-- /.cert-content -->
+
+  </div><!-- /.cert-page -->
+
+</body>
+</html>

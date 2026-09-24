@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/infographic.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      background-color: #F1F5F9;
+      padding: 1.5rem 0;
+    }
+    .preview-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    .control-bar {
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    @media print {
+      body { padding: 0 !important; background: white !important; }
+      .control-bar { display: none !important; }
+      .preview-container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-container">
+    <div class="control-bar no-print">
+      <a href="/history" class="btn btn-secondary btn-sm">
+        ← Kembali ke Riwayat
+      </a>
+      <div style="display: flex; gap: 0.5rem;">
+        <button id="btn-preview-download-png" class="btn btn-secondary btn-sm" style="background: #0F172A; color: #FFFFFF; border-color: #0F172A;">
+          <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Unduh PNG HD</span>
+        </button>
+        <button onclick="window.print()" class="btn btn-primary btn-sm">
+          🖨️ Cetak / Unduh PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- The Full High Resolution Infographic Canvas -->
+    <div class="infographic-canvas">
+      <!-- Header Banner -->
+      <div class="info-header">
+        <div class="info-header-top">
+          <div class="info-brand">
+            <img src="<%= doc.logo_path || '/images/Logo_Badan_Kepegawaian_Negara.png' %>" alt="Logo BKN">
+            <div class="info-brand-text">
+              <h1><%= doc.report_title %></h1>
+              <p><%= doc.report_subtitle %></p>
+            </div>
+          </div>
+          <div class="info-date-badge">
+            <%= doc.dateFormatted %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Identity Bar -->
+      <div class="info-meta-bar">
+        <div class="meta-user-info">
+          <div class="meta-avatar" style="overflow: hidden; padding: 0;">
+            <img src="<%= doc.avatar_path || '/images/default_avatar.png' %>" alt="<%= doc.full_name %>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+          </div>
+          <div class="meta-details">
+            <div class="meta-name"><%= doc.full_name %></div>
+            <div class="meta-role"><%= doc.division %></div>
+            <div class="meta-nip"><%= doc.institution %></div>
+          </div>
+        </div>
+        <div class="meta-mentor-box">
+          <div class="label">NIP Pegawai:</div>
+          <div class="value"><%= doc.nip || '-' %></div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="info-body">
+
+        <!-- Pillars -->
+        <div>
+          <div class="info-section-heading">Pilar Aktivitas & Program Prioritas</div>
+          <div class="info-pillars-grid">
+            <% (doc.pillars || []).forEach(p => { %>
+              <div class="pillar-card">
+                <div class="pillar-title"><%= p.title %></div>
+                <ul class="pillar-list">
+                  <% (p.items || []).forEach(item => { %>
+                    <li class="pillar-item"><%= item %></li>
+                  <% }) %>
+                </ul>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <!-- Component Table -->
+        <div>
+          <div class="info-section-heading">Matriks Implementasi Komponen Sistem</div>
+          <div class="info-table-container">
+            <table class="info-table">
+              <thead>
+                <tr>
+                  <th>Komponen Pekerjaan</th>
+                  <th>PIC / Penanggung Jawab</th>
+                  <th>Status</th>
+                  <th>Target</th>
+                  <th>Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% (doc.tableRows || []).forEach(r => { %>
+                  <tr>
+                    <td style="font-weight: 600;"><%= r.komponen %></td>
+                    <td><%= doc.full_name %></td>
+                    <td>
+                      <span class="badge-status <%= (r.status || '').toLowerCase() %>"><%= r.status %></span>
+                    </td>
+                    <td style="font-weight: 600;"><%= r.target %></td>
+                    <td><%= r.ket %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Visual Evidence Gallery Section -->
+        <% if (doc.visualEvidence && doc.visualEvidence.length > 0) { %>
+          <div>
+            <div class="info-section-heading">Dokumentasi & Bukti Visual Pelaksanaan Kegiatan</div>
+            <div class="info-evidence-grid">
+              <% doc.visualEvidence.forEach(ev => { %>
+                <div class="evidence-card">
+                  <div class="evidence-img-box">
+                    <img src="<%= ev.url %>" alt="<%= ev.caption || 'Bukti Visual' %>">
+                  </div>
+                  <div class="evidence-caption"><%= ev.caption || 'Dokumentasi Kegiatan' %></div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Institutional Seal Footer -->
+        <div class="info-footer-seal">
+          <div class="seal-verified">
+            <svg style="width: 1.15rem; height: 1.15rem; color: #059669;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+            <span>DOKUMEN RESMI BKN • TERVERIFIKASI SISTEM ELEKTRONIK</span>
+          </div>
+          <div class="doc-authority">
+            Kantor Regional V Badan Kepegawaian Negara • <span>ID: #DOC-<%= doc.id %></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btnDownload = document.getElementById('btn-preview-download-png');
+    if (btnDownload) {
+      btnDownload.addEventListener('click', async () => {
+        const canvasEl = document.querySelector('.infographic-canvas');
+        if (!canvasEl) return;
+        btnDownload.disabled = true;
+        btnDownload.innerHTML = '<span>Memproses...</span>';
+        try {
+          const canvas = await html2canvas(canvasEl, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#FFFFFF'
+          });
+          const link = document.createElement('a');
+          link.download = 'infografis-bkn-' + Date.now() + '.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } catch (err) {
+          console.error('Download error:', err);
+          alert('Gagal membuat gambar PNG: ' + err.message);
+        } finally {
+          btnDownload.disabled = false;
+          btnDownload.innerHTML = '<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg><span>Unduh PNG HD</span>';
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

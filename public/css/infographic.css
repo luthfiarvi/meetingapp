@@ -1,0 +1,509 @@
+/* BKN Infographic Canvas Styling - Executive Government Standard */
+.infographic-canvas {
+  background: #FFFFFF;
+  border-radius: 0.75rem;
+  border: 2px solid #CBD5E1;
+  box-shadow: 0 10px 25px -5px rgba(10, 37, 64, 0.12), 0 8px 10px -6px rgba(10, 37, 64, 0.06);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #1E293B;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Banner - Prestigious BKN Royal Navy & Gold Ribbon */
+.info-header {
+  background: linear-gradient(135deg, #071C33 0%, #0A2540 45%, #153E6B 100%) !important;
+  color: #FFFFFF !important;
+  padding: 1.5rem 1.75rem;
+  position: relative;
+  border-bottom: 4px solid #D97706;
+}
+.info-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40%;
+  background: radial-gradient(circle at right, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+.info-header::before {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #F59E0B;
+  opacity: 0.7;
+}
+
+.info-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.info-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.info-brand img {
+  height: 58px !important;
+  width: auto !important;
+  max-height: 58px !important;
+  max-width: 56px !important;
+  object-fit: contain !important;
+  background: #FFFFFF !important;
+  border-radius: 0.5rem !important;
+  padding: 4px !important;
+  border: 2px solid #F59E0B !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+  display: block;
+}
+.info-brand-text h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem 0;
+  color: #FFFFFF !important;
+  line-height: 1.25;
+}
+.info-brand-text p {
+  font-size: 0.85rem;
+  color: #FDE68A !important;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.info-date-badge {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1.5px solid #F59E0B !important;
+  backdrop-filter: blur(6px);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.775rem;
+  font-weight: 700;
+  color: #FFFFFF !important;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* User Identity Bar (Meta Data) - Executive Soft Tint with Gold Left Accent */
+.info-meta-bar {
+  background: linear-gradient(90deg, #F8FAFC 0%, #EFF6FF 60%, #F0FDF4 100%) !important;
+  border-bottom: 2px solid #E2E8F0;
+  border-left: 5px solid #1E40AF;
+  padding: 1rem 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.meta-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.meta-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #0A2540 !important;
+  border: 2px solid #D97706 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+  flex-shrink: 0;
+}
+.meta-details .meta-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0A2540;
+  line-height: 1.25;
+}
+.meta-details .meta-role {
+  font-size: 0.8rem;
+  color: #1E40AF;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.meta-details .meta-nip {
+  font-size: 0.725rem;
+  color: #475569;
+  font-weight: 500;
+}
+.meta-mentor-box {
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1;
+  border-left: 4px solid #D97706;
+  padding: 0.45rem 0.875rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.meta-mentor-box .label {
+  color: #64748B;
+  font-size: 0.675rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+.meta-mentor-box .value {
+  font-weight: 700;
+  font-size: 0.825rem;
+  color: #0A2540;
+}
+
+/* Content Body */
+.info-body {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex-grow: 1;
+}
+
+/* Section Title inside Canvas - Executive Ribbon */
+.info-section-heading {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0A2540;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  padding: 0.4rem 0.75rem;
+  background: linear-gradient(90deg, #F1F5F9 0%, rgba(241, 245, 249, 0.1) 100%) !important;
+  border-left: 4px solid #D97706;
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* 2-Column Activity Pillars - Styled Executive Cards */
+.info-pillars-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 640px) {
+  .info-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Pillar 1: Royal Navy / Indigo Theme */
+.pillar-card:nth-child(1) {
+  background: linear-gradient(180deg, #F0F7FF 0%, #FFFFFF 100%) !important;
+  border: 1.5px solid #BFDBFE;
+  border-top: 5px solid #1D4ED8;
+  border-radius: 0.625rem;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 2px 5px rgba(29, 78, 216, 0.06);
+}
+.pillar-card:nth-child(1) .pillar-title {
+  color: #1E40AF;
+  border-bottom: 2px solid #DBEAFE;
+}
+.pillar-card:nth-child(1) .pillar-item::before {
+  background: #1D4ED8;
+}
+
+/* Pillar 2: Emerald / Teal Theme */
+.pillar-card:nth-child(2) {
+  background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%) !important;
+  border: 1.5px solid #BBF7D0;
+  border-top: 5px solid #0D9488;
+  border-radius: 0.625rem;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 2px 5px rgba(13, 148, 136, 0.06);
+}
+.pillar-card:nth-child(2) .pillar-title {
+  color: #0F766E;
+  border-bottom: 2px solid #D1FAE5;
+}
+.pillar-card:nth-child(2) .pillar-item::before {
+  background: #0D9488;
+}
+
+.pillar-title {
+  font-size: 0.875rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+.pillar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.pillar-item {
+  font-size: 0.775rem;
+  color: #1E293B;
+  position: relative;
+  padding-left: 1.4rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+.pillar-item::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 0.65rem;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Component Matrix Table - High Contrast & Authority */
+.info-table-container {
+  overflow-x: auto;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 0.625rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.775rem;
+  text-align: left;
+}
+.info-table thead tr {
+  background: linear-gradient(90deg, #0A2540 0%, #153E6B 100%) !important;
+}
+.info-table th {
+  color: #FFFFFF !important;
+  font-weight: 800;
+  padding: 0.75rem 0.875rem;
+  border-bottom: 3px solid #D97706;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+.info-table tbody tr {
+  border-bottom: 1px solid #E2E8F0;
+  transition: background 0.15s ease;
+}
+.info-table tbody tr:nth-child(even) {
+  background-color: #F8FAFC !important;
+}
+.info-table td {
+  padding: 0.75rem 0.875rem;
+  color: #1E293B;
+  line-height: 1.35;
+}
+.info-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status Badges - Vivid Government Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.badge-status.selesai {
+  background-color: #DEF7EC !important;
+  color: #03543F !important;
+  border: 1.5px solid #31C48D !important;
+}
+.badge-status.berjalan {
+  background-color: #E1EFFE !important;
+  color: #1E429F !important;
+  border: 1.5px solid #76A9FA !important;
+}
+.badge-status.tertunda {
+  background-color: #FDF6B2 !important;
+  color: #723B13 !important;
+  border: 1.5px solid #FACA15 !important;
+}
+
+/* Bukti Visual & Dokumentasi Kegiatan */
+.info-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.evidence-card {
+  background: #FFFFFF !important;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+.evidence-img-box {
+  width: 100%;
+  height: 145px;
+  background: #F1F5F9;
+  position: relative;
+  overflow: hidden;
+}
+.evidence-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+.evidence-caption {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #0A2540;
+  font-weight: 700;
+  background: #F8FAFC !important;
+  border-top: 2px solid #E2E8F0;
+  line-height: 1.35;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Institutional Footer in Canvas - Security Seal & Verification QR */
+.info-footer-seal {
+  margin-top: 1rem;
+  padding-top: 0.875rem;
+  border-top: 2px dashed #CBD5E1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #475569;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.info-footer-seal .seal-verified {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #047857;
+  font-weight: 700;
+  background: #ECFDF5 !important;
+  border: 1px solid #A7F3D0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+}
+.info-footer-seal .seal-verified svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #059669;
+}
+.info-footer-seal .doc-authority {
+  text-align: right;
+  font-size: 0.7rem;
+  color: #64748B;
+  font-weight: 600;
+}
+.info-footer-seal .doc-authority span {
+  color: #0A2540;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   PRINT OPTIMIZATION (A4 Full Height, Exact Colors, Professional Output)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0.6cm !important;
+  }
+
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    color: #0F172A !important;
+  }
+
+  .app-header, .app-footer, .form-panel, .control-bar, .no-print, #toast {
+    display: none !important;
+  }
+
+  .generator-layout, .preview-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .preview-panel {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Canvas fills the A4 page height elegantly */
+  .infographic-canvas {
+    border: 2px solid #0A2540 !important;
+    border-radius: 0.5rem !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    min-height: 275mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .info-body {
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    gap: 1.25rem !important;
+    padding: 1.25rem 1.5rem !important;
+  }
+
+  .pillar-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .info-table-container {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

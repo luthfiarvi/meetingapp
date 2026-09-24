@@ -20,39 +20,53 @@
         <aside class="sidebar">
 
             <div class="brand">
-                <div class="brand-logo">
-                    <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                <div class="brand-info">
+                    <div class="brand-logo">
+                        <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                    </div>
+                    <div class="brand-text">
+                        <h2>Meeting App</h2>
+                        <span>BKN Regional V</span>
+                    </div>
                 </div>
-                <div>
-                    <h2>Meeting App</h2>
-                    <span>BKN Regional V</span>
-                </div>
+                <button type="button" class="btn-sidebar-toggle" id="btnSidebarToggle" title="Kecilkan Sidebar (Perluas Tampilan Tengah)" onclick="toggleSidebar()">
+                    <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
             </div>
 
             <nav class="menu">
-                <a href="/dashboard" class="menu-item">
+                <a href="/dashboard" class="menu-item" data-tooltip="Dashboard">
                     <span>🏠</span>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="/manajemenmeeting" class="menu-item active">
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/manajemenuser" class="menu-item" data-tooltip="Manajemen User">
+                    <span>👥</span>
+                    <span>Manajemen User</span>
+                </a>
+                <% } %>
+
+                <a href="/manajemenmeeting" class="menu-item active" data-tooltip="Manajemen Meeting">
                     <span>📋</span>
                     <span>Manajemen Meeting</span>
                 </a>
 
-                <a href="#" class="menu-item">
-                    <span>📝</span>
-                    <span>Manajemen Presensi</span>
+                <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
+                    <span>📹</span>
+                    <span>Request Zoom</span>
                 </a>
 
-                <a href="#" class="menu-item">
-                    <span>📜</span>
-                    <span>Manajemen Sertifikat</span>
+                <a href="/infografis" class="menu-item" data-tooltip="App Infografis">
+                    <span>📊</span>
+                    <span>App Infografis</span>
                 </a>
 
-                <a href="/" class="menu-item" onclick="showLogoutModal(event)">
-                    <span>🚪</span>
-                    <span>Manajemen Logout</span>
+                <a href="/manual-book" class="menu-item" data-tooltip="Manual Book">
+                    <span>📖</span>
+                    <span>Manual Book</span>
                 </a>
             </nav>
 
@@ -88,15 +102,34 @@
                     </div>
                 </div>
 
-                <div class="management-actions">
+                <div class="management-actions" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                     <div class="search-box-wrapper">
                         <span class="search-icon">🔍</span>
                         <input type="text" id="searchMeeting" placeholder="Cari Meeting..." onkeyup="filterMeetings()">
                     </div>
 
-                    <button type="button" class="btn-add-primary" onclick="openMeetingModal()">
-                        ＋ Tambah Meeting
-                    </button>
+                    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                        <!-- KHUSUS ADMIN (TIM KERJA SIDIGI) -->
+                        <a href="/request-zoom" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; border-radius: 0.625rem; padding: 0.65rem 1.15rem; font-weight: 700; font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); white-space: nowrap; transition: all 0.2s ease;">
+                            <span>📋</span>
+                            <span>Lihat Pengajuan Zoom</span>
+                            <% if (typeof pendingZoomCount !== 'undefined' && pendingZoomCount > 0) { %>
+                                <span style="background: #ef4444; color: white; border-radius: 9999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 800;">
+                                    <%= pendingZoomCount %>
+                                </span>
+                            <% } %>
+                        </a>
+
+                        <button type="button" class="btn-add-primary" onclick="openMeetingModal()">
+                            ＋ Tambah Meeting
+                        </button>
+                    <% } else { %>
+                        <!-- KHUSUS USER (DIVISI LAIN) -->
+                        <a href="/request-zoom" class="btn-add-primary" style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); white-space: nowrap;" title="Ajukan permohonan lisensi/jadwal rapat Zoom ke Tim Kerja Sidigi">
+                            <span>📹</span>
+                            <span>Request Zoom Meeting</span>
+                        </a>
+                    <% } %>
                 </div>
             </section>
 
@@ -105,14 +138,36 @@
 
                 <% if (typeof meetings !== 'undefined' && meetings && meetings.length > 0) { %>
                     <% meetings.forEach(function(m) { %>
-                        <div class="meeting-card" data-meeting-id="<%= m.m_id || m.meeting_id || m.id %>">
+                        <% 
+                            let tipeDisplay = m.tipe_meeting || m.m_tipe || 'Rapat Offline';
+                            if (tipeDisplay === '1') tipeDisplay = 'Rapat Offline';
+                            else if (tipeDisplay === '2') tipeDisplay = 'Zoom';
+                            else if (tipeDisplay === '3') tipeDisplay = 'Webinar';
+                            
+                            let formattedTgl = '21 Agustus 2026';
+                            if (m.tanggal) {
+                                const d = new Date(m.tanggal);
+                                formattedTgl = !isNaN(d) ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : m.tanggal;
+                            }
+                        %>
+                        <div class="meeting-card" 
+                             data-meeting-id="<%= m.meeting_id || m.m_id || m.id %>"
+                             data-tipe-meeting="<%= tipeDisplay %>"
+                             data-title="<%= m.meeting_nama || m.m_nama || 'Agenda Rapat BKN' %>"
+                             data-zoom-link="<%= m.zoom_link || '' %>"
+                             data-zoom-id="<%= m.zoom_meeting_id || '' %>"
+                             data-zoom-pass="<%= m.zoom_passcode || '' %>"
+                             data-zoom-request-id="<%= m.zoom_request_id || '' %>"
+                             data-thumbnail="<%= m.thumbnail || '' %>"
+                             data-pdf-url="<%= m.notulen_pdf || '' %>"
+                             data-video-url="<%= m.video_url || '' %>">
                             <div class="meeting-card-banner">
-                                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop" alt="Meeting BKN" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
-                                <span class="meeting-card-badge"><%= m.m_tipe || 'Rapat Offline' %></span>
+                                <img src="<%= m.thumbnail || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=600&auto=format&fit=crop' %>" alt="Meeting BKN" onerror="this.onerror=null; this.src='/logo-bkn-asli.png'; this.style.objectFit='contain'; this.style.padding='20px'; this.style.background='linear-gradient(135deg, #0d2b5c, #2563eb)';">
+                                <span class="meeting-card-badge"><%= tipeDisplay %></span>
                             </div>
                             <div class="meeting-card-content">
-                                <h3 class="meeting-card-title"><%= m.m_nama %></h3>
-                                <p class="meeting-card-meta">📅 Tanggal: <%= m.tanggal || '21 Agustus 2026' %></p>
+                                <h3 class="meeting-card-title"><%= m.meeting_nama || m.m_nama || 'Agenda Rapat BKN' %></h3>
+                                <p class="meeting-card-meta">📅 Tanggal: <%= formattedTgl %></p>
                                 <p class="meeting-card-desc" style="display:none;"><%= m.deskripsi || 'Pembahasan agenda rutin BKN Regional V.' %></p>
                                 <div class="meeting-card-actions">
                                     <button type="button" class="btn-card-view" onclick="openViewModal(this)">
@@ -123,6 +178,9 @@
                                     </button>
                                     <button type="button" class="btn-card-edit" onclick="openEditModal(this)">
                                         ✏️ Edit
+                                    </button>
+                                    <button type="button" class="btn-card-sertif" onclick="openSertifikatModal(this.closest('.meeting-card').dataset.meetingId, this.closest('.meeting-card').dataset.title)">
+                                        📜 Lihat Sertifikat
                                     </button>
                                 </div>
                             </div>
@@ -177,9 +235,9 @@
                         <label for="meetingType">Tipe Meeting</label>
                         <select id="meetingType" name="m_tipe" required>
                             <option value="">Pilih Tipe Meeting</option>
-                            <option value="1">Rapat Offline</option>
-                            <option value="2">Zoom</option>
-                            <option value="3">Webinar</option>
+                            <option value="Rapat Offline">Rapat Offline</option>
+                            <option value="Zoom">Zoom</option>
+                            <option value="Webinar">Webinar</option>
                         </select>
                     </div>
                 </div>
@@ -218,10 +276,32 @@
                     <p id="viewDesc" style="font-size: 13px; color:#475569; margin-top: 4px; line-height: 1.5;"></p>
                 </div>
 
+                <!-- INFORMASI TAUTAN ZOOM RESMI (JIKA ADA) -->
+                <div id="viewZoomBox" style="display:none; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+                        <span style="font-size:12.5px; font-weight:700; color:#1e40af; display:inline-flex; align-items:center; gap:6px;">
+                            <span>📹</span> Tautan Zoom Meeting Resmi
+                        </span>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" onclick="copyViewZoomLink()" style="background:#ffffff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                                📋 Salin Tautan
+                            </button>
+                            <a id="btnOpenViewZoom" href="#" target="_blank" style="background:#2563eb; color:#ffffff; border-radius:6px; padding:5px 12px; font-size:11.5px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+                                Buka Zoom ↗
+                            </a>
+                        </div>
+                    </div>
+                    <input type="text" id="viewZoomLinkInput" readonly style="width:100%; font-size:11.5px; padding:6px 10px; border:1px solid #93c5fd; border-radius:6px; background:#ffffff; color:#1e293b; font-family:monospace; box-sizing:border-box; outline:none;" value="">
+                    <div id="viewZoomCredentials" style="display:flex; gap:16px; font-size:12px; color:#334155; margin-top:8px; font-weight:600;">
+                        <span id="viewZoomMeetingId"></span>
+                        <span id="viewZoomPasscode"></span>
+                    </div>
+                </div>
+
                 <!-- BERKAS UNDUHAN NOTULEN & VIDEO -->
                 <div style="background:#f0f7ff; padding: 16px; border-radius: 12px; border: 1px solid #bfdbfe;">
                     <strong style="font-size: 13px; color:#1e40af; display:block; margin-bottom: 10px;">📄 Berkas & Dokumentasi Rapat:</strong>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
                         <a id="btnDownloadPdf" href="#" download="Notulen_Rapat_BKN.pdf" onclick="triggerPdfDownload(event)" style="flex:1; min-width:180px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; background:#2563eb; color:#ffffff; border-radius:10px; font-size:12px; font-weight:600; text-decoration:none; box-shadow: 0 4px 12px rgba(37,99,235,0.25); transition: 0.2s;">
                             📄 Unduh Notulen (PDF)
                         </a>
@@ -229,11 +309,68 @@
                             🎬 Unduh Video Rapat
                         </a>
                     </div>
+                    <button type="button" id="btnViewPhotos" onclick="openPhotoGalleryModal()" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#ffffff; border:none; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; box-shadow: 0 4px 14px rgba(217,119,6,0.25); transition: 0.2s; margin-bottom:10px;">
+                        📸 Lihat Dokumentasi Lengkap Kegiatan (Foto-Foto)
+                    </button>
+                    <a id="btnOpenPresensiForm" href="#" target="_blank" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s;">
+                        ✍️ Buka Link Form Presensi Peserta ↗
+                    </a>
+                    <a id="btnWebinarQa" href="#" target="_blank" style="display:none; width:100%; align-items:center; justify-content:center; gap:8px; padding:12px 16px; background:linear-gradient(135deg, #7c3aed, #6366f1); color:#ffffff; border:none; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; cursor:pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.25); transition: 0.2s; margin-top:10px; box-sizing: border-box;">
+                        <span>💬</span> Forum Q&A & Kuis Interaktif (Slido BKN) ↗
+                    </a>
                 </div>
             </div>
 
             <div class="modal-actions" style="margin-top: 20px;">
                 <button type="button" class="modal-cancel" onclick="closeViewModal()" style="width:100%;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GALERI DOKUMENTASI FOTO KEGIATAN LENGKAP -->
+    <div class="meeting-modal" id="photoGalleryModal" style="z-index: 10500;">
+        <div class="meeting-modal-content" style="max-width: 880px; width: 92%; max-height: 88vh; display:flex; flex-direction:column;">
+            <button type="button" class="modal-close" onclick="closePhotoGalleryModal()">×</button>
+
+            <div class="modal-title" style="margin-bottom: 14px;">
+                <div class="modal-icon" style="background:#fef3c7; color:#d97706;">📸</div>
+                <div>
+                    <h2>Dokumentasi Foto Kegiatan Rapat</h2>
+                    <p id="galleryMeetingSubtitle" style="color:#64748b;">Arsip foto resmi saat pelaksanaan kegiatan rapat di lingkungan BKN</p>
+                </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; padding:12px 16px; background:#f8fafc; border-radius:10px; border:1px solid #e2e8f0;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:12px; font-weight:700; color:#334155;">Arsip Foto:</span>
+                    <span id="galleryPhotoCount" style="font-size:11px; font-weight:700; background:#dbeafe; color:#1d4ed8; padding:3px 10px; border-radius:9999px;">4 Foto</span>
+                </div>
+                <label style="margin:0; font-size:12px; font-weight:600; padding:8px 14px; cursor:pointer; background:#2563eb; color:#ffffff; border-radius:8px; display:inline-flex; align-items:center; gap:6px; box-shadow: 0 2px 8px rgba(37,99,235,0.25);">
+                    <span>＋ Unggah Foto Dokumentasi Baru</span>
+                    <input type="file" id="uploadGalleryPhotoInput" accept="image/*" multiple style="display:none;" onchange="handleUploadGalleryPhotos(event)">
+                </label>
+            </div>
+
+            <!-- Grid Foto -->
+            <div id="galleryPhotoGrid" style="flex:1; overflow-y:auto; display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:16px; padding:6px; margin-bottom:14px; max-height:60vh; align-items:start; grid-auto-rows:max-content;">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="modal-actions" style="margin-top: 10px; border-top:1px solid #f1f5f9; padding-top:12px;">
+                <button type="button" class="modal-cancel" onclick="closePhotoGalleryModal()" style="width:100%;">Tutup Galeri Foto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LIGHTBOX PREVIEW FOTO BESAR -->
+    <div class="meeting-modal" id="photoLightboxModal" style="z-index: 11000; background: rgba(15,23,42,0.9); backdrop-filter: blur(6px); display:none; align-items:center; justify-content:center;">
+        <div style="position:relative; max-width:92vw; max-height:92vh; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:auto;">
+            <button type="button" onclick="closeLightboxModal()" style="position:absolute; top:-40px; right:0; background:rgba(255,255,255,0.2); border:none; color:#ffffff; font-size:24px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1;">×</button>
+            <img id="lightboxImage" src="" alt="Pratinjau Foto" style="max-width:88vw; max-height:76vh; border-radius:10px; object-fit:contain; box-shadow:0 12px 40px rgba(0,0,0,0.6); background:#000;">
+            <div style="margin-top:14px; display:flex; align-items:center; justify-content:space-between; width:100%; max-width:88vw; color:#ffffff; flex-wrap:wrap; gap:10px;">
+                <div id="lightboxCaption" style="font-size:14px; font-weight:600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);"></div>
+                <a id="lightboxDownloadBtn" href="#" download="Dokumentasi_Rapat_BKN.jpg" style="padding:7px 16px; background:#2563eb; color:#fff; border-radius:8px; font-size:12px; font-weight:600; text-decoration:none; box-shadow: 0 2px 8px rgba(37,99,235,0.4);">⬇ Unduh Foto</a>
             </div>
         </div>
     </div>
@@ -303,6 +440,203 @@
         </div>
     </div>
 
+    <!-- MODAL LIHAT SERTIFIKAT MEETING -->
+    <div class="meeting-modal" id="sertifikatModal">
+        <div class="meeting-modal-content" style="max-width: 620px;">
+            <button type="button" class="modal-close" onclick="closeSertifikatModal()">×</button>
+
+            <div class="modal-title">
+                <div class="modal-icon" style="background:#fef3c7; color:#b45309;">📜</div>
+                <div>
+                    <h2>Daftar Sertifikat Terbit</h2>
+                    <p id="sertifikatModalSubtitle">Data sertifikat peserta pada rapat ini</p>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="sertifikatModalLoading" style="text-align:center; padding: 28px; color: #64748b; font-size: 13px;">
+                ⏳ Mengambil data sertifikat...
+            </div>
+
+            <!-- List of Certificates -->
+            <div id="sertifikatModalList" style="display:none; max-height: 380px; overflow-y: auto; padding: 2px;">
+            </div>
+
+            <!-- Empty State -->
+            <div id="sertifikatModalEmpty" style="display:none; text-align:center; padding: 35px 20px;">
+                <div style="font-size: 38px; margin-bottom: 8px;">📜</div>
+                <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Belum Ada Sertifikat Terbit</h3>
+                <p style="font-size: 12.5px; color: #64748b; max-width: 380px; margin: 0 auto; line-height: 1.5;">
+                    Sertifikat diterbitkan secara otomatis untuk meeting bertipe <strong>Webinar</strong> saat peserta telah mengisi formulir presensi.
+                </p>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="modal-cancel" onclick="closeSertifikatModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORUM Q&A & KUIS WEBINAR (SLIDO BKN) -->
+    <div class="meeting-modal" id="webinarQaModal" style="z-index: 10400;">
+        <div class="meeting-modal-content" style="max-width: 920px; width: 94%; max-height: 88vh; display: flex; flex-direction: column;">
+            <button type="button" class="modal-close" onclick="closeWebinarQaModal()">×</button>
+
+            <!-- Header -->
+            <div class="modal-title" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                <div class="modal-icon" style="background:#ede9fe; color:#7c3aed; font-size:20px;">💬</div>
+                <div>
+                    <h2 style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin: 0;">Forum Q&A & Kuis Webinar (Slido BKN)</h2>
+                    <p style="font-size: 12px; color: #6b7280; margin: 2px 0 0 0;" id="webinarQaSubtitle">Agenda: Memuat data...</p>
+                </div>
+            </div>
+
+            <!-- Share Participant Link Banner -->
+            <div style="background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1px solid #ddd6fe; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 260px;">
+                    <span style="font-size: 16px;">🔗</span>
+                    <div style="flex: 1;">
+                        <span style="font-size: 11px; font-weight: 700; color: #5b21b6; text-transform: uppercase; letter-spacing: 0.5px;">Tautan Peserta Webinar (Bagikan ke Chat Zoom):</span>
+                        <input type="text" id="webinarQaPublicUrl" readonly style="width: 100%; font-size: 11.5px; color: #374151; background: #ffffff; border: 1px solid #c4b5fd; border-radius: 6px; padding: 5px 8px; margin-top: 3px; font-family: monospace; outline: none;" value="Memuat link...">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button type="button" onclick="copyWebinarQaPublicUrl()" style="background: #7c3aed; color: #ffffff; border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3);">
+                        📋 Salin Tautan
+                    </button>
+                    <a id="btnWebinarOpenPublicTab" href="#" target="_blank" style="background: #ffffff; color: #5b21b6; border: 1px solid #c4b5fd; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                        ↗ Buka Layar Peserta
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 14px; overflow-x: auto;">
+                <button type="button" id="tabBtnQaList" onclick="switchWebinarTab('list')" style="background: none; border: none; padding: 8px 14px; font-size: 13px; font-weight: 700; color: #7c3aed; border-bottom: 2px solid #7c3aed; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: -2px;">
+                    💬 Pertanyaan Peserta <span id="badgeQaCount" style="background:#ede9fe; color:#6d28d9; padding:2px 7px; border-radius:999px; font-size:11px;">0</span>
+                </button>
+                <button type="button" id="tabBtnZoomChat" onclick="switchWebinarTab('zoom-chat')" style="background: none; border: none; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: -2px;">
+                    ✍️ Catat dari Chat Zoom
+                </button>
+                <button type="button" id="tabBtnQuiz" onclick="switchWebinarTab('quiz')" style="background: none; border: none; padding: 8px 14px; font-size: 13px; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: -2px;">
+                    📊 Kuis & Polling Interaktif
+                </button>
+            </div>
+
+            <!-- Content Area (Scrollable) -->
+            <div style="flex: 1; overflow-y: auto; padding-right: 4px; min-height: 280px; max-height: 52vh;">
+                <!-- TAB 1: LIST PERTANYAAN -->
+                <div id="tabContentQaList">
+                    <div id="qaLoadingState" style="text-align: center; padding: 30px; color: #6b7280; font-size: 13px;">
+                        ⏳ Memuat daftar pertanyaan webinar...
+                    </div>
+
+                    <div id="qaEmptyState" style="display: none; text-align: center; padding: 40px 20px; background: #f9fafb; border-radius: 12px; border: 1px dashed #d1d5db;">
+                        <span style="font-size: 36px; display: block; margin-bottom: 8px;">💭</span>
+                        <h4 style="margin: 0 0 4px 0; font-size: 15px; color: #374151;">Belum Ada Pertanyaan Masuk</h4>
+                        <p style="margin: 0; font-size: 12.5px; color: #6b7280;">Bagikan tautan kepada audiens di Zoom chat atau catat langsung pertanyaan peserta dari chat Zoom melalui tab kedua.</p>
+                    </div>
+
+                    <div id="qaQuestionsContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Question cards dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- TAB 2: CATAT PERTANYAAN DARI CHAT ZOOM -->
+                <div id="tabContentZoomChat" style="display: none;">
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <span style="font-size: 18px;">📹</span>
+                            <div>
+                                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #1e293b;">Input Pertanyaan yang Muncul di Zoom Chat</h4>
+                                <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748b;">Notulis / Co-host dapat mendokumentasikan pertanyaan peserta langsung dari chat Zoom ke sistem agar terarsip dan dapat dijawab oleh Narasumber.</p>
+                            </div>
+                        </div>
+
+                        <form id="formAddZoomChat" onsubmit="submitZoomChatQuestion(event)">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Nama Penanya di Zoom <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="zoomChatNama" required placeholder="Contoh: Budi Santoso" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Instansi / Unit Kerja (Opsional)</label>
+                                    <input type="text" id="zoomChatInstansi" placeholder="Contoh: Kanreg V BKN / Ditjen..." style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 4px;">Isi Pertanyaan dari Peserta <span style="color: #ef4444;">*</span></label>
+                                <textarea id="zoomChatPertanyaan" required rows="3" placeholder="Tuliskan pertanyaan peserta yang ada di chat Zoom..." style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; resize: vertical;"></textarea>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end;">
+                                <button type="submit" id="btnSubmitZoomChat" style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);">
+                                    💾 Simpan ke Forum Q&A Webinar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TAB 3: KUIS & POLLING INTERAKTIF -->
+                <div id="tabContentQuiz" style="display: none;">
+                    <div style="background: #fdf4ff; border: 1px solid #f5d0fe; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #86198f;">🎯 Buat Kuis / Polling Baru untuk Audiens</h4>
+                        <p style="margin: 0 0 12px 0; font-size: 12px; color: #701a75;">Kuis akan langsung tampil di layar peserta webinar untuk dijawab secara live.</p>
+
+                        <form id="formCreateQuiz" onsubmit="submitCreateQuiz(event)">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 12px; font-weight: 600; color: #4a044e; margin-bottom: 4px;">Pertanyaan Kuis / Topik Polling <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="quizJudul" required placeholder="Contoh: Seberapa paham Anda mengenai materi teknis tadi?" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 1px solid #e879f9; border-radius: 8px; box-sizing: border-box;">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 11.5px; font-weight: 600; color: #4a044e; margin-bottom: 3px;">Opsi A <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" id="quizOptA" required placeholder="Sangat Paham" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid #e879f9; border-radius: 6px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11.5px; font-weight: 600; color: #4a044e; margin-bottom: 3px;">Opsi B <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" id="quizOptB" required placeholder="Cukup Paham" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid #e879f9; border-radius: 6px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11.5px; font-weight: 600; color: #4a044e; margin-bottom: 3px;">Opsi C (Opsional)</label>
+                                    <input type="text" id="quizOptC" placeholder="Kurang Paham" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid #e879f9; border-radius: 6px; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11.5px; font-weight: 600; color: #4a044e; margin-bottom: 3px;">Opsi D (Opsional)</label>
+                                    <input type="text" id="quizOptD" placeholder="Perlu Pendalaman" style="width: 100%; padding: 7px 10px; font-size: 12.5px; border: 1px solid #e879f9; border-radius: 6px; box-sizing: border-box;">
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btnSubmitQuiz" style="background: linear-gradient(135deg, #c026d3, #a21caf); color: #ffffff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                🚀 Terbitkan Kuis & Aktifkan untuk Audiens
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Current Active Quiz Results Live -->
+                    <div id="quizResultsCard" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: 700; color: #1e293b;">📊 Hasil Polling / Kuis Saat Ini</h4>
+                        <div id="quizResultsContainer">
+                            <p style="font-size: 12.5px; color: #64748b; margin: 0;">Belum ada kuis aktif yang diterbitkan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="modal-actions" style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <button type="button" onclick="loadWebinarQaData()" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    🔄 Segarkan Data
+                </button>
+                <button type="button" class="modal-cancel" onclick="closeWebinarQaModal()" style="margin: 0; min-width: 100px;">Tutup</button>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL FORUM Q&A & KUIS WEBINAR -->
+
     <script>
         const meetingModal = document.getElementById("meetingModal");
         const closeMeetingButton = document.getElementById("closeMeetingModal");
@@ -311,6 +645,60 @@
         let activeCardForEdit = null;
         let currentActivePdfBlob = null;
         let currentActiveVideoBlob = null;
+
+        async function openSertifikatModal(meetingId, meetingTitle) {
+            const modal = document.getElementById('sertifikatModal');
+            const subtitle = document.getElementById('sertifikatModalSubtitle');
+            const loading = document.getElementById('sertifikatModalLoading');
+            const list = document.getElementById('sertifikatModalList');
+            const empty = document.getElementById('sertifikatModalEmpty');
+
+            subtitle.textContent = `Agenda: ${meetingTitle || '#' + meetingId}`;
+            modal.classList.add('show');
+            loading.style.display = 'block';
+            list.style.display = 'none';
+            empty.style.display = 'none';
+
+            try {
+                const res = await fetch(`/api/sertifikat/${meetingId}`);
+                const result = await res.json();
+
+                loading.style.display = 'none';
+                if (result.success && result.data && result.data.length > 0) {
+                    list.innerHTML = result.data.map((cert, i) => `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 9px; gap: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: linear-gradient(135deg, #102f63, #2563eb); color: #ffffff; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 6px;">#${i + 1}</span>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 13.5px; color: #102f63;">${cert.nama}</div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">NIP: ${cert.nip || '-'} • Terbit: ${cert.created_at ? new Date(cert.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</div>
+                                </div>
+                            </div>
+                            <a href="${cert.file_path}" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; box-shadow: 0 3px 10px rgba(5,150,105,0.25); white-space: nowrap;">
+                                🎓 Buka Sertifikat ↗
+                            </a>
+                        </div>
+                    `).join('');
+                    list.style.display = 'block';
+                } else {
+                    empty.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Error fetching certificates:', err);
+                loading.style.display = 'none';
+                empty.style.display = 'block';
+            }
+        }
+
+        function closeSertifikatModal() {
+            const modal = document.getElementById('sertifikatModal');
+            modal.classList.remove('show');
+        }
+
+        // Close on backdrop click
+        document.getElementById('sertifikatModal').addEventListener('click', function(e) {
+            if (e.target === this) closeSertifikatModal();
+        });
 
         function openMeetingModal() {
             meetingModal.classList.add("show");
@@ -334,9 +722,167 @@
             }
         });
 
+        let currentActiveCardForPhotos = null;
+        const meetingPhotosStore = {};
+
+        // Default realistic meeting photos for demonstration and presentation
+        const defaultMeetingPhotos = [
+            {
+                url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop",
+                caption: "Pembukaan Rapat Koordinasi oleh Pimpinan & Pengarahan Kebijakan",
+                time: "09.00 WIB"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=800&auto=format&fit=crop",
+                caption: "Pemaparan Materi Teknis & Evaluasi Program Layanan BKN",
+                time: "09.45 WIB"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?q=80&w=800&auto=format&fit=crop",
+                caption: "Sesi Diskusi Interaktif, Tanya Jawab & Rekomendasi Kerja",
+                time: "10.30 WIB"
+            },
+            {
+                url: "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800&auto=format&fit=crop",
+                caption: "Dokumentasi Bersama Seluruh Peserta & Penandatanganan Berita Acara",
+                time: "11.15 WIB"
+            }
+        ];
+
+        function getPhotosForMeeting(meetingId) {
+            if (!meetingPhotosStore[meetingId]) {
+                meetingPhotosStore[meetingId] = JSON.parse(JSON.stringify(defaultMeetingPhotos));
+            }
+            return meetingPhotosStore[meetingId];
+        }
+
+        function openPhotoGalleryModal() {
+            if (!currentActiveCardForPhotos) return;
+            const meetingId = currentActiveCardForPhotos.dataset.meetingId || currentActiveCardForPhotos.querySelector('.meeting-card-title').textContent.trim();
+            const meetingTitle = currentActiveCardForPhotos.querySelector('.meeting-card-title').textContent.trim();
+            const meetingMeta = currentActiveCardForPhotos.querySelector('.meeting-card-meta').textContent.trim();
+
+            document.getElementById('galleryMeetingSubtitle').textContent = `${meetingTitle} • ${meetingMeta}`;
+
+            renderGalleryGrid(meetingId);
+            document.getElementById('photoGalleryModal').classList.add('show');
+        }
+
+        function renderGalleryGrid(meetingId) {
+            const photos = getPhotosForMeeting(meetingId);
+            const grid = document.getElementById('galleryPhotoGrid');
+            const countBadge = document.getElementById('galleryPhotoCount');
+
+            countBadge.textContent = `${photos.length} Foto Dokumentasi`;
+
+            if (photos.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:30px; background:#f8fafc; border-radius:10px; border:1px dashed #cbd5e1;">
+                        <p style="font-size:13px; color:#64748b; margin-bottom:8px;">Belum ada foto dokumentasi untuk kegiatan ini.</p>
+                        <p style="font-size:12px; color:#94a3b8;">Klik tombol "+ Unggah Foto Dokumentasi Baru" di atas untuk menambahkan foto.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = photos.map((p, idx) => `
+                <div style="position:relative; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.06); transition:transform 0.2s ease, box-shadow 0.2s ease; display:flex; flex-direction:column;" class="gallery-card-item">
+                    <!-- THUMBNAIL FOTO UTAMA (DIPERBESAR & TIDAK TERPOTONG) -->
+                    <div style="height:175px; min-height:175px; flex-shrink:0; overflow:hidden; position:relative; cursor:pointer; background:#0f172a;" onclick="openLightbox('${p.url}', '${encodeURIComponent(p.caption)}')">
+                        <img src="${p.url}" alt="${p.caption}" style="width:100%; height:100%; object-fit:cover; display:block; transition: transform 0.3s ease;">
+                        <div style="position:absolute; inset:0; background:rgba(15,23,42,0.4); opacity:0; transition:opacity 0.2s; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:600;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                            🔍 Klik Perbesar
+                        </div>
+                        <span style="position:absolute; top:8px; right:8px; background:rgba(15,23,42,0.72); backdrop-filter:blur(4px); color:#ffffff; font-size:10px; font-weight:600; padding:2px 7px; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.25);">
+                            🕒 ${p.time || 'Dokumentasi'}
+                        </span>
+                    </div>
+
+                    <!-- KONTEN TEKS & AKSI (LEBIH RINGKAS & KOMPAK) -->
+                    <div style="padding:8px 10px; background:#ffffff; display:flex; flex-direction:column; gap:6px;">
+                        <div style="font-size:11.5px; font-weight:600; color:#1e293b; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;" title="${p.caption}">
+                            ${p.caption}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px; padding-top:5px; border-top:1px solid #f1f5f9;">
+                            <button type="button" onclick="openLightbox('${p.url}', '${encodeURIComponent(p.caption)}')" style="border:none; background:none; color:#2563eb; font-size:11px; font-weight:600; cursor:pointer; padding:2px 0;">
+                                👁️ Lihat Penuh
+                            </button>
+                            <button type="button" onclick="deleteGalleryPhoto('${meetingId}', ${idx})" style="border:none; background:none; color:#ef4444; font-size:11px; font-weight:600; cursor:pointer; padding:2px 0;">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function closePhotoGalleryModal() {
+            document.getElementById('photoGalleryModal').classList.remove('show');
+        }
+
+        function handleUploadGalleryPhotos(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0 || !currentActiveCardForPhotos) return;
+
+            const meetingId = currentActiveCardForPhotos.dataset.meetingId || currentActiveCardForPhotos.querySelector('.meeting-card-title').textContent.trim();
+            const photos = getPhotosForMeeting(meetingId);
+
+            Array.from(files).forEach((file, fIdx) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const now = new Date();
+                    const timeStr = `${String(now.getHours()).padStart(2, '0')}.${String(now.getMinutes()).padStart(2, '0')} WIB`;
+                    photos.push({
+                        url: e.target.result,
+                        caption: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ') || `Foto Dokumentasi ${photos.length + 1}`,
+                        time: timeStr
+                    });
+                    renderGalleryGrid(meetingId);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            event.target.value = '';
+            showToast('Foto dokumentasi kegiatan berhasil ditambahkan ke galeri!', 'success', 'Foto Ditambahkan');
+        }
+
+        async function deleteGalleryPhoto(meetingId, index) {
+            const confirmed = await showConfirmDialog({
+                title: 'Hapus Foto Dokumentasi',
+                message: 'Apakah Anda yakin ingin menghapus foto dokumentasi ini dari arsip kegiatan?',
+                icon: '🗑️',
+                confirmText: 'Ya, Hapus'
+            });
+            if (confirmed) {
+                const photos = getPhotosForMeeting(meetingId);
+                photos.splice(index, 1);
+                renderGalleryGrid(meetingId);
+                showToast('Foto dokumentasi telah berhasil dihapus.', 'info', 'Foto Dihapus');
+            }
+        }
+
+        function openLightbox(imgUrl, encodedCaption) {
+            const caption = decodeURIComponent(encodedCaption || '');
+            document.getElementById('lightboxImage').src = imgUrl;
+            document.getElementById('lightboxCaption').textContent = caption;
+            document.getElementById('lightboxDownloadBtn').href = imgUrl;
+            document.getElementById('lightboxDownloadBtn').download = `${caption.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+            const modal = document.getElementById('photoLightboxModal');
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+
+        function closeLightboxModal() {
+            const modal = document.getElementById('photoLightboxModal');
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+
         // VIEW MODAL LOGIC
         function openViewModal(button) {
             const card = button.closest('.meeting-card');
+            currentActiveCardForPhotos = card;
+
             const img = card.querySelector('.meeting-card-banner img').src;
             const badge = card.querySelector('.meeting-card-badge').textContent;
             const title = card.querySelector('.meeting-card-title').textContent;
@@ -370,11 +916,67 @@
                 videoBtn.href = "#";
             }
 
+            // Link ke form presensi
+            const meetingId = card.dataset.meetingId || '1';
+            const presensiLinkBtn = document.getElementById('btnOpenPresensiForm');
+            if (presensiLinkBtn) {
+                presensiLinkBtn.href = '/presensi/' + meetingId;
+            }
+
+            // Tampilkan tombol Forum Q&A & Kuis Interaktif (Slido BKN) HANYA untuk tipe Webinar
+            const webinarBtn = document.getElementById('btnWebinarQa');
+            if (webinarBtn) {
+                const tipeMeeting = (card.dataset.tipeMeeting || badge || '').toLowerCase().trim();
+                const isWebinar = tipeMeeting.includes('webinar');
+
+                if (isWebinar) {
+                    const zoomReqId = card.dataset.zoomRequestId;
+                    const roomId = zoomReqId ? ('zoom-' + zoomReqId) : ('m-' + meetingId);
+                    const quizUrl = '/webinar-quiz/' + roomId;
+                    webinarBtn.style.display = 'inline-flex';
+                    webinarBtn.href = quizUrl;
+                    webinarBtn.dataset.meetingId = meetingId;
+                    webinarBtn.dataset.meetingTitle = title;
+                    webinarBtn.dataset.roomId = roomId;
+                } else {
+                    webinarBtn.style.display = 'none';
+                }
+            }
+
+            // Tampilkan informasi Zoom jika ada
+            const zoomLink = card.dataset.zoomLink;
+            const zoomId = card.dataset.zoomId;
+            const zoomPass = card.dataset.zoomPass;
+            const zoomBox = document.getElementById('viewZoomBox');
+            if (zoomBox) {
+                if (zoomLink && zoomLink.trim() !== '') {
+                    zoomBox.style.display = 'block';
+                    document.getElementById('viewZoomLinkInput').value = zoomLink;
+                    document.getElementById('btnOpenViewZoom').href = zoomLink;
+                    document.getElementById('viewZoomMeetingId').textContent = zoomId ? 'Meeting ID: ' + zoomId : '';
+                    document.getElementById('viewZoomPasscode').textContent = zoomPass ? 'Passcode: ' + zoomPass : '';
+                } else {
+                    zoomBox.style.display = 'none';
+                }
+            }
+
             document.getElementById('viewMeetingModal').classList.add('show');
         }
 
         function closeViewModal() {
             document.getElementById('viewMeetingModal').classList.remove('show');
+        }
+
+        function copyViewZoomLink() {
+            const input = document.getElementById('viewZoomLinkInput');
+            if (!input || !input.value) return;
+            navigator.clipboard.writeText(input.value).then(() => {
+                showToast('Tautan Zoom resmi berhasil disalin ke clipboard!', 'success', 'Tautan Disalin');
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+                showToast('Tautan disalin ke clipboard!', 'success', 'Berhasil');
+            });
         }
 
         // TRIGGER SIMULATED DOWNLOAD IF NO FILE UPLOADED YET
@@ -397,7 +999,7 @@
         function triggerVideoDownload(e) {
             if (!currentActiveVideoBlob) {
                 e.preventDefault();
-                alert('🎬 Mengunduh rekaman video rapat...');
+                showToast('Memulai pengunduhan berkas rekaman video rapat...', 'info', 'Unduh Video');
                 const dummyContent = "DOKUMENTASI REKAMAN VIDEO RAPAT BKN REGIONAL V";
                 const blob = new Blob([dummyContent], { type: 'video/mp4' });
                 const url = URL.createObjectURL(blob);
@@ -431,6 +1033,11 @@
                 editTypeSelect.value = 'Rapat Offline';
             }
 
+            // Reset input file
+            document.getElementById('editThumbnail').value = '';
+            document.getElementById('editNotulenPdf').value = '';
+            document.getElementById('editVideoFile').value = '';
+
             document.getElementById('editMeetingModal').classList.add('show');
         }
 
@@ -439,47 +1046,110 @@
             activeCardForEdit = null;
         }
 
-        document.getElementById('editMeetingForm').addEventListener('submit', function (e) {
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) return resolve(null);
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        document.getElementById('editMeetingForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             if (!activeCardForEdit) return;
+            const targetCard = activeCardForEdit;
+            const meetingId = targetCard.dataset.meetingId;
 
-            const name = document.getElementById('editName').value;
-            const date = document.getElementById('editDate').value;
-            const type = document.getElementById('editType').value;
-            const desc = document.getElementById('editDescription').value;
+            const name = document.getElementById('editName').value.trim();
+            const date = document.getElementById('editDate').value.trim();
+            const type = document.getElementById('editType').value.trim();
+            const desc = document.getElementById('editDescription').value.trim();
             const fileInput = document.getElementById('editThumbnail');
             const pdfInput = document.getElementById('editNotulenPdf');
             const videoInput = document.getElementById('editVideoFile');
 
-            activeCardForEdit.querySelector('.meeting-card-title').textContent = name;
-            activeCardForEdit.querySelector('.meeting-card-badge').textContent = type;
-            activeCardForEdit.querySelector('.meeting-card-meta').textContent = `📅 Tanggal: ${date}`;
-            if (activeCardForEdit.querySelector('.meeting-card-desc')) {
-                activeCardForEdit.querySelector('.meeting-card-desc').textContent = desc;
-            }
+            // Button loading state
+            const saveBtn = this.querySelector('.modal-save');
+            const originalText = saveBtn.textContent;
+            saveBtn.disabled = true;
+            saveBtn.textContent = '⏳ Menyimpan...';
 
-            // Save Thumbnail Photo
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    activeCardForEdit.querySelector('.meeting-card-banner img').src = event.target.result;
+            try {
+                // Read files asynchronously
+                let thumbnailBase64 = null;
+                if (fileInput.files && fileInput.files[0]) {
+                    thumbnailBase64 = await readFileAsBase64(fileInput.files[0]);
+                    // Instant optimistic visual feedback on card
+                    targetCard.querySelector('.meeting-card-banner img').src = thumbnailBase64;
+                }
+
+                let pdfBase64 = null;
+                if (pdfInput.files && pdfInput.files[0]) {
+                    pdfBase64 = await readFileAsBase64(pdfInput.files[0]);
+                }
+
+                let videoBase64 = null;
+                if (videoInput.files && videoInput.files[0]) {
+                    videoBase64 = await readFileAsBase64(videoInput.files[0]);
+                }
+
+                // Send update payload to server
+                const payload = {
+                    meeting_id: meetingId,
+                    m_nama: name,
+                    deskripsi: desc,
+                    tanggal: date,
+                    m_tipe: type
                 };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
+                if (thumbnailBase64) payload.thumbnail = thumbnailBase64;
+                if (pdfBase64) payload.notulen_pdf = pdfBase64;
+                if (videoBase64) payload.video_url = videoBase64;
 
-            // Save PDF Notulen
-            if (pdfInput.files && pdfInput.files[0]) {
-                activeCardForEdit.dataset.pdfUrl = URL.createObjectURL(pdfInput.files[0]);
-            }
+                const response = await fetch('/updatemeeting', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            // Save Video Documentation
-            if (videoInput.files && videoInput.files[0]) {
-                activeCardForEdit.dataset.videoUrl = URL.createObjectURL(videoInput.files[0]);
-            }
+                const result = await response.json();
 
-            alert('✓ Meeting, Notulen PDF, dan Video Dokumentasi berhasil diperbarui!');
-            closeEditModal();
+                if (response.ok && result.success) {
+                    targetCard.querySelector('.meeting-card-title').textContent = name;
+                    targetCard.querySelector('.meeting-card-badge').textContent = type;
+                    targetCard.querySelector('.meeting-card-meta').textContent = `📅 Tanggal: ${date}`;
+                    if (targetCard.querySelector('.meeting-card-desc')) {
+                        targetCard.querySelector('.meeting-card-desc').textContent = desc;
+                    }
+
+                    if (result.data?.thumbnail) {
+                        targetCard.querySelector('.meeting-card-banner img').src = result.data.thumbnail;
+                        targetCard.dataset.thumbnail = result.data.thumbnail;
+                    }
+                    if (result.data?.notulen_pdf) {
+                        targetCard.dataset.pdfUrl = result.data.notulen_pdf;
+                    }
+                    if (result.data?.video_url) {
+                        targetCard.dataset.videoUrl = result.data.video_url;
+                    }
+
+                    showToast('Data Meeting dan Foto Thumbnail berhasil diperbarui!', 'success', 'Perubahan Disimpan');
+                    closeEditModal();
+                } else {
+                    showToast(result.message || 'Gagal memperbarui meeting.', 'error', 'Gagal Simpan');
+                }
+            } catch (err) {
+                console.error('Error updating meeting:', err);
+                showToast('Terjadi kesalahan saat memperbarui meeting.', 'error', 'Koneksi Terganggu');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            }
         });
 
         function filterMeetings() {
@@ -535,7 +1205,7 @@
             const grid = document.getElementById("meetingGrid");
             grid.insertAdjacentHTML("afterbegin", newCardHTML);
 
-            alert('✓ Meeting baru berhasil ditambahkan! Anda dapat mengeklik Edit setelah rapat selesai untuk mengunggah Notulen PDF & Video.');
+            showToast('Meeting baru berhasil ditambahkan!', 'success', 'Berhasil Ditambahkan');
             closeMeetingModal();
             document.getElementById("meetingForm").reset();
         });
@@ -552,10 +1222,156 @@
             <p>Apakah Anda yakin ingin keluar dari Sistem Informasi Manajemen Ruang Rapat (SIM-RAPAT BKN)?</p>
             <div class="logout-modal-actions">
                 <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Batal</button>
-                <a href="/" class="btn-logout-confirm">Ya, Keluar</a>
+                <a href="/logout" class="btn-logout-confirm">Ya, Keluar</a>
             </div>
         </div>
     </div>
+
+    <!-- MODAL KONFIRMASI UMUM (PENGGANTI CONFIRM BROWSER) -->
+    <div id="confirmModal" class="logout-modal-overlay" style="z-index: 100000;">
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon" id="confirmModalIcon" style="background:#fef2f2; color:#ef4444;">
+                🗑️
+            </div>
+            <h3 id="confirmModalTitle">Konfirmasi Hapus</h3>
+            <p id="confirmModalMessage">Apakah Anda yakin ingin menghapus data ini?</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeConfirmModal(false)">Batal</button>
+                <button type="button" class="btn-logout-confirm" id="confirmModalBtnAction" style="background:#ef4444; color:#fff;" onclick="closeConfirmModal(true)">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" style="position: fixed; top: 24px; right: 24px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; pointer-events: none;"></div>
+
+    <style>
+    /* =================================
+       MODERN TOAST NOTIFICATIONS
+    ================================= */
+    .toast-item {
+        pointer-events: auto;
+        width: 380px;
+        max-width: calc(100vw - 32px);
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16), 0 2px 8px rgba(15, 23, 42, 0.06);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    }
+
+    .toast-item.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .toast-item.hide {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    .toast-body {
+        padding: 14px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .toast-icon-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .toast-icon-box.success {
+        background: #ecfdf5;
+        color: #059669;
+        border: 1px solid #a7f3d0;
+    }
+
+    .toast-icon-box.info {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+    }
+
+    .toast-icon-box.warning {
+        background: #fffbeb;
+        color: #d97706;
+        border: 1px solid #fde68a;
+    }
+
+    .toast-icon-box.error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .toast-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .toast-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 3px;
+        line-height: 1.3;
+    }
+
+    .toast-message {
+        font-size: 12px;
+        color: #475569;
+        line-height: 1.45;
+    }
+
+    .toast-close-btn {
+        border: none;
+        background: none;
+        color: #94a3b8;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 4px;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+    }
+
+    .toast-close-btn:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+    }
+
+    .toast-progress-bar {
+        height: 3px;
+        width: 100%;
+        background: #f1f5f9;
+        overflow: hidden;
+    }
+
+    .toast-progress-fill {
+        height: 100%;
+        width: 100%;
+        transition: width 3.5s linear;
+    }
+
+    .toast-progress-fill.success { background: #10b981; }
+    .toast-progress-fill.info { background: #3b82f6; }
+    .toast-progress-fill.warning { background: #f59e0b; }
+    .toast-progress-fill.error { background: #ef4444; }
+    </style>
 
     <script>
     function showLogoutModal(event) {
@@ -567,13 +1383,532 @@
         document.getElementById("logoutModal").classList.remove("show");
     }
 
+    // ===================================
+    // TOAST NOTIFICATION HANDLER
+    // ===================================
+    function showToast(message, type = 'success', title = '') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const defaultTitles = {
+            success: title || 'Berhasil',
+            info: title || 'Informasi',
+            warning: title || 'Peringatan',
+            error: title || 'Terjadi Kesalahan'
+        };
+
+        const icons = {
+            success: '✓',
+            info: 'ℹ',
+            warning: '⚠️',
+            error: '✕'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-item';
+        toast.innerHTML = `
+            <div class="toast-body">
+                <div class="toast-icon-box ${type}">${icons[type] || '✓'}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${defaultTitles[type]}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button type="button" class="toast-close-btn" aria-label="Tutup">&times;</button>
+            </div>
+            <div class="toast-progress-bar">
+                <div class="toast-progress-fill ${type}"></div>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+            const fill = toast.querySelector('.toast-progress-fill');
+            if (fill) {
+                setTimeout(() => {
+                    fill.style.width = '0%';
+                }, 50);
+            }
+        });
+
+        const closeToast = () => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            setTimeout(() => {
+                toast.remove();
+            }, 350);
+        };
+
+        toast.querySelector('.toast-close-btn').addEventListener('click', closeToast);
+
+        let timer = setTimeout(closeToast, 3500);
+
+        toast.addEventListener('mouseenter', () => clearTimeout(timer));
+        toast.addEventListener('mouseleave', () => {
+            timer = setTimeout(closeToast, 1500);
+        });
+    }
+
+    // ===================================
+    // WEBINAR Q&A & KUIS (SLIDO BKN)
+    // ===================================
+    let currentWebinarMeetingId = null;
+    let currentWebinarMeetingTitle = '';
+    let currentWebinarRoomId = '';
+
+    function openWebinarQaModal() {
+        const btn = document.getElementById('btnWebinarQa');
+        const meetingId = btn.dataset.meetingId || '1';
+        const meetingTitle = btn.dataset.meetingTitle || 'Agenda Webinar BKN';
+        const roomId = btn.dataset.roomId || ('m-' + meetingId);
+
+        currentWebinarMeetingId = meetingId;
+        currentWebinarMeetingTitle = meetingTitle;
+        currentWebinarRoomId = roomId;
+
+        document.getElementById('webinarQaSubtitle').textContent = 'Agenda: ' + meetingTitle;
+
+        const publicUrl = window.location.origin + '/webinar-quiz/' + currentWebinarRoomId;
+        document.getElementById('webinarQaPublicUrl').value = publicUrl;
+        document.getElementById('btnWebinarOpenPublicTab').href = publicUrl;
+
+        switchWebinarTab('list');
+        document.getElementById('webinarQaModal').classList.add('show');
+        loadWebinarQaData();
+    }
+
+    function closeWebinarQaModal() {
+        document.getElementById('webinarQaModal').classList.remove('show');
+    }
+
+    function copyWebinarQaPublicUrl() {
+        const input = document.getElementById('webinarQaPublicUrl');
+        if (!input) return;
+        navigator.clipboard.writeText(input.value).then(() => {
+            showToast('Tautan peserta webinar berhasil disalin ke clipboard! Bagikan tautan ini ke kolom chat aplikasi Zoom.', 'success', 'Tautan Disalin');
+        }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            showToast('Tautan disalin ke clipboard!', 'success', 'Berhasil');
+        });
+    }
+
+    function switchWebinarTab(tab) {
+        const tabList = document.getElementById('tabContentQaList');
+        const tabZoom = document.getElementById('tabContentZoomChat');
+        const tabQuiz = document.getElementById('tabContentQuiz');
+
+        const btnList = document.getElementById('tabBtnQaList');
+        const btnZoom = document.getElementById('tabBtnZoomChat');
+        const btnQuiz = document.getElementById('tabBtnQuiz');
+
+        // Reset tab styles
+        [btnList, btnZoom, btnQuiz].forEach(b => {
+            b.style.color = '#64748b';
+            b.style.borderBottom = '2px solid transparent';
+            b.style.fontWeight = '600';
+        });
+
+        // Hide all contents
+        tabList.style.display = 'none';
+        tabZoom.style.display = 'none';
+        tabQuiz.style.display = 'none';
+
+        if (tab === 'list') {
+            tabList.style.display = 'block';
+            btnList.style.color = '#7c3aed';
+            btnList.style.borderBottom = '2px solid #7c3aed';
+            btnList.style.fontWeight = '700';
+        } else if (tab === 'zoom-chat') {
+            tabZoom.style.display = 'block';
+            btnZoom.style.color = '#0284c7';
+            btnZoom.style.borderBottom = '2px solid #0284c7';
+            btnZoom.style.fontWeight = '700';
+        } else if (tab === 'quiz') {
+            tabQuiz.style.display = 'block';
+            btnQuiz.style.color = '#c026d3';
+            btnQuiz.style.borderBottom = '2px solid #c026d3';
+            btnQuiz.style.fontWeight = '700';
+        }
+    }
+
+    async function loadWebinarQaData() {
+        if (!currentWebinarRoomId) return;
+
+        const loadingState = document.getElementById('qaLoadingState');
+        const emptyState = document.getElementById('qaEmptyState');
+        const container = document.getElementById('qaQuestionsContainer');
+        const badgeCount = document.getElementById('badgeQaCount');
+
+        loadingState.style.display = 'block';
+        container.innerHTML = '';
+        emptyState.style.display = 'none';
+
+        try {
+            const res = await fetch(`/api/webinar-quiz/${encodeURIComponent(currentWebinarRoomId)}/data`);
+            const json = await res.json();
+
+            loadingState.style.display = 'none';
+
+            if (!json.success || !json.data) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            const questions = json.data.questions || [];
+            badgeCount.textContent = questions.length;
+
+            if (questions.length === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+                container.innerHTML = questions.map(q => {
+                    const isAnswered = !!q.is_answered;
+                    const badgeSource = q.sumber === 'zoom_chat' 
+                        ? '<span style="background:#e0f2fe; color:#0369a1; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px;">📹 Chat Zoom</span>'
+                        : '<span style="background:#ede9fe; color:#6d28d9; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px;">🔗 Link Publik</span>';
+
+                    const statusBadge = isAnswered
+                        ? '<span style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px;">✓ Terjawab</span>'
+                        : '<span style="background:#fef3c7; color:#b45309; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px;">⏳ Menunggu Jawaban</span>';
+
+                    const timeStr = q.created_at ? new Date(q.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+
+                    return `
+                        <div style="background:#ffffff; border:1px solid ${isAnswered ? '#bbf7d0' : '#e2e8f0'}; border-radius:10px; padding:14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: 0.2s;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <strong style="font-size:13px; color:#1e293b;">${escapeHtml(q.nama_penanya || 'Peserta')}</strong>
+                                    ${q.instansi ? `<span style="font-size:11.5px; color:#64748b;">(${escapeHtml(q.instansi)})</span>` : ''}
+                                    ${badgeSource}
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    ${statusBadge}
+                                    <span style="font-size:11px; color:#94a3b8;">${timeStr}</span>
+                                    <button type="button" onclick="deleteWebinarQuestion(${q.id})" title="Hapus pertanyaan" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:13px; padding:2px 4px;">🗑️</button>
+                                </div>
+                            </div>
+
+                            <p style="font-size:13px; color:#334155; line-height:1.5; margin:0 0 10px 0; font-weight:500;">
+                                ${escapeHtml(q.pertanyaan || '')}
+                            </p>
+
+                            <!-- Kotak Jawaban Admin -->
+                            ${isAnswered ? `
+                                <div style="background:#f0fdf4; border-left:3px solid #22c55e; border-radius:6px; padding:10px 12px; margin-top:8px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                        <span style="font-size:11px; font-weight:700; color:#15803d;">💬 Jawaban Narasumber / Admin (${escapeHtml(q.dijawab_oleh || 'Tim Sidigi')}):</span>
+                                        <button type="button" onclick="toggleEditAnswer(${q.id})" style="background:none; border:none; color:#16a34a; font-size:11px; font-weight:600; cursor:pointer; text-decoration:underline;">Ubah Jawaban</button>
+                                    </div>
+                                    <p style="font-size:12.5px; color:#166534; line-height:1.45; margin:0;" id="answerText-${q.id}">${escapeHtml(q.jawaban || '')}</p>
+                                    <div id="editAnswerBox-${q.id}" style="display:none; margin-top:8px;">
+                                        <textarea id="editAnswerInput-${q.id}" rows="2" style="width:100%; font-size:12px; padding:6px 8px; border:1px solid #86efac; border-radius:6px; box-sizing:border-box;">${escapeHtml(q.jawaban || '')}</textarea>
+                                        <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:6px;">
+                                            <button type="button" onclick="toggleEditAnswer(${q.id})" style="background:#f1f5f9; border:none; padding:4px 8px; font-size:11px; border-radius:4px; cursor:pointer;">Batal</button>
+                                            <button type="button" onclick="saveEditedAnswer(${q.id})" style="background:#16a34a; color:#ffffff; border:none; padding:4px 10px; font-size:11px; font-weight:600; border-radius:4px; cursor:pointer;">Simpan</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; margin-top:8px;">
+                                    <textarea id="answerInput-${q.id}" rows="2" placeholder="Tuliskan jawaban narasumber/admin untuk pertanyaan ini..." style="width:100%; font-size:12px; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box; resize:vertical; outline:none;"></textarea>
+                                    <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+                                        <button type="button" onclick="submitAnswer(${q.id})" style="background:#22c55e; color:#ffffff; border:none; border-radius:6px; padding:6px 14px; font-size:11.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 4px rgba(34,197,94,0.3);">
+                                            ✓ Kirim & Tampilkan Jawaban
+                                        </button>
+                                    </div>
+                                </div>
+                            `}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Quiz Tab
+            renderQuizResultsTab(json.data.activeQuiz, json.data.quizResults);
+
+        } catch (err) {
+            console.error('Error loading webinar Q&A data:', err);
+            loadingState.style.display = 'none';
+            showToast('Gagal memuat data webinar Q&A: ' + err.message, 'error', 'Koneksi Bermasalah');
+        }
+    }
+
+    function toggleEditAnswer(qId) {
+        const box = document.getElementById('editAnswerBox-' + qId);
+        if (box) {
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    async function saveEditedAnswer(qId) {
+        const input = document.getElementById('editAnswerInput-' + qId);
+        if (!input || !input.value.trim()) {
+            showToast('Jawaban tidak boleh kosong!', 'warning', 'Peringatan');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/webinar-quiz/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: qId,
+                    jawaban: input.value.trim()
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Jawaban berhasil diperbarui!', 'success', 'Tersimpan');
+                loadWebinarQaData();
+            } else {
+                showToast(data.message || 'Gagal menyimpan jawaban', 'error', 'Gagal');
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Kesalahan Sistem');
+        }
+    }
+
+    async function submitAnswer(qId) {
+        const input = document.getElementById('answerInput-' + qId);
+        if (!input || !input.value.trim()) {
+            showToast('Tuliskan jawaban terlebih dahulu!', 'warning', 'Peringatan');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/webinar-quiz/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: qId,
+                    jawaban: input.value.trim()
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Jawaban berhasil dikirim & langsung tampil di layar peserta webinar!', 'success', 'Jawaban Terkirim');
+                loadWebinarQaData();
+            } else {
+                showToast(data.message || 'Gagal mengirim jawaban', 'error', 'Gagal');
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Kesalahan Sistem');
+        }
+    }
+
+    async function submitZoomChatQuestion(e) {
+        e.preventDefault();
+        const nama = document.getElementById('zoomChatNama').value.trim();
+        const instansi = document.getElementById('zoomChatInstansi').value.trim();
+        const pertanyaan = document.getElementById('zoomChatPertanyaan').value.trim();
+
+        if (!pertanyaan) {
+            showToast('Pertanyaan tidak boleh kosong!', 'warning', 'Peringatan');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/webinar-quiz/add-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: currentWebinarRoomId,
+                    nama_penanya: nama || 'Peserta Zoom',
+                    instansi: instansi,
+                    pertanyaan: pertanyaan
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Pertanyaan dari chat Zoom berhasil didokumentasikan!', 'success', 'Tercatat');
+                document.getElementById('formAddZoomChat').reset();
+                switchWebinarTab('list');
+                loadWebinarQaData();
+            } else {
+                showToast(data.message || 'Gagal menyimpan pertanyaan', 'error', 'Gagal');
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Kesalahan');
+        }
+    }
+
+    async function submitCreateQuiz(e) {
+        e.preventDefault();
+        const judul = document.getElementById('quizJudul').value.trim();
+        const optA = document.getElementById('quizOptA').value.trim();
+        const optB = document.getElementById('quizOptB').value.trim();
+        const optC = document.getElementById('quizOptC').value.trim();
+        const optD = document.getElementById('quizOptD').value.trim();
+
+        const options = [optA, optB, optC, optD].filter(Boolean);
+        if (options.length < 2) {
+            showToast('Minimal masukkan 2 opsi jawaban kuis!', 'warning', 'Peringatan');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/webinar-quiz/create-quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: currentWebinarRoomId,
+                    judul_kuis: judul,
+                    opsi_jawaban: options
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Kuis live berhasil diterbitkan untuk audiens webinar!', 'success', 'Kuis Terbit');
+                document.getElementById('formCreateQuiz').reset();
+                loadWebinarQaData();
+            } else {
+                showToast(data.message || 'Gagal menerbitkan kuis', 'error', 'Gagal');
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Kesalahan');
+        }
+    }
+
+    function renderQuizResultsTab(activeQuiz, quizResults) {
+        const container = document.getElementById('quizResultsContainer');
+        if (!activeQuiz) {
+            container.innerHTML = '<p style="font-size:12.5px; color:#64748b; margin:0;">Belum ada kuis atau polling aktif saat ini. Anda dapat membuatnya melalui formulir di atas.</p>';
+            return;
+        }
+
+        const results = quizResults || [];
+        const totalVotes = results.reduce((acc, r) => acc + parseInt(r.total_votes || 0), 0);
+
+        let optionsHtml = '';
+        const options = activeQuiz.opsi_jawaban || [];
+
+        options.forEach(opt => {
+            const optResult = results.find(r => r.selected_option === opt);
+            const votes = optResult ? parseInt(optResult.total_votes) : 0;
+            const pct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+
+            optionsHtml += `
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:600; color:#1e293b; margin-bottom:4px;">
+                        <span>${escapeHtml(opt)}</span>
+                        <span>${pct}% (${votes} suara)</span>
+                    </div>
+                    <div style="height:10px; background:#f1f5f9; border-radius:999px; overflow:hidden;">
+                        <div style="width:${pct}%; height:100%; background:linear-gradient(90deg, #c026d3, #7c3aed); border-radius:999px; transition:width 0.4s ease;"></div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = `
+            <div style="background:#fdf4ff; border:1px solid #f0abfc; border-radius:10px; padding:14px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="background:#fae8ff; color:#a21caf; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase;">● KUIS SEDANG AKTIF</span>
+                    <span style="font-size:12px; font-weight:700; color:#4a044e;">Total: ${totalVotes} Suara Masuk</span>
+                </div>
+                <h5 style="margin:0 0 12px 0; font-size:14px; font-weight:700; color:#3b0764;">${escapeHtml(activeQuiz.judul_kuis)}</h5>
+                <div>${optionsHtml}</div>
+            </div>
+        `;
+    }
+
+    async function deleteWebinarQuestion(qId) {
+        const confirmed = await showConfirmDialog({
+            title: 'Hapus Pertanyaan Webinar',
+            message: 'Apakah Anda yakin ingin menghapus pertanyaan ini dari forum arsip webinar?',
+            icon: '🗑️',
+            confirmText: 'Ya, Hapus'
+        });
+
+        if (!confirmed) return;
+
+        try {
+            const res = await fetch('/api/webinar-quiz/delete-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: qId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Pertanyaan telah dihapus.', 'info', 'Terhapus');
+                loadWebinarQaData();
+            } else {
+                showToast(data.message || 'Gagal menghapus pertanyaan', 'error', 'Gagal');
+            }
+        } catch (err) {
+            showToast(err.message, 'error', 'Kesalahan');
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // ===================================
+    // CONFIRM MODAL PROMISE DIALOG
+    // ===================================
+    let confirmCallback = null;
+    function showConfirmDialog({ title = 'Konfirmasi', message = 'Apakah Anda yakin?', icon = '⚠️', confirmText = 'Ya, Lanjutkan' }) {
+        return new Promise((resolve) => {
+            document.getElementById('confirmModalTitle').textContent = title;
+            document.getElementById('confirmModalMessage').textContent = message;
+            document.getElementById('confirmModalIcon').textContent = icon;
+            document.getElementById('confirmModalBtnAction').textContent = confirmText;
+            
+            confirmCallback = resolve;
+            document.getElementById('confirmModal').classList.add('show');
+        });
+    }
+
+    function closeConfirmModal(result) {
+        document.getElementById('confirmModal').classList.remove('show');
+        if (typeof confirmCallback === 'function') {
+            confirmCallback(result);
+            confirmCallback = null;
+        }
+    }
+
     window.addEventListener("click", function(event) {
         const modal = document.getElementById("logoutModal");
         if (event.target === modal) {
             closeLogoutModal();
         }
+        const confirmMdl = document.getElementById("confirmModal");
+        if (event.target === confirmMdl) {
+            closeConfirmModal(false);
+        }
+        const galleryModal = document.getElementById("photoGalleryModal");
+        if (event.target === galleryModal) {
+            closePhotoGalleryModal();
+        }
+        const lightboxModal = document.getElementById("photoLightboxModal");
+        if (event.target === lightboxModal) {
+            closeLightboxModal();
+        }
+        const viewModal = document.getElementById("viewMeetingModal");
+        if (event.target === viewModal) {
+            closeViewModal();
+        }
+        const editModal = document.getElementById("editMeetingModal");
+        if (event.target === editModal) {
+            closeEditModal();
+        }
+        const webinarMdl = document.getElementById("webinarQaModal");
+        if (event.target === webinarMdl) {
+            closeWebinarQaModal();
+        }
     });
     </script>
+    <script src="/js/sidebar.js"></script>
 </body>
 
 </html>

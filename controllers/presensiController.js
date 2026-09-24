@@ -6,7 +6,8 @@ import {
     getPresensiByMeeting,
     getMeetingById,
     saveSertifikat,
-    getNextSertifikatNumber
+    getNextSertifikatNumber,
+    getSertifikatByMeeting
 } from "../models/presensiModel.js";
 
 // Helper function: Convert Base64 signature to physical PNG file (Nama file: NIP & ID Rapat)
@@ -27,7 +28,7 @@ function saveSignatureToFile(signatureData, meeting_id, nip) {
         // Format NIP dan ID Rapat fleksibel sesuai rapat yang diikuti
         const cleanNip = nip && String(nip).trim() ? String(nip).trim().replace(/[^a-zA-Z0-9]/g, "") : "tanpanip";
         const cleanMeetingId = meeting_id ? String(meeting_id).trim().replace(/[^a-zA-Z0-9]/g, "") : "0";
-        
+
         // Contoh: ttd_199510102022031005_1.png
         const fileName = `ttd_${cleanNip}_${cleanMeetingId}.png`;
         const fullPath = path.join(uploadDir, fileName);
@@ -47,7 +48,7 @@ function saveSignatureToFile(signatureData, meeting_id, nip) {
 // Helper: konversi bulan (1-12) ke angka Romawi
 // ============================================================
 function toRomanMonth(month) {
-    const romans = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    const romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
     return romans[(month - 1)] || String(month);
 }
 
@@ -73,7 +74,7 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
         }
 
         // ── Siapkan data peserta ──
-        const cleanNip  = nip  && String(nip).trim()  ? String(nip).trim()  : "-";
+        const cleanNip = nip && String(nip).trim() ? String(nip).trim() : "-";
         const cleanNama = nama && String(nama).trim() ? String(nama).trim() : "Peserta";
         const temaWebinar = meetingNama || "Webinar BKN";
 
@@ -89,20 +90,20 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
         }
 
         // ── Nomor sertifikat format: [urutan]/AKSARA.ASN.05/KRV/[bulan_romawi]/[tahun] ──
-        const now         = new Date();
-        const tahun       = now.getFullYear();
+        const now = new Date();
+        const tahun = now.getFullYear();
         const bulanRomawi = toRomanMonth(now.getMonth() + 1);
-        const nomorUrut   = await getNextSertifikatNumber();
+        const nomorUrut = await getNextSertifikatNumber();
         const nomorSertifikat = `${nomorUrut}/AKSARA.ASN.05/KRV/${bulanRomawi}/${tahun}`;
 
         // ── Nama file unik ──
         const timestamp = Date.now();
-        const nipClean  = cleanNip.replace(/[^a-zA-Z0-9]/g, "") || "tanpanip";
-        const fileName  = `sertif_${nipClean}_${timestamp}.html`;
+        const nipClean = cleanNip.replace(/[^a-zA-Z0-9]/g, "") || "tanpanip";
+        const fileName = `sertif_${nipClean}_${timestamp}.html`;
 
         // ── URL publik sertifikat (untuk QR Download) ──
-        const sertifUrl     = `/uploads/sertif/${meeting_id}/${fileName}`;
-        const baseUrl       = process.env.BASE_URL || "http://localhost:3000";
+        const sertifUrl = `/uploads/sertif/${meeting_id}/${fileName}`;
+        const baseUrl = process.env.BASE_URL || "http://localhost:3000";
         const fullSertifUrl = `${baseUrl}${sertifUrl}`;
 
         // ── Generate QR code: Download Link (kiri bawah) ──
@@ -130,14 +131,14 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
 
         // ── Replace semua placeholder ──
         templateHtml = templateHtml
-            .replaceAll("{{NAMA}}",              cleanNama)
-            .replaceAll("{{NIP}}",               cleanNip)
-            .replaceAll("{{NOMOR_SERTIFIKAT}}",  nomorSertifikat)
-            .replaceAll("{{TEMA_WEBINAR}}",      temaWebinar)
-            .replaceAll("{{TANGGAL}}",           tanggalStr)
-            .replaceAll("{{TAHUN}}",             String(tahun))
-            .replaceAll("{{QR_DOWNLOAD_SRC}}",   qrDownloadSrc)
-            .replaceAll("{{QR_TTD_SRC}}",        qrTtdSrc);
+            .replaceAll("{{NAMA}}", cleanNama)
+            .replaceAll("{{NIP}}", cleanNip)
+            .replaceAll("{{NOMOR_SERTIFIKAT}}", nomorSertifikat)
+            .replaceAll("{{TEMA_WEBINAR}}", temaWebinar)
+            .replaceAll("{{TANGGAL}}", tanggalStr)
+            .replaceAll("{{TAHUN}}", String(tahun))
+            .replaceAll("{{QR_DOWNLOAD_SRC}}", qrDownloadSrc)
+            .replaceAll("{{QR_TTD_SRC}}", qrTtdSrc);
 
         // ── Tulis file HTML sertifikat ──
         const filePath = path.join(sertifDir, fileName);
@@ -146,7 +147,7 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
         // ── Simpan ke database ──
         await saveSertifikat({
             nama: cleanNama,
-            nip:  cleanNip,
+            nip: cleanNip,
             meeting_id,
             file_path: sertifUrl
         });
@@ -160,11 +161,21 @@ async function generateSertifikat({ meeting_id, nama, nip, meetingNama, meetingT
     }
 }
 export const formPresensi = async (req, res) => {
-    const { meeting_id } = req.params;
+    const meeting_id = req.params.meeting_id || req.query.meeting_id || "";
     const status = req.query.status;
+
+    let meeting = null;
+    if (meeting_id) {
+        try {
+            meeting = await getMeetingById(meeting_id);
+        } catch (e) {
+            console.warn("Notice: could not load meeting details for presensi:", e.message);
+        }
+    }
 
     res.render("presensi", {
         meeting_id,
+        meeting,
         error: null,
         success: status === "success" ? "Presensi berhasil disimpan!" : null
     });
@@ -183,8 +194,8 @@ export const inputPresensi = async (req, res) => {
             tanda_tangan
         } = req.body;
 
-        const isAjax = req.xhr || 
-            req.headers.accept?.includes("application/json") || 
+        const isAjax = req.xhr ||
+            req.headers.accept?.includes("application/json") ||
             req.headers["content-type"]?.includes("application/json") ||
             req.headers["x-requested-with"] === "XMLHttpRequest";
 
@@ -222,8 +233,8 @@ export const inputPresensi = async (req, res) => {
 
         try {
             const meeting = await getMeetingById(meeting_id);
-            if (meeting && meeting.tipe_meeting &&
-                meeting.tipe_meeting.toLowerCase().trim() === "webinar") {
+            const tipeMeeting = meeting?.tipe_meeting ? String(meeting.tipe_meeting).toLowerCase().trim() : "";
+            if (tipeMeeting === "webinar" || tipeMeeting === "3" || tipeMeeting.includes("webinar")) {
                 isWebinar = true;
                 sertifUrl = await generateSertifikat({
                     meeting_id,
@@ -256,8 +267,8 @@ export const inputPresensi = async (req, res) => {
     } catch (err) {
         console.error("Error input presensi:", err);
 
-        const isAjax = req.xhr || 
-            req.headers.accept?.includes("application/json") || 
+        const isAjax = req.xhr ||
+            req.headers.accept?.includes("application/json") ||
             req.headers["content-type"]?.includes("application/json") ||
             req.headers["x-requested-with"] === "XMLHttpRequest";
 
@@ -278,15 +289,76 @@ export const inputPresensi = async (req, res) => {
 export const daftarPresensi = async (req, res) => {
     try {
         const { meeting_id } = req.params;
-        const dataPresensi = await getPresensiByMeeting(meeting_id);
+        const [dataPresensi, meeting] = await Promise.all([
+            getPresensiByMeeting(meeting_id),
+            getMeetingById(meeting_id)
+        ]);
+
+        let formattedTanggal = "-";
+        if (meeting?.tanggal) {
+            const d = new Date(meeting.tanggal);
+            formattedTanggal = d.toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            });
+        }
+
+        const todayFormatted = new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
 
         res.render("daftarPresensi", {
             meeting_id,
-            dataPresensi
+            dataPresensi: dataPresensi || [],
+            meeting: meeting || {},
+            formattedTanggal,
+            todayFormatted
         });
     } catch (err) {
         console.error("Error daftar presensi:", err);
         res.status(500).send("Gagal mengambil data presensi");
+    }
+};
+
+export const daftarPresensiPdf = async (req, res) => {
+    try {
+        const { meeting_id } = req.params;
+        const [dataPresensi, meeting] = await Promise.all([
+            getPresensiByMeeting(meeting_id),
+            getMeetingById(meeting_id)
+        ]);
+
+        let formattedTanggal = "-";
+        if (meeting?.tanggal) {
+            const d = new Date(meeting.tanggal);
+            formattedTanggal = d.toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            });
+        }
+
+        const todayFormatted = new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
+
+        res.render("daftarPresensiPdf", {
+            meeting_id,
+            dataPresensi: dataPresensi || [],
+            meeting: meeting || {},
+            formattedTanggal,
+            todayFormatted
+        });
+    } catch (err) {
+        console.error("Error export presensi pdf:", err);
+        res.status(500).send("Gagal memuat pratinjau presensi PDF");
     }
 };
 export const showPresensi = async (req, res) => {
@@ -302,5 +374,16 @@ export const showPresensi = async (req, res) => {
         res.status(500).json({
             message: "Gagal mengambil data presensi"
         });
+    }
+};
+
+export const listSertifikatApi = async (req, res) => {
+    try {
+        const { meeting_id } = req.params;
+        const certs = await getSertifikatByMeeting(meeting_id);
+        res.json({ success: true, data: certs });
+    } catch (err) {
+        console.error("Error listing sertifikat:", err);
+        res.status(500).json({ success: false, message: "Gagal memuat sertifikat" });
     }
 };

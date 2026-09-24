@@ -141,7 +141,7 @@ export const getPresensiByMeeting = async (meeting_id) => {
 export const getMeetingById = async (meeting_id) => {
     try {
         const result = await pool.query(
-            `SELECT meeting_id, meeting_nama, tipe_meeting, tanggal
+            `SELECT meeting_id, meeting_nama, deskripsi, tipe_meeting, tanggal, tgl_buat
              FROM meetings
              WHERE meeting_id = $1
              LIMIT 1`,
@@ -187,10 +187,31 @@ export const getNextSertifikatNumber = async () => {
     }
 };
 
+// ============================================================
+// Ambil daftar sertifikat berdasarkan meeting_id
+// ============================================================
+export const getSertifikatByMeeting = async (meeting_id) => {
+    try {
+        await ensureSertifikatTable();
+        const result = await pool.query(
+            `SELECT id, nama, nip, meeting_id, file_path, created_at
+             FROM sertifikat
+             WHERE meeting_id = $1
+             ORDER BY id ASC`,
+            [String(meeting_id)]
+        );
+        return result.rows;
+    } catch (err) {
+        console.warn("⚠️ [DEV MODE] PostgreSQL error in getSertifikatByMeeting:", err.message);
+        return [];
+    }
+};
+
 export default {
     createPresensi,
     getPresensiByMeeting,
     getMeetingById,
     saveSertifikat,
-    getNextSertifikatNumber
+    getNextSertifikatNumber,
+    getSertifikatByMeeting
 };

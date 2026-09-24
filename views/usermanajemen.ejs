@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen User | Meeting App BKN</title>
+    <link rel="stylesheet" href="/dashboard.css">
+    <style>
+        /* =========================================
+           MANAJEMEN USER SPECIFIC STYLES
+           ========================================= */
+        .user-page-container {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            padding-bottom: 40px;
+        }
+
+        /* Alert Notifications */
+        .alert-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.7;
+            padding: 0 6px;
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats & Action Toolbar */
+        .toolbar-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 18px;
+            padding: 20px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            box-shadow: 0 10px 25px rgba(13, 43, 92, 0.05);
+        }
+
+        .stats-summary {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .stat-pill strong {
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .stat-pill.pill-blue {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .stat-pill.pill-purple {
+            background: #faf5ff;
+            border-color: #e9d5ff;
+            color: #7e22ce;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 240px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 36px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+            background: white;
+            color: #1e293b;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .role-filter select {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+            background: white;
+            color: #1e293b;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .role-filter select:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-add-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-add-user:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+        }
+
+        /* User Table Container */
+        .table-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(13, 43, 92, 0.05);
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .user-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-size: 11px;
+            padding: 14px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .user-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            color: #334155;
+        }
+
+        .user-table tr:hover {
+            background: #f8fafc;
+        }
+
+        /* User Info Column */
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0d2b5c 0%, #2563eb 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+            flex-shrink: 0;
+        }
+
+        .user-avatar-badge.admin-avatar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .user-avatar-badge.operator-avatar {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+        }
+
+        .user-avatar-badge.user-avatar {
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+        }
+
+        .user-avatar-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .user-details strong {
+            display: block;
+            color: #0f172a;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .user-details span {
+            display: inline-block;
+            color: #2563eb;
+            font-size: 11px;
+            font-weight: 600;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* Role Badges */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-badge.badge-admin {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .role-badge.badge-operator {
+            background: #f0fdfa;
+            color: #0f766e;
+            border: 1px solid #99f6e4;
+        }
+
+        .role-badge.badge-user {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Actions Column */
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-action-password {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .btn-action-password:hover {
+            background: #fef3c7;
+            color: #92400e;
+            transform: translateY(-1px);
+        }
+
+        .btn-action-edit {
+            background: #f0f9ff;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .btn-action-edit:hover {
+            background: #e0f2fe;
+            color: #0284c7;
+            transform: translateY(-1px);
+        }
+
+        .btn-action-delete {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-action-delete:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .btn-action:disabled,
+        .btn-action.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Empty State */
+        .empty-users {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-users span {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* =========================================
+           POPUP MODALS STYLES
+           ========================================= */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+            padding: 20px;
+        }
+
+        .custom-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-modal-dialog {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.25s ease;
+            overflow: hidden;
+        }
+
+        .custom-modal.show .custom-modal-dialog {
+            transform: scale(1);
+        }
+
+        .modal-header-styled {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 26px;
+            background: linear-gradient(135deg, #0d2b5c 0%, #174f99 100%);
+            color: white;
+        }
+
+        .modal-header-styled h3 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-modal-close {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .btn-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-body-styled {
+            padding: 24px 26px;
+            max-height: calc(85vh - 140px);
+            overflow-y: auto;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-field {
+            margin-bottom: 16px;
+        }
+
+        .form-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .form-field small {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .modal-footer-styled {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 26px 22px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-modal-secondary {
+            padding: 10px 18px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-modal-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-modal-primary {
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-modal-danger {
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-modal-danger:disabled {
+            opacity: 0.45 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+            background: #94a3b8 !important;
+        }
+
+        .user-highlight-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+        }
+
+        .user-highlight-badge .avatar-mini {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            overflow: hidden;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .user-highlight-badge .avatar-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- ANIMASI EMBLEM BKN BACKGROUND -->
+        <div class="bubble bubble-top-right"></div>
+        <div class="bubble bubble-bottom-left"></div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-info">
+                    <div class="brand-logo">
+                        <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                    </div>
+                    <div class="brand-text">
+                        <h2>Meeting App</h2>
+                        <span>BKN Regional V</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-sidebar-toggle" id="btnSidebarToggle" title="Kecilkan Sidebar (Perluas Tampilan Tengah)" onclick="toggleSidebar()">
+                    <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="menu">
+                <a href="/dashboard" class="menu-item" data-tooltip="Dashboard">
+                    <span>🏠</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                <a href="/manajemenuser" class="menu-item active" data-tooltip="Manajemen User">
+                    <span>👥</span>
+                    <span>Manajemen User</span>
+                </a>
+                <% } %>
+
+                <a href="/manajemenmeeting" class="menu-item" data-tooltip="Manajemen Meeting">
+                    <span>📋</span>
+                    <span>Manajemen Meeting</span>
+                </a>
+
+                <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
+                    <span>📹</span>
+                    <span>Request Zoom</span>
+                </a>
+
+                <a href="/infografis" class="menu-item" data-tooltip="App Infografis">
+                    <span>📊</span>
+                    <span>App Infografis</span>
+                </a>
+
+                <a href="/manual-book" class="menu-item" data-tooltip="Manual Book">
+                    <span>📖</span>
+                    <span>Manual Book</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="help-box">
+                    <span class="help-icon">?</span>
+                    <div>
+                        <strong>Butuh bantuan?</strong>
+                        <p>Hubungi administrator sistem.</p>
+                    </div>
+                </div>
+
+                <a href="/" class="logout" onclick="showLogoutModal(event)">
+                    <span>↪</span>
+                    Keluar
+                </a>
+            </div>
+
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- HEADER / TOPBAR -->
+            <header class="topbar">
+                <div>
+                    <p class="breadcrumb">PENGGUNA SISTEM / MANAJEMEN USER</p>
+                    <h1>Manajemen User 👥</h1>
+                    <p class="subtitle">
+                        Kelola data pengguna, hak akses, dan pengaturan kata sandi aplikasi.
+                    </p>
+                </div>
+
+                <div class="profile">
+                    <div class="notification">
+                        🔔
+                        <span></span>
+                    </div>
+
+                    <div class="profile-info">
+                        <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
+                        <small><%= (typeof user !== 'undefined' && user && user.role) ? user.role.toUpperCase() : "ADMINISTRATOR" %></small>
+                    </div>
+
+                    <div class="avatar" title="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
+                        <img src="<%= (typeof user !== 'undefined' && user && user.avatar_path) ? user.avatar_path : '/images/default_avatar.png' %>" alt="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
+                    </div>
+                </div>
+            </header>
+
+            <div class="user-page-container">
+
+                <!-- NOTIFICATIONS (SUCCESS / ERROR) -->
+                <% if (msg) { %>
+                <div class="alert-box alert-success" id="alertBox">
+                    <span>✓ <%= msg %></span>
+                    <button type="button" class="alert-close" onclick="closeAlert()">×</button>
+                </div>
+                <% } %>
+
+                <% if (error) { %>
+                <div class="alert-box alert-error" id="alertBox">
+                    <span>⚠️ <%= error %></span>
+                    <button type="button" class="alert-close" onclick="closeAlert()">×</button>
+                </div>
+                <% } %>
+
+                <!-- TOOLBAR (STATS + SEARCH + TAMBAH USER) -->
+                <div class="toolbar-card">
+                    <div class="stats-summary">
+                        <div class="stat-pill pill-blue">
+                            <span>Total Pengguna:</span>
+                            <strong id="totalUserCount"><%= users ? users.length : 0 %></strong>
+                        </div>
+                        <div class="stat-pill">
+                            <span>Admin Sidigi:</span>
+                            <strong><%= users ? users.filter(u => u.role === 'admin').length : 0 %></strong>
+                        </div>
+                        <div class="stat-pill pill-purple">
+                            <span>Pegawai / Divisi Lain:</span>
+                            <strong><%= users ? users.filter(u => u.role !== 'admin').length : 0 %></strong>
+                        </div>
+                    </div>
+
+                    <div class="toolbar-actions">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="userSearchInput" placeholder="Cari nama, NIP, atau username..." onkeyup="filterUserTable()">
+                        </div>
+
+                        <div class="role-filter">
+                            <select id="roleFilterSelect" onchange="filterUserTable()">
+                                <option value="all">Semua Hak Akses</option>
+                                <option value="admin">Administrator (Tim Sidigi)</option>
+                                <option value="user">Pegawai / User (Divisi Lain)</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn-add-user" onclick="openAddUserModal()">
+                            <span>＋</span> Tambah User Baru
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABLE DAFTAR PENGGUNA -->
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="user-table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">No</th>
+                                    <th>Pengguna / Akun</th>
+                                    <th>NIP & Unit Kerja</th>
+                                    <th>Hak Akses (Role)</th>
+                                    <th style="text-align: right; width: 280px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (users && users.length > 0) { %>
+                                    <% 
+                                        const currentUserId = (typeof user !== 'undefined' && user && user.id) ? String(user.id).toLowerCase() : '';
+                                        const totalAdminCount = users.filter(x => x.role === 'admin').length;
+                                    %>
+                                    <% users.forEach((u, index) => { 
+                                        const isSelf = currentUserId && (String(u.id).toLowerCase() === currentUserId);
+                                        const isTargetAdmin = (u.role === 'admin');
+                                    %>
+                                    <tr class="user-row" data-username="<%= (u.username || '').toLowerCase() %>" data-id="<%= (u.id || '').toLowerCase() %>" data-fullname="<%= (u.full_name || '').toLowerCase() %>" data-nip="<%= (u.nip || '').toLowerCase() %>" data-role="<%= (u.role || '').toLowerCase() %>">
+                                        <td style="text-align: center; color: #94a3b8; font-weight: 600;">
+                                            <%= index + 1 %>
+                                        </td>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-badge <%= u.role === 'admin' ? 'admin-avatar' : (u.role === 'operator' ? 'operator-avatar' : 'user-avatar') %>" style="overflow: hidden; padding: 0;">
+                                                    <img src="<%= u.avatar_path || '/images/default_avatar.png' %>" alt="<%= u.full_name || u.username %>">
+                                                </div>
+                                                <div class="user-details">
+                                                    <strong><%= u.full_name || u.username %></strong>
+                                                    <span>@<%= u.id %></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: #1e293b;"><%= u.nip ? u.nip : '-' %></div>
+                                            <div style="font-size: 11px; color: #64748b;"><%= u.division ? u.division : (u.institution || 'Kantor Regional V BKN') %></div>
+                                        </td>
+                                        <td>
+                                            <% if (u.role === 'admin') { %>
+                                                <span class="role-badge badge-admin">👑 Admin (Tim Sidigi)</span>
+                                            <% } else { %>
+                                                <span class="role-badge badge-user">👤 Pegawai / User</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div class="action-buttons" style="justify-content: flex-end;">
+                                                <button type="button" class="btn-action btn-action-password" onclick="openPasswordModal('<%= u.id %>', '<%= u.full_name || u.username %>', '<%= u.avatar_path || '/images/default_avatar.png' %>')">
+                                                    🔑 Ganti Password
+                                                </button>
+
+                                                <button type="button" class="btn-action btn-action-edit" onclick="openEditUserModal('<%= u.id %>', '<%= u.username || '' %>', '<%= u.full_name || '' %>', '<%= u.nip || '' %>', '<%= u.role === 'admin' ? 'admin' : 'user' %>', '<%= u.division || '' %>', '<%= u.institution || '' %>')">
+                                                    ✏️ Edit
+                                                </button>
+
+                                                <% if (isSelf) { %>
+                                                <button type="button" class="btn-action btn-action-delete disabled" title="Akun Anda sedang aktif digunakan" disabled style="opacity: 0.55; cursor: not-allowed;">
+                                                    🔒 Akun Anda
+                                                </button>
+                                                <% } else if (isTargetAdmin && totalAdminCount <= 1) { %>
+                                                <button type="button" class="btn-action btn-action-delete disabled" title="Satu-satunya Administrator sistem (tidak dapat dihapus)" disabled style="opacity: 0.55; cursor: not-allowed;">
+                                                    🔒 Terkunci
+                                                </button>
+                                                <% } else { %>
+                                                <button type="button" class="btn-action btn-action-delete" 
+                                                        onclick="openDeleteUserModal('<%= u.id %>', '<%= u.full_name || u.username %>', '<%= u.role %>')"
+                                                        title="<%= isTargetAdmin ? 'Hapus Akun Administrator (Perlu Verifikasi)' : 'Hapus Pengguna' %>">
+                                                    🗑️ Hapus
+                                                </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-users">
+                                                <span>👥</span>
+                                                <h3>Belum ada pengguna terdaftar</h3>
+                                                <p>Silakan klik tombol "Tambah User Baru" di atas untuk menambahkan akun.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="footer-bottom-center">
+                Meeting App • Kantor Regional V BKN Jakarta • 2026
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- =======================================================
+         MODAL 1: TAMBAH USER BARU
+         ======================================================= -->
+    <div id="addUserModal" class="custom-modal">
+        <div class="custom-modal-dialog">
+            <div class="modal-header-styled">
+                <h3><span>👤➕</span> Tambah Pengguna Baru</h3>
+                <button type="button" class="btn-modal-close" onclick="closeAddUserModal()">×</button>
+            </div>
+            <form action="/manajemenuser/tambah" method="POST" id="addUserForm" onsubmit="return validateAddUserForm()">
+                <div class="modal-body-styled">
+                    <div class="form-row-2">
+                        <div class="form-field">
+                            <label for="newUserId">Username / ID Login <span style="color:red;">*</span></label>
+                            <input type="text" id="newUserId" name="id" placeholder="contoh: budi.santoso" required autocomplete="off">
+                            <small>Digunakan saat login ke sistem (huruf kecil & tanpa spasi)</small>
+                        </div>
+                        <div class="form-field">
+                            <label for="newUserRole">Hak Akses (Role) <span style="color:red;">*</span></label>
+                            <select id="newUserRole" name="role" required>
+                                <option value="user" selected>Pegawai / User (Divisi Lain)</option>
+                                <option value="admin">Administrator (Tim Kerja Sidigi)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="newUserFullName">Nama Lengkap & Gelar <span style="color:red;">*</span></label>
+                        <input type="text" id="newUserFullName" name="full_name" placeholder="contoh: Budi Santoso, S.Kom." required>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-field">
+                            <label for="newUserNip">NIP (Nomor Induk Pegawai)</label>
+                            <input type="text" id="newUserNip" name="nip" placeholder="199201012019011002">
+                        </div>
+                        <div class="form-field">
+                            <label for="newUserDivision">Unit Kerja / Jabatan</label>
+                            <input type="text" id="newUserDivision" name="division" placeholder="contoh: Pengelola IT">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="newUserInstitution">Instansi</label>
+                        <input type="text" id="newUserInstitution" name="institution" value="Kantor Regional V BKN Jakarta">
+                    </div>
+
+                    <div class="form-row-2" style="margin-top: 10px; padding-top: 12px; border-top: 1px dashed #e2e8f0;">
+                        <div class="form-field">
+                            <label for="newUserPassword">Kata Sandi (Password) <span style="color:red;">*</span></label>
+                            <input type="password" id="newUserPassword" name="password" placeholder="Minimal 4 karakter" required minlength="4">
+                        </div>
+                        <div class="form-field">
+                            <label for="newUserConfirmPassword">Ulangi Kata Sandi <span style="color:red;">*</span></label>
+                            <input type="password" id="newUserConfirmPassword" name="confirmPassword" placeholder="Ketik ulang kata sandi" required minlength="4">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer-styled">
+                    <button type="button" class="btn-modal-secondary" onclick="closeAddUserModal()">Batal</button>
+                    <button type="submit" class="btn-modal-primary">✓ Simpan Pengguna</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         MODAL 2: GANTI PASSWORD
+         ======================================================= -->
+    <div id="changePasswordModal" class="custom-modal">
+        <div class="custom-modal-dialog">
+            <div class="modal-header-styled" style="background: linear-gradient(135deg, #b45309 0%, #d97706 100%);">
+                <h3><span>🔑</span> Ganti Kata Sandi</h3>
+                <button type="button" class="btn-modal-close" onclick="closePasswordModal()">×</button>
+            </div>
+            <form action="/manajemenuser/ganti-password" method="POST" id="changePasswordForm" onsubmit="return validatePasswordForm()">
+                <input type="hidden" id="pwdUserId" name="id">
+                <div class="modal-body-styled">
+                    
+                    <div class="user-highlight-badge">
+                        <div class="avatar-mini" id="pwdAvatar">A</div>
+                        <div>
+                            <strong id="pwdUserName" style="color: #0f172a; display: block; font-size: 13px;">Nama User</strong>
+                            <small id="pwdUserIdDisplay" style="color: #64748b; font-size: 11px;">@userid</small>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="targetNewPassword">Kata Sandi Baru <span style="color:red;">*</span></label>
+                        <input type="password" id="targetNewPassword" name="newPassword" placeholder="Masukkan kata sandi baru" required minlength="4">
+                        <small>Minimal 4 karakter kombinasi huruf dan angka</small>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="targetConfirmPassword">Konfirmasi Kata Sandi Baru <span style="color:red;">*</span></label>
+                        <input type="password" id="targetConfirmPassword" name="confirmPassword" placeholder="Ketik ulang kata sandi baru" required minlength="4">
+                    </div>
+                </div>
+                <div class="modal-footer-styled">
+                    <button type="button" class="btn-modal-secondary" onclick="closePasswordModal()">Batal</button>
+                    <button type="submit" class="btn-modal-primary" style="background: linear-gradient(135deg, #b45309 0%, #d97706 100%);">🔑 Simpan Password Baru</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         MODAL 3: EDIT USER DATA
+         ======================================================= -->
+    <div id="editUserModal" class="custom-modal">
+        <div class="custom-modal-dialog">
+            <div class="modal-header-styled">
+                <h3><span>✏️</span> Edit Data Pengguna</h3>
+                <button type="button" class="btn-modal-close" onclick="closeEditUserModal()">×</button>
+            </div>
+            <form action="/manajemenuser/edit" method="POST">
+                <input type="hidden" id="editUserId" name="id">
+                <div class="modal-body-styled">
+                    
+                    <div class="form-row-2">
+                        <div class="form-field">
+                            <label>User ID / Akun</label>
+                            <input type="text" id="editUserIdDisplay" disabled style="background: #f8fafc; color: #64748b;">
+                        </div>
+                        <div class="form-field">
+                            <label for="editUserRole">Hak Akses (Role)</label>
+                            <select id="editUserRole" name="role" required>
+                                <option value="user">Pegawai / User (Divisi Lain)</option>
+                                <option value="admin">Administrator (Tim Kerja Sidigi)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editUserFullName">Nama Lengkap & Gelar <span style="color:red;">*</span></label>
+                        <input type="text" id="editUserFullName" name="full_name" required>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-field">
+                            <label for="editUserNip">NIP</label>
+                            <input type="text" id="editUserNip" name="nip">
+                        </div>
+                        <div class="form-field">
+                            <label for="editUserDivision">Unit Kerja / Jabatan</label>
+                            <input type="text" id="editUserDivision" name="division">
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="editUserInstitution">Instansi</label>
+                        <input type="text" id="editUserInstitution" name="institution">
+                    </div>
+                </div>
+                <div class="modal-footer-styled">
+                    <button type="button" class="btn-modal-secondary" onclick="closeEditUserModal()">Batal</button>
+                    <button type="submit" class="btn-modal-primary">✓ Perbarui Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         MODAL 4: HAPUS USER
+         ======================================================= -->
+    <div id="deleteUserModal" class="custom-modal">
+        <div class="custom-modal-dialog" style="max-width: 480px;">
+            <div class="modal-header-styled" id="delModalHeader" style="background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);">
+                <h3 id="delModalTitle"><span>⚠️</span> Hapus Pengguna</h3>
+                <button type="button" class="btn-modal-close" onclick="closeDeleteUserModal()">×</button>
+            </div>
+            <form action="/manajemenuser/hapus" method="POST" id="deleteUserForm" onsubmit="return validateDeleteForm()">
+                <input type="hidden" id="delUserId" name="id">
+                <input type="hidden" id="delUserRole" name="role">
+                <div class="modal-body-styled" style="text-align: center; padding: 26px 24px;">
+                    <div id="delIcon" style="font-size: 44px; margin-bottom: 10px;">🗑️</div>
+                    <h4 style="font-size: 16px; color: #0f172a; margin-bottom: 8px;" id="delQuestion">Apakah Anda yakin ingin menghapus akun ini?</h4>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 0;" id="delUserText">Akun pengguna ini akan dihapus secara permanen dari sistem.</p>
+
+                    <!-- KHUSUS PERINGATAN & KONFIRMASI HAPUS ADMIN -->
+                    <div id="delAdminAlertBox" style="display: none; margin-top: 18px; padding: 16px; background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 12px; text-align: left; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.08);">
+                        <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; color: #9f1239; font-size: 13.5px; margin-bottom: 8px;">
+                            <span>🚨</span> PERINGATAN: HAPUS AKUN ADMINISTRATOR
+                        </div>
+                        <p style="font-size: 12.5px; color: #881337; line-height: 1.5; margin-bottom: 12px;">
+                            Akun ini memiliki hak akses penuh <strong>Admin (Tim Sidigi)</strong>. Untuk mencegah kesalahan fatal karena salah klik, Anda wajib mengetik kata <code style="background: #ffe4e6; padding: 2px 7px; border-radius: 4px; color: #be123c; font-family: monospace; font-size: 13px; font-weight: 700; border: 1px solid #fecdd3;">hapus</code> di bawah ini:
+                        </p>
+                        <div>
+                            <input type="text" id="delConfirmInput" name="confirmText" autocomplete="off" placeholder='Ketik kata "hapus" untuk konfirmasi...' 
+                                   oninput="checkDeleteConfirmation()"
+                                   style="width: 100%; padding: 10px 14px; border: 1.5px solid #f43f5e; border-radius: 8px; font-size: 13.5px; font-weight: 600; outline: none; box-sizing: border-box; background: #ffffff; color: #0f172a; transition: all 0.2s;">
+                        </div>
+                        <small id="delConfirmHint" style="display: block; font-size: 11.5px; color: #e11d48; margin-top: 6px; font-weight: 600;">
+                            * Tombol hapus akan aktif setelah Anda mengetik kata "hapus".
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer-styled" style="justify-content: center; gap: 10px;">
+                    <button type="button" class="btn-modal-secondary" onclick="closeDeleteUserModal()">Batal</button>
+                    <button type="submit" id="delSubmitBtn" class="btn-modal-danger">Ya, Hapus Sekarang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI LOGOUT -->
+    <div id="logoutModal" class="logout-modal-overlay">
+        <div class="logout-modal-card">
+            <div class="logout-modal-icon">⚠️</div>
+            <h3>Konfirmasi Keluar</h3>
+            <p>Apakah Anda yakin ingin keluar dari Sistem Informasi Manajemen Ruang Rapat (SIM-RAPAT BKN)?</p>
+            <div class="logout-modal-actions">
+                <button type="button" class="btn-logout-cancel" onclick="closeLogoutModal()">Batal</button>
+                <a href="/logout" class="btn-logout-confirm">Ya, Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         CLIENT-SIDE SCRIPTS
+         ======================================================= -->
+    <script>
+        // Modal Tambah User
+        function openAddUserModal() {
+            document.getElementById("addUserModal").classList.add("show");
+        }
+        function closeAddUserModal() {
+            document.getElementById("addUserModal").classList.remove("show");
+            document.getElementById("addUserForm").reset();
+        }
+        function validateAddUserForm() {
+            const pwd = document.getElementById("newUserPassword").value;
+            const confirm = document.getElementById("newUserConfirmPassword").value;
+            if (pwd !== confirm) {
+                alert("Konfirmasi kata sandi tidak cocok!");
+                return false;
+            }
+            return true;
+        }
+
+        // Modal Ganti Password
+        function openPasswordModal(id, name, avatarPath) {
+            document.getElementById("pwdUserId").value = id;
+            document.getElementById("pwdUserIdDisplay").innerText = "@" + id;
+            document.getElementById("pwdUserName").innerText = name;
+            const pwdAvatar = document.getElementById("pwdAvatar");
+            if (avatarPath) {
+                pwdAvatar.innerHTML = '<img src="' + avatarPath + '" alt="' + name + '">';
+            } else {
+                pwdAvatar.innerText = name.charAt(0).toUpperCase();
+            }
+            document.getElementById("targetNewPassword").value = "";
+            document.getElementById("targetConfirmPassword").value = "";
+            document.getElementById("changePasswordModal").classList.add("show");
+        }
+        function closePasswordModal() {
+            document.getElementById("changePasswordModal").classList.remove("show");
+        }
+        function validatePasswordForm() {
+            const p1 = document.getElementById("targetNewPassword").value;
+            const p2 = document.getElementById("targetConfirmPassword").value;
+            if (p1 !== p2) {
+                alert("Konfirmasi kata sandi baru tidak cocok!");
+                return false;
+            }
+            return true;
+        }
+
+        // Modal Edit User
+        function openEditUserModal(id, username, fullName, nip, role, division, institution) {
+            document.getElementById("editUserId").value = id;
+            document.getElementById("editUserIdDisplay").value = "@" + id;
+            document.getElementById("editUserFullName").value = fullName || username;
+            document.getElementById("editUserNip").value = nip || "";
+            document.getElementById("editUserRole").value = role || "operator";
+            document.getElementById("editUserDivision").value = division || "";
+            document.getElementById("editUserInstitution").value = institution || "Kantor Regional V BKN Jakarta";
+            document.getElementById("editUserModal").classList.add("show");
+        }
+        function closeEditUserModal() {
+            document.getElementById("editUserModal").classList.remove("show");
+        }
+
+        // Modal Hapus User
+        function openDeleteUserModal(id, name, role) {
+            document.getElementById("delUserId").value = id;
+            document.getElementById("delUserRole").value = role || "user";
+
+            const adminAlertBox = document.getElementById("delAdminAlertBox");
+            const confirmInput = document.getElementById("delConfirmInput");
+            const confirmHint = document.getElementById("delConfirmHint");
+            const submitBtn = document.getElementById("delSubmitBtn");
+            const modalTitle = document.getElementById("delModalTitle");
+            const modalHeader = document.getElementById("delModalHeader");
+            const icon = document.getElementById("delIcon");
+            const question = document.getElementById("delQuestion");
+
+            confirmInput.value = "";
+
+            if (role === "admin") {
+                modalHeader.style.background = "linear-gradient(135deg, #881337 0%, #be123c 100%)";
+                modalTitle.innerHTML = "<span>🚨</span> Konfirmasi Hapus Administrator";
+                icon.innerText = "⚠️";
+                question.innerHTML = 'Hapus Akun Administrator: <span style="color: #be123c;">' + name + '</span>?';
+                document.getElementById("delUserText").innerHTML = 'Akun <strong>' + name + ' (@' + id + ')</strong> berstatus <strong>👑 ADMIN (Tim Sidigi)</strong>.';
+                adminAlertBox.style.display = "block";
+
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = "0.45";
+                submitBtn.style.cursor = "not-allowed";
+                submitBtn.innerText = "Ketik 'hapus' untuk Hapus";
+
+                confirmHint.style.color = "#e11d48";
+                confirmHint.innerText = '* Ketik kata "hapus" untuk membuka tombol konfirmasi.';
+                setTimeout(() => confirmInput.focus(), 150);
+            } else {
+                modalHeader.style.background = "linear-gradient(135deg, #991b1b 0%, #dc2626 100%)";
+                modalTitle.innerHTML = "<span>⚠️</span> Hapus Pengguna";
+                icon.innerText = "🗑️";
+                question.innerText = "Apakah Anda yakin ingin menghapus akun ini?";
+                document.getElementById("delUserText").innerHTML = "Akun <strong>" + name + " (@" + id + ")</strong> akan dihapus permanen dari sistem.";
+                adminAlertBox.style.display = "none";
+
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+                submitBtn.style.cursor = "pointer";
+                submitBtn.innerText = "Ya, Hapus Sekarang";
+            }
+
+            document.getElementById("deleteUserModal").classList.add("show");
+        }
+
+        function checkDeleteConfirmation() {
+            const role = document.getElementById("delUserRole").value;
+            if (role !== "admin") return;
+
+            const val = document.getElementById("delConfirmInput").value.trim().toLowerCase();
+            const submitBtn = document.getElementById("delSubmitBtn");
+            const confirmHint = document.getElementById("delConfirmHint");
+
+            if (val === "hapus") {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = "1";
+                submitBtn.style.cursor = "pointer";
+                submitBtn.style.background = "#be123c";
+                submitBtn.innerText = "Ya, Hapus Akun Admin Ini";
+                confirmHint.style.color = "#16a34a";
+                confirmHint.innerText = '✓ Kata konfirmasi cocok. Klik tombol untuk menghapus.';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = "0.45";
+                submitBtn.style.cursor = "not-allowed";
+                submitBtn.style.background = "";
+                submitBtn.innerText = "Ketik 'hapus' untuk Hapus";
+                confirmHint.style.color = "#e11d48";
+                confirmHint.innerText = '* Kata konfirmasi belum cocok (ketik: hapus).';
+            }
+        }
+
+        function validateDeleteForm() {
+            const role = document.getElementById("delUserRole").value;
+            if (role === "admin") {
+                const val = document.getElementById("delConfirmInput").value.trim().toLowerCase();
+                if (val !== "hapus") {
+                    alert('Silakan ketik kata "hapus" terlebih dahulu untuk menghapus akun Administrator!');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function closeDeleteUserModal() {
+            document.getElementById("deleteUserModal").classList.remove("show");
+            document.getElementById("delConfirmInput").value = "";
+        }
+
+        // Search & Filter
+        function filterUserTable() {
+            const query = document.getElementById("userSearchInput").value.toLowerCase().trim();
+            const roleFilter = document.getElementById("roleFilterSelect").value.toLowerCase();
+            const rows = document.querySelectorAll("#usersTable tbody tr.user-row");
+
+            let visibleCount = 0;
+            rows.forEach(row => {
+                const username = row.getAttribute("data-username") || "";
+                const id = row.getAttribute("data-id") || "";
+                const fullName = row.getAttribute("data-fullname") || "";
+                const nip = row.getAttribute("data-nip") || "";
+                const role = row.getAttribute("data-role") || "";
+
+                const matchesQuery = query === "" || 
+                    username.includes(query) || 
+                    id.includes(query) || 
+                    fullName.includes(query) || 
+                    nip.includes(query);
+
+                const matchesRole = roleFilter === "all" || role === roleFilter;
+
+                if (matchesQuery && matchesRole) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // Alert auto-close
+        function closeAlert() {
+            const box = document.getElementById("alertBox");
+            if (box) box.style.display = "none";
+        }
+
+        // Logout Modal
+        function showLogoutModal(event) {
+            if (event) event.preventDefault();
+            document.getElementById("logoutModal").classList.add("show");
+        }
+
+        function closeLogoutModal() {
+            document.getElementById("logoutModal").classList.remove("show");
+        }
+
+        // Close modal on click outside
+        window.addEventListener("click", function (event) {
+            const modals = [
+                document.getElementById("addUserModal"),
+                document.getElementById("changePasswordModal"),
+                document.getElementById("editUserModal"),
+                document.getElementById("deleteUserModal"),
+                document.getElementById("logoutModal")
+            ];
+            modals.forEach(m => {
+                if (m && event.target === m) {
+                    m.classList.remove("show");
+                }
+            });
+        });
+    </script>
+    <script src="/js/sidebar.js"></script>
+</body>
+
+</html>

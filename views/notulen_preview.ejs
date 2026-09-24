@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/notulen.css">
+  <style>
+    body {
+      background: #E2E8F0;
+      margin: 0;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .preview-actions {
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .preview-actions {
+        display: none !important;
+      }
+      .notula-paper {
+        box-shadow: none !important;
+        padding: 15mm 20mm !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-actions">
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/notulen?id=<%= doc.id %>" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <span>Kembali ke Editor</span>
+      </a>
+      <a href="/history?tab=notulen" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+        <span>📂 Riwayat Notulen</span>
+      </a>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/notulen/export-docx/<%= doc.id %>" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <span>📥 Unduh Word (.docx)</span>
+      </a>
+      <button type="button" onclick="window.print()" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.4rem;">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        <span>Cetak / Simpan PDF A4</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="notula-paper">
+    <!-- Kop Surat Resmi -->
+    <div class="notula-kop">
+      <img src="/images/garuda_pancasila.png" alt="Lambang Garuda Pancasila" class="notula-garuda">
+      <div class="notula-kop-title">
+        <%= (typeof user !== 'undefined' && user.institution_kop) ? user.institution_kop : 'BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V' %>
+      </div>
+      <div class="notula-kop-address">
+        <%= (typeof user !== 'undefined' && user.kop_address) ? user.kop_address : 'Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730' %><br>
+        <%= (typeof user !== 'undefined' && user.kop_contact) ? user.kop_contact : 'Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id' %>
+      </div>
+      <div class="notula-kop-divider"></div>
+    </div>
+
+    <!-- Judul Notula & Pelaksanaan -->
+    <div class="notula-title-block">
+      <div class="notula-main-title">NOTULA</div>
+      <div class="notula-sub-title">
+        (<%= doc.title %>)
+      </div>
+      <div class="notula-meta-line">
+        <%= doc.formattedDate %>, Waktu: <%= doc.meetingTime %>
+      </div>
+      <div class="notula-meta-line">
+        Tempat: <%= doc.meetingPlace %>
+      </div>
+    </div>
+
+    <!-- 1. Agenda Kegiatan -->
+    <div class="notula-box-header">
+      AGENDA KEGIATAN
+    </div>
+    <ul class="notula-list">
+      <% (doc.agenda || []).forEach(function(item) { %>
+        <li><%= item %></li>
+      <% }); %>
+    </ul>
+
+    <!-- 2. Peserta / Unsur yang Hadir -->
+    <div class="notula-section-heading">
+      PESERTA / UNSUR YANG HADIR
+    </div>
+    <ul class="notula-list">
+      <% (doc.attendees || []).forEach(function(item) { %>
+        <li><%= item %></li>
+      <% }); %>
+    </ul>
+
+    <!-- 3. Uraian Kegiatan -->
+    <div class="notula-section-heading" style="margin-top: 2rem;">
+      URAIAN KEGIATAN
+    </div>
+    <div>
+      <% (doc.activities || []).forEach(function(act) { %>
+        <div style="margin-bottom: 1.25rem;">
+          <div class="notula-subsection-title"><%= act.sectionTitle %></div>
+          <ul class="notula-list">
+            <% (act.points || []).forEach(function(pt) { %>
+              <li><%= pt %></li>
+            <% }); %>
+          </ul>
+        </div>
+      <% }); %>
+    </div>
+
+    <!-- 4. Pokok Tindak Lanjut -->
+    <div class="notula-section-heading" style="margin-top: 2rem;">
+      POKOK TINDAK LANJUT
+    </div>
+    <ul class="notula-list">
+      <% (doc.actionItems || []).forEach(function(item) { %>
+        <li><%= item %></li>
+      <% }); %>
+    </ul>
+
+    <!-- 5. Kesimpulan -->
+    <div class="notula-section-heading" style="margin-top: 2rem;">
+      KESIMPULAN
+    </div>
+    <ul class="notula-list">
+      <% (doc.conclusions || []).forEach(function(item) { %>
+        <li><%= item %></li>
+      <% }); %>
+    </ul>
+
+    <!-- 6. Penutup -->
+    <div class="notula-section-heading" style="margin-top: 2rem;">
+      PENUTUP
+    </div>
+    <p style="text-align: justify; margin-bottom: 2rem; line-height: 1.5; font-size: 10.5pt;">
+      <%= doc.closingText %>
+    </p>
+
+    <!-- BUKTI GIAT / DOKUMENTASI KEGIATAN (LANGSUNG DIBAWAH PENUTUP & DIATAS TANDA TANGAN) -->
+    <% if (doc.documentationPhotos && doc.documentationPhotos.length > 0) { %>
+      <div style="margin-top: 2rem; margin-bottom: 2rem; page-break-inside: avoid;">
+        <div class="notula-section-heading" style="margin-bottom: 1rem;">
+          DOKUMENTASI / BUKTI KEGIATAN
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+          <% doc.documentationPhotos.forEach(function(photo) { %>
+            <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
+              <img src="<%= photo.url %>" alt="<%= photo.caption || 'Dokumentasi Giat' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
+              <% if (photo.caption) { %>
+                <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;"><%= photo.caption %></div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- 7. Tanda Tangan Notulis (Rata Kanan) -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; page-break-inside: avoid;">
+      <div class="notula-signature-block">
+        <div class="notula-sig-date"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= doc.formattedDate.includes(',') ? doc.formattedDate.split(',')[1].trim() : doc.formattedDate %></div>
+        <div class="notula-sig-role">Notulis,</div>
+        <div class="notula-sig-name"><%= doc.notulisName %></div>
+        <div class="notula-sig-division"><%= doc.notulisRole %></div>
+      </div>
+    </div>
+
+    <!-- Running Footer Cetak -->
+    <div class="notula-running-footer">
+      <span>Notula <%= doc.title %></span>
+      <span><%= (typeof user !== 'undefined' && user.running_footer) ? user.running_footer : 'Dokumen Resmi Kanreg V BKN' %></span>
+    </div>
+
+  </div>
+
+</body>
+</html>

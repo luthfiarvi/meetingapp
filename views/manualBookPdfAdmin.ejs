@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOP Pedoman Lengkap Administrator (Admin Walkthrough SOP) - Meeting App BKN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #e2e8f0;
+            color: #1e293b;
+            line-height: 1.55;
+            font-size: 13px;
+        }
+
+        /* Topbar Aksi (Layar Saja) */
+        .pdf-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            border-bottom: 2px solid #ef4444;
+        }
+
+        .pdf-toolbar-btn {
+            background: #dc2626;
+            color: #ffffff;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .pdf-toolbar-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .pdf-toolbar-btn.secondary {
+            background: #334155;
+        }
+
+        .pdf-toolbar-btn.secondary:hover {
+            background: #475569;
+        }
+
+        /* Lembar Dokumen A4 */
+        .doc-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 16mm 20mm;
+            margin: 20px auto;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            page-break-after: always;
+        }
+
+        /* Kop Surat Resmi BKN */
+        .kop-surat {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            border-bottom: 2.5px solid #0f172a;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .kop-logo {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+        }
+
+        .kop-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .kop-text h2 {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+
+        .kop-text h3 {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #991b1b;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .kop-text p {
+            font-size: 9.5px;
+            color: #64748b;
+        }
+
+        /* Cover Halaman */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 248mm;
+            text-align: center;
+            border: 2px solid #fecaca;
+            border-radius: 16px;
+            padding: 32px;
+            background: radial-gradient(circle at center, #ffffff 60%, #fef2f2 100%);
+        }
+
+        .cover-badge {
+            background: #fee2e2;
+            color: #dc2626;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 5px 14px;
+            border-radius: 9999px;
+            margin-bottom: 18px;
+            border: 1px solid #fecaca;
+        }
+
+        .cover-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #7f1d1d;
+            line-height: 1.3;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .cover-subtitle {
+            font-size: 13px;
+            color: #475569;
+            max-width: 530px;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .cover-divider {
+            width: 80px;
+            height: 4px;
+            background: #dc2626;
+            border-radius: 2px;
+            margin-bottom: 22px;
+        }
+
+        .cover-meta-box {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px 22px;
+            font-size: 11.5px;
+            text-align: left;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .cover-meta-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed #f1f5f9;
+        }
+
+        .cover-meta-row:last-child {
+            border-bottom: none;
+        }
+
+        /* Bab Dokumen */
+        .chapter-header {
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1.5px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chapter-badge {
+            background: #dc2626;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .chapter-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #7f1d1d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Scenario Box: Menjelaskan apa yang dihadapi admin */
+        .scenario-box {
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            border-radius: 0 8px 8px 0;
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #991b1b;
+            margin-bottom: 10px;
+        }
+
+        .scenario-box strong {
+            display: block;
+            font-size: 11.5px;
+            color: #7f1d1d;
+            margin-bottom: 2px;
+        }
+
+        /* Mockup Screenshot Browser Frame */
+        .ss-browser-frame {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+        }
+
+        .ss-browser-bar {
+            background: #f1f5f9;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #cbd5e1;
+            font-size: 9px;
+        }
+
+        .ss-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .ss-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .ss-dot.r { background: #ef4444; }
+        .ss-dot.y { background: #f59e0b; }
+        .ss-dot.g { background: #10b981; }
+
+        .ss-address-bar {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #475569;
+            font-size: 8.5px;
+        }
+
+        .ss-viewport {
+            background: #f8fafc;
+            padding: 10px;
+            position: relative;
+        }
+
+        /* Penanda Pointer / Step Callout */
+        .callout-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #dc2626;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 9.5px;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+            flex-shrink: 0;
+        }
+
+        .step-list {
+            margin: 8px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 7px 11px;
+        }
+
+        .step-item-content strong {
+            display: block;
+            color: #0f172a;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .step-item-content p {
+            color: #475569;
+            font-size: 11px;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .info-box {
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 7px 11px;
+            border-radius: 0 7px 7px 0;
+            font-size: 10.5px;
+            color: #991b1b;
+            margin: 8px 0;
+        }
+
+        .workflow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            padding: 6px 10px;
+            margin-bottom: 10px;
+        }
+
+        .wf-node {
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #475569;
+            background: white;
+            padding: 3px 6px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .wf-node.active {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .wf-arrow {
+            color: #94a3b8;
+            font-size: 10px;
+        }
+
+        .doc-footer {
+            position: absolute;
+            bottom: 10mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 4px;
+        }
+
+        /* CETAK (PRINT MEDIA) */
+        @media print {
+            body {
+                background: #ffffff;
+                color: #000000;
+            }
+
+            .pdf-toolbar {
+                display: none !important;
+            }
+
+            .doc-sheet {
+                margin: 0;
+                padding: 12mm 15mm;
+                box-shadow: none;
+                width: 100%;
+                min-height: 100vh;
+            }
+
+            .ss-browser-frame {
+                box-shadow: none !important;
+                border: 1px solid #94a3b8 !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR ATAS (HANYA DITAMPILKAN DI BROWSER) -->
+    <div class="pdf-toolbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <img src="/logo-bkn-asli.png" alt="Logo" style="height: 32px;">
+            <div>
+                <strong style="font-size: 0.95rem;">Standar Operasional Prosedur (SOP) Administrator Lengkap</strong>
+                <span style="display: block; font-size: 0.75rem; color: #fecaca;">Panduan Alur Langkah Nyata Pengelolaan Sistem Setiap Sudut oleh Tim Sidigi</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="/manual-book" class="pdf-toolbar-btn secondary">
+                ⬅️ Kembali ke Web
+            </a>
+            <button type="button" class="pdf-toolbar-btn" onclick="window.print()">
+                🖨️ Cetak / Simpan PDF (A4)
+            </button>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 1: COVER RESMI PEDOMAN ADMINISTRATOR
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>Jl. Ciracas No. 36, Jakarta Timur • Telp: (021) 87721074 • Website: jakarta.bkn.go.id</p>
+            </div>
+        </div>
+
+        <div class="cover-page">
+            <span class="cover-badge">STANDAR OPERASIONAL PROSEDUR (SOP) RESMI</span>
+            <h1 class="cover-title">PANDUAN LANGKAH OPERASIONAL ADMINISTRATOR<br>(ADMIN WALKTHROUGH SOP)</h1>
+            <div class="cover-divider"></div>
+            <p class="cover-subtitle">
+                Panduan menyeluruh pelaksanaan tugas Administrator Tim Kerja Sidigi BKN: Menelusuri seluruh siklus kerja mulai dari <strong>Login & Monitoring Dashboard</strong>, <strong>Pengelolaan Akun & Reset Kata Sandi User</strong>, <strong>Validasi & Penerbitan Lisensi Zoom/Webinar</strong>, <strong>Penjadwalan Rapat & Upload Risalah Notulen/Video/Foto</strong>, <strong>Rekapitulasi Presensi Digital & Ekspor Berita Acara Resmi (PDF Ber-Kop)</strong>, hingga <strong>Moderasi Slido Live & Notulen AI (.docx)</strong>.
+            </p>
+
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" style="width: 90px; height: 90px; margin-bottom: 22px;">
+
+            <div class="cover-meta-box">
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Nama Sistem</span>
+                    <strong>Meeting App Kanreg V BKN</strong>
+                </div>
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Peruntukan Pengguna</span>
+                    <strong style="color: #dc2626;">Administrator / Tim Kerja Sidigi BKN</strong>
+                </div>
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Klasifikasi Dokumen</span>
+                    <strong>SOP Kedinasan & Panduan Praktik Operasional</strong>
+                </div>
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Cakupan Alur</span>
+                    <strong>Login ➔ User ➔ Approval Zoom ➔ Meeting ➔ Berita Acara ➔ Slido ➔ AI</strong>
+                </div>
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Versi Sistem</span>
+                    <strong>Versi 2.0 (Terbaru - 2026)</strong>
+                </div>
+                <div class="cover-meta-row">
+                    <span style="color: #64748b;">Unit Kerja Penerbit</span>
+                    <strong>Subbagian Kepegawaian & Tim Kerja Sidigi BKN</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 1</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 2: LANGKAH 1 - LOGIN ADMIN & TINJAUAN EKSEKUTIF DASHBOARD
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 1: Akses Login & Dashboard Eksekutif</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>🔐</span> LANGKAH 1: Login Admin & Tinjau Metrik Dashboard
+            </div>
+            <span class="chapter-badge">Langkah Awal</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Anda mengawali jam kerja kedinasan dengan membuka sistem untuk memeriksa antrean permohonan lisensi daring yang diajukan divisi dan memantau ketersediaan ruang rapat kantor.
+        </div>
+
+        <!-- DIAGRAM ALUR ADMIN -->
+        <div class="workflow-diagram">
+            <div class="wf-node active">1. Login & Dashboard</div>
+            <span class="wf-arrow">➔</span>
+            <div class="wf-node">2. Manajemen User</div>
+            <span class="wf-arrow">➔</span>
+            <div class="wf-node">3. Approval Zoom</div>
+            <span class="wf-arrow">➔</span>
+            <div class="wf-node">4. Kelola Meeting</div>
+            <span class="wf-arrow">➔</span>
+            <div class="wf-node">5. Berita Acara</div>
+            <span class="wf-arrow">➔</span>
+            <div class="wf-node">6. Slido & AI</div>
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 1: LOGIN & DASHBOARD EKSEKUTIF ADMIN -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/dashboard (Hak Akses: Administrator)</div>
+            </div>
+            <div class="ss-viewport" style="display: grid; grid-template-columns: 140px 1fr; gap: 12px;">
+                <!-- Sidebar Khusus Admin -->
+                <div style="background: #0f172a; border-radius: 6px; padding: 10px; color: white; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 6px; top: 6px;">1</span>
+                    <div style="font-size: 8.5px; font-weight: 800; color: #f87171; margin-bottom: 6px;">MENU ADMIN:</div>
+                    <div style="font-size: 8px; display: flex; flex-direction: column; gap: 3px;">
+                        <span style="background: #1e293b; padding: 3px 5px; border-radius: 3px;">🏠 Dashboard</span>
+                        <span style="background: #dc2626; padding: 3px 5px; border-radius: 3px; font-weight: 700;">👥 Manajemen User</span>
+                        <span style="background: #1e293b; padding: 3px 5px; border-radius: 3px;">📋 Manajemen Meeting</span>
+                        <span style="background: #1e293b; padding: 3px 5px; border-radius: 3px;">📹 Request Zoom</span>
+                        <span style="background: #1e293b; padding: 3px 5px; border-radius: 3px;">📊 App Infografis</span>
+                        <span style="background: #1e293b; padding: 3px 5px; border-radius: 3px;">📖 Manual Book</span>
+                    </div>
+                </div>
+
+                <!-- Konten Utama Dashboard -->
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
+                    <div style="font-size: 10.5px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Periksa 3 Kartu Metrik Prioritas:</div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 6px;">
+                        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 5px; text-align: center;">
+                            <div style="font-size: 13px; font-weight: 800; color: #1d4ed8;">12</div>
+                            <div style="font-size: 7px; color: #475569;">Total Agenda</div>
+                        </div>
+                        <div style="background: #fef2f2; border: 1.5px solid #ef4444; border-radius: 4px; padding: 5px; text-align: center;">
+                            <div style="font-size: 13px; font-weight: 800; color: #dc2626;">3</div>
+                            <div style="font-size: 7px; color: #dc2626; font-weight: 700;">Antrean Menunggu!</div>
+                        </div>
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 5px; text-align: center;">
+                            <div style="font-size: 13px; font-weight: 800; color: #15803d;">8</div>
+                            <div style="font-size: 7px; color: #475569;">Lisensi Terbit</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 7.5px; color: #64748b;">
+                        Jika kotak merah <em>"Antrean Menunggu"</em> menunjukkan angka > 0, segera buka menu <strong>Request Zoom</strong> untuk memberikan persetujuan.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Masuk Menggunakan NIP/Username Administrator</strong>
+                    <p>Buka form login dan ketikkan akun admin Anda. Menu khusus admin seperti <strong>"👥 Manajemen User"</strong> dan tab kelola permohonan otomatis aktif di bilah navigasi kiri.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Pantau Metrik Antrean Lisensi & Agenda Hari Ini</strong>
+                    <p>Soroti kartu merah <strong>"Antrean Zoom Menunggu"</strong>. Angka ini menunjukkan jumlah pegawai unit kerja yang membutuhkan lisensi Zoom resmi dan sedang menunggu persetujuan Anda agar jadwal tidak terlambat.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 2</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 3: LANGKAH 2 - PENGELOLAAN AKUN PEGAWAI (MANAJEMEN USER)
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 2: Manajemen Akun Pegawai & Hak Akses</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>👥</span> LANGKAH 2: Mengelola Akun Pegawai & Hak Akses
+            </div>
+            <span class="chapter-badge">Menu Manajemen User</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Ada pegawai baru yang mutasi masuk dan butuh dibuatkan akun, atau ada rekan pegawai yang akunnya terkunci/lupa kata sandi dan meminta bantuan Anda untuk reset.
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 2: TABEL MANAJEMEN USER & MODAL TAMBAH USER -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/manajemenuser</div>
+            </div>
+            <div class="ss-viewport" style="display: flex; gap: 12px;">
+                <!-- Tabel Pegawai & Tombol Reset -->
+                <div style="flex: 1.35; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #0f172a; margin-bottom: 5px;">Daftar Akun Pegawai BKN</div>
+                    
+                    <div style="border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; font-size: 8px;">
+                        <div style="background: #f1f5f9; padding: 3px 5px; font-weight: 700; display: flex; justify-content: space-between;">
+                            <span>NIP & NAMA</span>
+                            <span>ROLE & AKSI</span>
+                        </div>
+                        <div style="padding: 4px 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9;">
+                            <div><strong>Syahroni, S.Pd</strong><br><span style="color:#64748b;">198705122010121002</span></div>
+                            <div style="display: flex; gap: 3px; align-items: center;">
+                                <span style="background: #eff6ff; color: #1d4ed8; font-weight: 700; padding: 1px 4px; border-radius: 3px;">USER</span>
+                                <span style="background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; font-weight: 700; padding: 1px 4px; border-radius: 3px; cursor: pointer;">🔑 Reset</span>
+                            </div>
+                        </div>
+                        <div style="padding: 4px 5px; display: flex; justify-content: space-between; align-items: center;">
+                            <div><strong>Luthfi Arviandi</strong><br><span style="color:#64748b;">admin</span></div>
+                            <span style="background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 1px 4px; border-radius: 3px;">ADMIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Tambah Pegawai Baru -->
+                <div style="flex: 1; background: white; border: 1.5px solid #dc2626; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #991b1b; margin-bottom: 4px;">+ Tambah Pegawai Baru</div>
+                    <div style="margin-bottom: 3px;">
+                        <span style="font-size: 7px; font-weight: 700;">NAMA LENGKAP:</span>
+                        <div style="border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 7.5px;">Budi Santoso, S.Kom</div>
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <span style="font-size: 7px; font-weight: 700;">NIP / USERNAME:</span>
+                        <div style="border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 7.5px;">199003152015021001</div>
+                    </div>
+                    <div style="margin-bottom: 4px;">
+                        <span style="font-size: 7px; font-weight: 700;">HAK AKSES ROLE:</span>
+                        <div style="border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 7.5px; color: #1e3a8a; font-weight: 700;">User (Pegawai Biasa)</div>
+                    </div>
+                    <div style="background: #dc2626; color: white; padding: 3px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">
+                        Simpan Akun Pegawai
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Reset Kata Sandi Pegawai yang Lupa</strong>
+                    <p>Buka menu <strong>"Manajemen User"</strong>. Cari NIP pegawai pada tabel. Klik tombol <strong>"🔑 Reset"</strong>. Kata sandi akun seketika dikembalikan ke default instansi (<code>bkn12345</code>) sehingga pegawai dapat kembali login tanpa hambatan.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Daftarkan Pegawai Baru & Tetapkan Role</strong>
+                    <p>Klik tombol <strong>"Tambah Pegawai Baru"</strong>. Masukkan NIP 18 digit, Nama Lengkap, Divisi, dan tetapkan role-nya (Role *Admin* khusus Tim Sidigi, sedangkan *User* untuk pegawai operasional biasa).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 3</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 4: LANGKAH 3 - VERIFIKASI & APPROVAL ZOOM / WEBINAR
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 3: Verifikasi & Penerbitan Lisensi Zoom</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>🛡️</span> LANGKAH 3: Memvalidasi & Menyetujui Zoom / Webinar
+            </div>
+            <span class="chapter-badge">Menu Request Zoom (Tab Admin)</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Unit kerja Mutasi mengajukan rapat Zoom tipe Webinar. Anda harus memeriksa jam pelaksanaan agar tidak bentrok, lalu menerbitkan tautan Zoom berlisensi resmi beserta ruang kuis Slido BKN.
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 3: TAB KELOLA & MODAL APPROVAL -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/request-zoom (Tab: Kelola Permohonan Masuk)</div>
+            </div>
+            <div class="ss-viewport" style="display: flex; gap: 12px;">
+                <!-- Antrean Masuk -->
+                <div style="flex: 1.2; background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Antrean Permohonan Masuk Unit Kerja:</div>
+                    
+                    <div style="border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px; margin-bottom: 5px; font-size: 8.5px; background: #fffbeb;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Rapat Koordinasi Mutasi</strong>
+                            <span style="color: #b45309; font-weight: 700;">⏳ Menunggu</span>
+                        </div>
+                        <div style="color: #64748b; font-size: 7.5px;">Tipe: Webinar • Pemohon: Syahroni • 30 Sep 2026</div>
+                        <div style="margin-top: 4px; display: flex; gap: 4px;">
+                            <span style="background: #2563eb; color: white; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: 700;">Setujui Permohonan</span>
+                            <span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 3px; font-size: 8px;">Tolak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Approval Sidigi -->
+                <div style="flex: 1; background: white; border: 2px solid #2563eb; border-radius: 8px; padding: 10px; position: relative; box-shadow: 0 4px 14px rgba(37,99,235,0.15);">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #1e3a8a; margin-bottom: 4px;">🛡️ Form Input Lisensi Zoom & Slido</div>
+                    
+                    <div style="margin-bottom: 3px;">
+                        <span style="font-size: 7.5px; font-weight: 700; color: #334155;">URL ZOOM BERLISENSI:</span>
+                        <div style="border: 1px solid #2563eb; border-radius: 3px; padding: 2px 4px; font-size: 7.5px; font-family: monospace;">https://bkn.zoom.us/j/84291823910</div>
+                    </div>
+
+                    <div style="display: flex; gap: 4px; margin-bottom: 3px;">
+                        <div style="flex:1;">
+                            <span style="font-size: 7.5px; font-weight: 700;">MEETING ID:</span>
+                            <div style="border: 1px solid #cbd5e1; padding: 2px; font-size: 7.5px;">842 9182 3910</div>
+                        </div>
+                        <div style="flex:1;">
+                            <span style="font-size: 7.5px; font-weight: 700;">PASSCODE:</span>
+                            <div style="border: 1px solid #cbd5e1; padding: 2px; font-size: 7.5px;">BKN52026</div>
+                        </div>
+                    </div>
+
+                    <div style="background: #eff6ff; border: 1px dashed #60a5fa; border-radius: 3px; padding: 3px 5px; font-size: 7px; color: #1d4ed8; margin-bottom: 4px;">
+                        🎯 <strong>Slido BKN Terbit Otomatis:</strong> Karena tipe rapat adalah Webinar, tautan kuis Slido langsung di-generate otomatis.
+                    </div>
+
+                    <div style="background: #2563eb; color: white; padding: 4px; border-radius: 3px; font-size: 8px; font-weight: 700; text-align: center;">
+                        ✓ Terbitkan Tautan & Sinkronkan
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Buka Tab "Kelola Permohonan Masuk"</strong>
+                    <p>Buka menu <strong>"Request Zoom"</strong>, lalu klik tab khusus admin <em>"Kelola Permohonan Masuk"</em>. Periksa tanggal, jam mulai-selesai, dan judul kegiatan agar tidak bentrok dengan jadwal pimpinan.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Setujui & Masukkan Kredensial Zoom Berlisensi</strong>
+                    <p>Klik tombol <strong>"Setujui Permohonan"</strong>. Ketikkan URL Zoom resmi BKN, Meeting ID, dan Passcode. Jika permohonan bertipe Webinar, sistem secara otomatis menerbitkan ruang kuis <strong>Slido BKN</strong>.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">3</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Terbitkan Tautan & Pantau Sinkronisasi</strong>
+                    <p>Klik tombol <strong>"Terbitkan Tautan & Sinkronkan"</strong>. Status pemohon langsung berubah menjadi <strong>✓ Disetujui</strong> dan rapat otomatis terdaftar di agenda <em>Manajemen Meeting</em>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 4</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 5: LANGKAH 4 - PENJADWALAN KANTOR & ARSIP BERKAS
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 4: Manajemen Meeting & Arsip Berkas</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>📋</span> LANGKAH 4: Penjadwalan Rapat & Upload Dokumentasi
+            </div>
+            <span class="chapter-badge">Menu Manajemen Meeting</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Anda perlu menjadwalkan rapat tatap muka ruangan kantor atau mengarsipkan berkas rapat dinas yang telah selesai (upload file Notulen PDF, video YouTube/MP4, dan galeri foto kegiatan).
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 4: MANAJEMEN MEETING ADMIN & UPLOAD BERKAS -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/manajemenmeeting (Aksi Pengelolaan Berkas)</div>
+            </div>
+            <div class="ss-viewport" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px;">
+                <!-- Kiri: Tambah Jadwal Kantor -->
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #0f172a; margin-bottom: 5px;">+ Buat Jadwal Rapat Kantor Baru</div>
+                    
+                    <div style="margin-bottom: 3px;">
+                        <span style="font-size: 7.5px; font-weight: 700;">NAMA AGENDA:</span>
+                        <div style="border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 8px;">Sosialisasi Kenaikan Pangkat</div>
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <span style="font-size: 7.5px; font-weight: 700;">RUANGAN / TEMPAT:</span>
+                        <div style="border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 8px;">Aula Garuda Lt. 2 / Hybrid</div>
+                    </div>
+                    <div style="background: #10b981; color: white; padding: 4px; border-radius: 3px; font-size: 8px; font-weight: 700; text-align: center; margin-top: 5px;">
+                        Simpan Agenda Rapat
+                    </div>
+                </div>
+
+                <!-- Kanan: Modal Upload Berkas Dokumentasi -->
+                <div style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #1e3a8a; margin-bottom: 5px;">Upload Berkas Dokumentasi Resmi:</div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 3px; margin-bottom: 5px;">
+                        <div style="border: 1px dashed #3b82f6; background: #eff6ff; padding: 3px 5px; border-radius: 3px; font-size: 7.5px;">
+                            <strong>📄 Upload Risalah Notulen (PDF)</strong>
+                            <div style="color: #64748b;">Pilih file PDF resmi bertandatangan</div>
+                        </div>
+                        <div style="border: 1px dashed #10b981; background: #f0fdf4; padding: 3px 5px; border-radius: 3px; font-size: 7.5px;">
+                            <strong>🎬 Upload Video Rapat (MP4 / Link)</strong>
+                            <div style="color: #64748b;">Masukkan file video rekaman kegiatan</div>
+                        </div>
+                        <div style="border: 1px dashed #f59e0b; background: #fffbeb; padding: 3px 5px; border-radius: 3px; font-size: 7.5px;">
+                            <strong>📸 Upload Foto-Foto Dokumentasi</strong>
+                            <div style="color: #64748b;">Unggah galeri foto suasana rapat</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Tambah Agenda Rapat Kantor Fisik / Hybrid</strong>
+                    <p>Buka menu <strong>"Manajemen Meeting"</strong>, klik tombol <strong>"+ Tambah Rapat"</strong> untuk membuat agenda yang dilaksanakan langsung di aula kantor atau secara hybrid.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Upload Berkas Risalah, Video, & Foto Dokumentasi</strong>
+                    <p>Setelah rapat selesai, klik tombol <strong>"View"</strong> pada kartu rapat. Unggah berkas risalah notulen resmi (PDF), rekaman video, serta galeri foto agar dapat diunduh oleh seluruh pegawai yang berhak.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">3</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Atur E-Sertifikat Peserta</strong>
+                    <p>Klik tombol <strong>"Sertifikat"</strong> untuk mengelola penomoran dan latar belakang e-sertifikat bagi kegiatan sosialisasi atau bimbingan teknis.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 5</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 6: LANGKAH 5 - MONITORING PRESENSI & CETAK BERITA ACARA
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 5: Rekap Presensi & Berita Acara Resmi</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>📑</span> LANGKAH 5: Rekap Kehadiran & Cetak Berita Acara
+            </div>
+            <span class="chapter-badge">Laporan Resmi Ber-Kop</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Rapat dinas telah selesai. Anda harus memverifikasi daftar kehadiran peserta dan mencetak dokumen Berita Acara Rapat resmi ber-Kop BKN lengkap dengan tanda tangan digital seluruh peserta untuk kebutuhan audit.
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 5: DAFTAR PRESENSI & CETAK BERITA ACARA PDF -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/daftar-presensi/5 (Rekap Kehadiran Realtime)</div>
+            </div>
+            <div class="ss-viewport" style="background: white; border-radius: 8px; padding: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 6px;">
+                    <div>
+                        <strong style="font-size: 10px; color: #0d2b5c;">Rekap: Sosialisasi Kenaikan Pangkat</strong>
+                        <div style="font-size: 7.5px; color: #64748b;">Hadir: 42 Peserta • Waktu: 29 September 2026</div>
+                    </div>
+                    <div style="display: flex; gap: 4px; position: relative;">
+                        <span class="callout-badge" style="position: absolute; right: -8px; top: -8px;">1</span>
+                        <span style="background: #10b981; color: white; padding: 3px 6px; border-radius: 3px; font-size: 7.5px; font-weight: 700;">📊 Ekspor Excel</span>
+                        <span style="background: #dc2626; color: white; padding: 3px 6px; border-radius: 3px; font-size: 7.5px; font-weight: 700;">🖨️ Cetak Berita Acara PDF</span>
+                    </div>
+                </div>
+
+                <div style="border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; font-size: 8px;">
+                    <div style="background: #f8fafc; padding: 4px 6px; font-weight: 700; display: grid; grid-template-columns: 25px 1.5fr 1fr 1fr; border-bottom: 1px solid #e2e8f0;">
+                        <span>NO</span>
+                        <span>NAMA & NIP</span>
+                        <span>INSTANSI</span>
+                        <span>TANDA TANGAN</span>
+                    </div>
+                    <div style="padding: 4px 6px; display: grid; grid-template-columns: 25px 1.5fr 1fr 1fr; align-items: center; border-bottom: 1px solid #f8fafc;">
+                        <span>1</span>
+                        <div><strong>Dr. Hendra Gunawan</strong><br><span style="color:#64748b; font-size:7px;">19820412...</span></div>
+                        <span>BKPSDM Kota Tangerang</span>
+                        <span style="color: #2563eb; font-family: cursive; font-size: 12px;">Hendra</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Buka Rekap Kehadiran di Menu Manajemen Meeting</strong>
+                    <p>Cari kartu rapat yang telah selesai, klik tombol <strong>"Lihat Presensi"</strong>. Anda dapat melihat daftar hadir real-time beserta timestamp kehadiran masing-masing peserta.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Terbitkan Dokumen Berita Acara Resmi (PDF Ber-Kop)</strong>
+                    <p>Klik tombol merah <strong>"🖨️ Cetak Berita Acara PDF"</strong>. Sistem otomatis membentuk dokumen resmi BKN ber-Kop Surat lengkap dengan nomor agenda, ringkasan, dan goresan tanda tangan digital seluruh peserta siap cetak/arsip audit.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">3</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Ekspor ke Excel (Jika Perlu)</strong>
+                    <p>Klik tombol <strong>"📊 Ekspor Excel"</strong> jika Anda perlu mengolah data rekap kehadiran ke aplikasi spreadsheet lainnya.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 6</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 7: LANGKAH 6 - MODERASI FORUM SLIDO BKN HOST
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 6: Moderasi Slido Host & Kuis Live</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>💬</span> LANGKAH 6: Memoderasi Slido BKN Saat Webinar
+            </div>
+            <span class="chapter-badge">Host & Operator Webinar</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Webinar dinas sedang berlangsung secara live. Anda bertindak sebagai operator/moderator interaksi audiens: menyaring pertanyaan dan meluncurkan kuis interaktif.
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 6: MODERASI HOST SLIDO -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/webinar-quiz/zoom-5/host (Panel Kontrol Moderator)</div>
+            </div>
+            <div class="ss-viewport" style="background: white; border: 1.5px solid #7c3aed; border-radius: 8px; padding: 10px; position: relative;">
+                <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
+                <div style="font-size: 10.5px; font-weight: 800; color: #6d28d9; margin-bottom: 6px;">Panel Host: Pertanyaan Masuk dari Peserta (18 Pertanyaan)</div>
+                
+                <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 5px; padding: 6px; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 8px; color: #6d28d9; font-weight: 700;">
+                        <span>Dari: Ahmad (BKPSDM) • ▲ 14 Upvote</span>
+                        <span style="color: #059669;">Topik Populer</span>
+                    </div>
+                    <p style="font-size: 8.5px; color: #1e293b; margin: 3px 0 5px;">"Bagaimana regulasi berkas mutasi pegawai antar-daerah di periode 2026?"</p>
+                    <div style="display: flex; gap: 4px;">
+                        <span style="background: #10b981; color: white; padding: 2px 6px; border-radius: 3px; font-size: 7.5px; font-weight: 700;">✓ Tampilkan di Layar Proyektor</span>
+                        <span style="background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 3px; font-size: 7.5px;">✕ Sembunyikan</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Buka Panel Kontrol Host Slido BKN</strong>
+                    <p>Buka tautan moderasi Slido untuk webinar yang sedang berlangsung. Anda akan melihat seluruh pertanyaan yang dikirimkan audiens secara berurutan berdasarkan jumlah dukungan (Upvote).</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Sorot Pertanyaan Terbaik ke Layar Proyektor</strong>
+                    <p>Klik tombol hijau <strong>"✓ Tampilkan di Layar"</strong> agar pertanyaan yang relevan langsung muncul di layar Zoom / layar proyektor panggung narasumber.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">3</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Luncurkan Kuis Live Interaktif</strong>
+                    <p>Jika narasumber mengadakan sesi kuis, buka tab <em>"Kuis Audiens"</em> lalu klik <strong>"Mulai Kuis"</strong>. Seluruh audiens di smartphone masing-masing dapat langsung menjawab serentak.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 7</span>
+        </div>
+    </div>
+
+    <!-- ==============================================================
+         HALAMAN 8: LANGKAH 7 - PORTAL INFOGRAFIS & NOTULEN AI + LOGOUT
+         ============================================================== -->
+    <div class="doc-sheet">
+        <div class="kop-surat">
+            <img src="/logo-bkn-asli.png" alt="Logo BKN" class="kop-logo">
+            <div class="kop-text">
+                <h2>BADAN KEPEGAWAIAN NEGARA</h2>
+                <h3>KANTOR REGIONAL V JAKARTA</h3>
+                <p>SOP Administrator • Langkah 7: Portal Infografis, AI Word & Logout</p>
+            </div>
+        </div>
+
+        <div class="chapter-header">
+            <div class="chapter-title">
+                <span>📊</span> LANGKAH 7: Notulen AI Word, Infografis & Logout
+            </div>
+            <span class="chapter-badge">Tahap Akhir Operasional</span>
+        </div>
+
+        <div class="scenario-box">
+            <strong>🎯 Skenario Anda sebagai Administrator:</strong>
+            Membantu unit kerja merapikan draf risalah rapat kedinasan dengan Notulen AI langsung ke format Word (.docx), membuat poster grafis kinerja, lalu menutup sesi kerja dengan aman.
+        </div>
+
+        <!-- SCREENSHOT MOCKUP 7: PORTAL INFOGRAFIS & NOTULEN AI WORD -->
+        <div class="ss-browser-frame">
+            <div class="ss-browser-bar">
+                <div class="ss-dots">
+                    <span class="ss-dot r"></span>
+                    <span class="ss-dot y"></span>
+                    <span class="ss-dot g"></span>
+                </div>
+                <div class="ss-address-bar">https://meeting.bkn.go.id/infografis (Modul Notulen AI & Infografis)</div>
+            </div>
+            <div class="ss-viewport" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <!-- Kiri: Modul AI Notulen -->
+                <div style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #1e3a8a; margin-bottom: 4px;">📝 Generator Risalah AI (.docx)</div>
+                    <p style="font-size: 7.5px; color: #64748b; margin-bottom: 6px;">Otomatisasi transkripsi poin rapat menjadi format resmi kedinasan</p>
+                    
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; font-size: 7.5px; margin-bottom: 5px;">
+                        <strong style="color:#0f172a;">Fitur Unggulan AI:</strong>
+                        <div style="color: #475569;">• Ekspor langsung file Word (.docx) ber-Kop BKN</div>
+                        <div style="color: #475569;">• Struktur format resmi siap tanda tangan pimpinan</div>
+                    </div>
+
+                    <div style="background: #2563eb; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
+                        Buka Generator Notulen Word AI
+                    </div>
+                </div>
+
+                <!-- Kanan: Modul Infografis Kinerja -->
+                <div style="background: white; border: 1.5px solid #059669; border-radius: 8px; padding: 10px; position: relative;">
+                    <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
+                    <div style="font-size: 10px; font-weight: 800; color: #065f46; margin-bottom: 4px;">📊 Infografis Kinerja Instansi</div>
+                    <p style="font-size: 7.5px; color: #64748b; margin-bottom: 6px;">Visualisasi grafis capaian kerja untuk presentasi & publikasi</p>
+                    
+                    <div style="background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: 4px; padding: 4px; font-size: 7.5px; margin-bottom: 5px;">
+                        <strong style="color:#065f46;">Fitur Infografis:</strong>
+                        <div style="color: #065f46;">• Template layout grafis otomatis instansi</div>
+                        <div style="color: #065f46;">• Upload evidence bukti capaian kinerja</div>
+                    </div>
+
+                    <div style="background: #059669; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
+                        Buka Pembuat Infografis Visual
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="step-list">
+            <div class="step-item">
+                <span class="callout-badge">1</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Membantu Unit Kerja Bikin Notulen AI Word</strong>
+                    <p>Buka menu <strong>"App Infografis"</strong>. Masukkan transkrip atau ringkasan hasil rapat ke modul Notulen AI. AI akan menyusun dokumen risalah sesuai tata naskah dinas dan dapat langsung diunduh dalam file <strong>Microsoft Word (.docx)</strong> ber-Kop resmi BKN.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">2</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Menyusun Poster Infografis Kinerja</strong>
+                    <p>Buka modul Infografis Kinerja untuk mengubah angka capaian rapat kerja menjadi poster grafis visual yang estetik untuk dipresentasikan ke pimpinan kantor.</p>
+                </div>
+            </div>
+            <div class="step-item">
+                <span class="callout-badge">3</span>
+                <div class="step-item-content">
+                    <strong>Tindakan Anda: Selesai & Keluar dari Akun Admin (Logout Aman)</strong>
+                    <p>Setelah seluruh tugas pengelolaan, persetujuan, dan pengarsipan selesai, klik tombol <strong>"Keluar"</strong> di bagian bawah sidebar lalu klik <em>OK</em> untuk mengamankan data akun administrator.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-footer">
+            <span>SOP Administrator • Kantor Regional V BKN Jakarta</span>
+            <span>Halaman 8 (Selesai)</span>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Meeting App • Infografis BKN' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/dashboard.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/infographic.css">
+  <style>
+    .dashboard .main-content {
+      margin-left: 245px;
+      width: calc(100% - 245px);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 30px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 1;
+    }
+    body.sidebar-collapsed .dashboard .main-content {
+      margin-left: 76px;
+      width: calc(100% - 76px);
+    }
+    @media (max-width: 900px) {
+      .dashboard .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800">
+
+  <div class="dashboard">
+
+    <!-- ANIMASI EMBLEM BKN BACKGROUND (1 KANAN ATAS & 1 KIRI BAWAH) -->
+    <div class="bubble bubble-top-right"></div>
+    <div class="bubble bubble-bottom-left"></div>
+
+    <!-- SIDEBAR BKN (SERAGAM DENGAN SEMUA HALAMAN) -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-info">
+                <div class="brand-logo">
+                    <img src="/logo-bkn-asli.png" alt="Logo BKN">
+                </div>
+                <div class="brand-text">
+                    <h2>Meeting App</h2>
+                    <span>BKN Regional V</span>
+                </div>
+            </div>
+            <button type="button" class="btn-sidebar-toggle" id="btnSidebarToggle" title="Kecilkan Sidebar (Perluas Tampilan Tengah)" onclick="toggleSidebar()">
+                <svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+        </div>
+
+        <nav class="menu">
+            <a href="/dashboard" class="menu-item" data-tooltip="Dashboard">
+                <span>🏠</span>
+                <span>Dashboard</span>
+            </a>
+
+            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+            <a href="/manajemenuser" class="menu-item" data-tooltip="Manajemen User">
+                <span>👥</span>
+                <span>Manajemen User</span>
+            </a>
+            <% } %>
+
+            <a href="/manajemenmeeting" class="menu-item" data-tooltip="Manajemen Meeting">
+                <span>📋</span>
+                <span>Manajemen Meeting</span>
+            </a>
+
+            <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
+                <span>📹</span>
+                <span>Request Zoom</span>
+            </a>
+
+            <a href="/infografis" class="menu-item active" data-tooltip="App Infografis">
+                <span>📊</span>
+                <span>App Infografis</span>
+            </a>
+
+            <a href="/manual-book" class="menu-item" data-tooltip="Manual Book">
+                <span>📖</span>
+                <span>Manual Book</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="help-box">
+                <span class="help-icon">?</span>
+                <div>
+                    <strong>Butuh bantuan?</strong>
+                    <p>Hubungi administrator sistem.</p>
+                </div>
+            </div>
+
+            <a href="/" class="logout" onclick="showLogoutModal(event)">
+                <span>↪</span>
+                Keluar
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <% if (typeof user !== 'undefined' && user) { %>
+        <!-- INFOGRAFIS SUB-HEADER / TOPBAR -->
+        <header class="infografis-sub-header" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(12px); border: 1px solid rgba(203, 213, 225, 0.85); border-radius: 1rem; padding: 0.75rem 1.25rem; margin-bottom: 1.75rem; box-shadow: 0 4px 16px rgba(16, 47, 99, 0.05); gap: 1rem; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            <a href="/portal" class="nav-link <%= typeof title !== 'undefined' && (title.includes('Portal') || title.includes('Layanan')) ? 'active' : '' %>" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.95rem; border-radius: 0.625rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+              <svg style="width: 1.05rem; height: 1.05rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <span>Menu Utama</span>
+            </a>
+            <a href="/generator" class="nav-link <%= typeof title !== 'undefined' && title.includes('Generator') ? 'active' : '' %>" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.95rem; border-radius: 0.625rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+              <svg style="width: 1.05rem; height: 1.05rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+              <span>Infografis</span>
+            </a>
+            <a href="/notulen" class="nav-link <%= typeof title !== 'undefined' && title.includes('Notulen') ? 'active' : '' %>" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.95rem; border-radius: 0.625rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+              <svg style="width: 1.05rem; height: 1.05rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <span>Notulen</span>
+            </a>
+            <a href="/history" class="nav-link <%= typeof title !== 'undefined' && (title.includes('Riwayat') || title.includes('Arsip')) ? 'active' : '' %>" style="display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.95rem; border-radius: 0.625rem; font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: all 0.2s;">
+              <svg style="width: 1.05rem; height: 1.05rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>Riwayat Arsip</span>
+            </a>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <a href="/profile" class="user-profile-pill <%= typeof title !== 'undefined' && title.includes('Profil') ? 'active' : '' %>" title="Kelola Kelengkapan Data Dokumen" style="text-decoration: none; display: flex; align-items: center; gap: 0.75rem; background: #f8fafc; padding: 0.4rem 0.95rem; border-radius: 9999px; border: 1px solid #cbd5e1; transition: all 0.2s;">
+              <div class="user-avatar-badge" style="width: 34px; height: 34px; border-radius: 50%; overflow: hidden; padding: 0; border: 2px solid #2563eb;">
+                <img src="<%= (typeof user !== 'undefined' && user && user.avatar_path) ? user.avatar_path : '/images/default_avatar.png' %>" alt="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Pegawai BKN' %>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              </div>
+              <div class="user-info-text" style="line-height: 1.25;">
+                <div class="user-name" style="font-size: 0.85rem; font-weight: 700; color: #1e293b;"><%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Pegawai BKN' %></div>
+                <div class="user-nip" style="font-size: 0.725rem; color: #64748b;"><%= (typeof user !== 'undefined' && user && user.division) ? user.division : 'Pegawai BKN' %></div>
+              </div>
+            </a>
+          </div>
+        </header>
+      <% } %>

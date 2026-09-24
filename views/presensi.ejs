@@ -36,8 +36,8 @@
 
         <!-- WELCOME / DESCRIPTION BOX -->
         <div class="welcome-box">
-            <h2>Form Presensi Meeting</h2>
-            <p>Silakan isi data kehadiran Anda dengan lengkap dan tepat.</p>
+            <h2><%= (typeof meeting !== 'undefined' && meeting && meeting.meeting_nama) ? meeting.meeting_nama : 'Form Presensi Kehadiran' %></h2>
+            <p><%= (typeof meeting !== 'undefined' && meeting && meeting.deskripsi) ? meeting.deskripsi : 'Silakan isi data kehadiran Anda dengan lengkap dan tepat.' %></p>
         </div>
 
         <% if (error) { %>

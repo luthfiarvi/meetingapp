@@ -1,11 +1,12 @@
 import express from "express";
-
-import { formMeeting,showMeeting,inputMeeting } from "../controllers/meetingController.js";
+import { ensureAuthenticated } from "../middleware/authMiddleware.js";
+import { formMeeting, showMeeting, inputMeeting, updateMeetingController } from "../controllers/meetingController.js";
 
 const routerMeeting = express.Router();
 
-routerMeeting.get("/manajemenmeeting",showMeeting);
-routerMeeting.get("/inputrapat",formMeeting);
-routerMeeting.post("/inputmeeting",inputMeeting);
+routerMeeting.get("/manajemenmeeting", ensureAuthenticated, showMeeting);
+routerMeeting.get("/inputrapat", ensureAuthenticated, formMeeting);
+routerMeeting.post("/inputmeeting", ensureAuthenticated, inputMeeting);
+routerMeeting.post("/updatemeeting", ensureAuthenticated, updateMeetingController);
 
 export default routerMeeting;

@@ -1,0 +1,236 @@
+<%- include('layouts/header', { title: 'Arsip Dokumen - BKN' }) %>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.65rem; font-weight: 800; color: #0A2540;">Arsip & Riwayat Dokumen BKN</h1>
+      <p style="font-size: 0.9rem; color: #64748B;">Kelola riwayat Infografis Kinerja dan Notulen Rapat Kedinasan akun <%= user.full_name %>.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <a href="/generator" class="btn btn-secondary" style="font-size: 0.85rem;">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <span>+ Infografis Baru</span>
+      </a>
+      <a href="/notulen" class="btn btn-primary" style="font-size: 0.85rem;">
+        <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span>+ Notulen Baru</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- TAB SWITCHER -->
+  <div style="display: flex; border-bottom: 2px solid #E2E8F0; margin-bottom: 2rem; gap: 1rem;">
+    <button type="button" id="tabBtnInfografis" onclick="switchTab('infografis')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; font-size: 0.95rem; font-weight: 700; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid #0A2540; color: #0A2540; margin-bottom: -2px; transition: all 0.2s;">
+      <svg style="width: 1.15rem; height: 1.15rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+      <span>Infografis Kinerja</span>
+      <span style="background: #E2E8F0; color: #334155; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 9999px;"><%= infographics ? infographics.length : 0 %></span>
+    </button>
+    <button type="button" id="tabBtnNotulen" onclick="switchTab('notulen')" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; font-size: 0.95rem; font-weight: 600; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; color: #64748B; margin-bottom: -2px; transition: all 0.2s;">
+      <svg style="width: 1.15rem; height: 1.15rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      <span>Notulen Rapat Kedinasan</span>
+      <span style="background: #E2E8F0; color: #334155; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 9999px;"><%= notulen ? notulen.length : 0 %></span>
+    </button>
+  </div>
+
+  <!-- TAB PANE: INFOGRAFIS -->
+  <div id="tabPaneInfografis">
+    <% if (!infographics || infographics.length === 0) { %>
+      <div style="background: white; border-radius: 0.75rem; border: 1px dashed #CBD5E1; padding: 3.5rem 1.5rem; text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+          <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #0A2540;">Belum Ada Riwayat Infografis</h3>
+        <p style="font-size: 0.875rem; color: #64748B; max-width: 24rem; margin: 0.5rem auto 1.5rem;">Mulai buat laporan kinerja harian pertama Anda dengan form generator otomatis.</p>
+        <a href="/generator" class="btn btn-primary">Buat Infografis Sekarang</a>
+      </div>
+    <% } else { %>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
+        <% infographics.forEach(info => { %>
+          <div style="background: white; border-radius: 0.75rem; border: 1px solid #E2E8F0; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; transition: box-shadow 0.2s;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                <span style="font-size: 0.725rem; font-weight: 700; color: #D97706; background: #FEF3C7; padding: 0.2rem 0.55rem; border-radius: 9999px;">
+                  <% 
+                    let dStr = info.report_date;
+                    if (info.report_date instanceof Date) {
+                      dStr = info.report_date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+                    }
+                  %>
+                  <%= dStr %>
+                </span>
+                <span style="font-size: 0.725rem; color: #94A3B8; font-family: monospace;">
+                  #INFO-<%= info.id %>
+                </span>
+              </div>
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: #0A2540; line-height: 1.35; margin-bottom: 0.35rem;">
+                <%= info.report_title %>
+              </h3>
+              <p style="font-size: 0.8rem; color: #64748B; margin-bottom: 1.25rem;">
+                <%= info.report_subtitle || 'Kantor Regional V BKN Jakarta' %>
+              </p>
+            </div>
+
+            <div style="border-top: 1px solid #F1F5F9; padding-top: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+              <a href="/preview/<%= info.id %>" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex: 1;">
+                🖨️ Cetak / PDF
+              </a>
+              <button onclick="deleteInfographic(<%= info.id %>)" class="btn btn-secondary btn-sm" style="color: #DC2626; padding: 0.35rem 0.6rem;" title="Hapus Dokumen">
+                <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- TAB PANE: NOTULEN -->
+  <div id="tabPaneNotulen" style="display: none;">
+    <% if (!notulen || notulen.length === 0) { %>
+      <div style="background: white; border-radius: 0.75rem; border: 1px dashed #CBD5E1; padding: 3.5rem 1.5rem; text-align: center;">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: #EFF6FF; color: #1D4ED8; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+          <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #0A2540;">Belum Ada Riwayat Notulen Rapat</h3>
+        <p style="font-size: 0.875rem; color: #64748B; max-width: 24rem; margin: 0.5rem auto 1.5rem;">Buat notulen kedinasan standar BKN berformat resmi dengan AI assistant & ekspor Word.</p>
+        <a href="/notulen" class="btn btn-primary">Buat Notulen Baru</a>
+      </div>
+    <% } else { %>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem;">
+        <% notulen.forEach(n => { %>
+          <div style="background: white; border-radius: 0.75rem; border: 1px solid #E2E8F0; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; transition: box-shadow 0.2s;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                <span style="font-size: 0.725rem; font-weight: 700; color: #1D4ED8; background: #DBEAFE; padding: 0.2rem 0.55rem; border-radius: 9999px;">
+                  <% 
+                    let nDate = n.meeting_date;
+                    if (n.meeting_date instanceof Date) {
+                      nDate = n.meeting_date.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    }
+                  %>
+                  <%= nDate || 'Tanggal Rapat' %>
+                </span>
+                <span style="font-size: 0.725rem; color: #94A3B8; font-family: monospace;">
+                  #NOT-<%= n.id %>
+                </span>
+              </div>
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: #0A2540; line-height: 1.35; margin-bottom: 0.5rem;">
+                <%= n.title %>
+              </h3>
+              <div style="font-size: 0.775rem; color: #64748B; margin-bottom: 1.25rem; line-height: 1.5;">
+                <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.2rem;">
+                  <span>📍</span>
+                  <span><%= n.meeting_place || 'Di Tempat' %></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.35rem;">
+                  <span>⏰</span>
+                  <span><%= n.meeting_time || '09.00 – 11.30 WIB' %></span>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid #F1F5F9; padding-top: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a href="/notulen/preview/<%= n.id %>" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex: 1;">
+                  🖨️ Cetak / PDF
+                </a>
+                <a href="/notulen/export-docx/<%= n.id %>" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex: 1; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+                  📥 Unduh Word
+                </a>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                <a href="/notulen?id=<%= n.id %>" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; flex: 1;">
+                  📝 Edit Notulen
+                </a>
+                <button onclick="deleteNotulen(<%= n.id %>)" class="btn btn-secondary btn-sm" style="color: #DC2626; padding: 0.35rem 0.6rem;" title="Hapus Notulen">
+                  <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  function switchTab(tab) {
+    const btnInfo = document.getElementById('tabBtnInfografis');
+    const btnNotu = document.getElementById('tabBtnNotulen');
+    const paneInfo = document.getElementById('tabPaneInfografis');
+    const paneNotu = document.getElementById('tabPaneNotulen');
+
+    if (tab === 'notulen') {
+      paneInfo.style.display = 'none';
+      paneNotu.style.display = 'block';
+
+      btnNotu.style.color = '#0A2540';
+      btnNotu.style.borderBottomColor = '#0A2540';
+      btnNotu.style.fontWeight = '700';
+
+      btnInfo.style.color = '#64748B';
+      btnInfo.style.borderBottomColor = 'transparent';
+      btnInfo.style.fontWeight = '600';
+
+      const url = new URL(window.location);
+      url.searchParams.set('tab', 'notulen');
+      window.history.replaceState({}, '', url);
+    } else {
+      paneNotu.style.display = 'none';
+      paneInfo.style.display = 'block';
+
+      btnInfo.style.color = '#0A2540';
+      btnInfo.style.borderBottomColor = '#0A2540';
+      btnInfo.style.fontWeight = '700';
+
+      btnNotu.style.color = '#64748B';
+      btnNotu.style.borderBottomColor = 'transparent';
+      btnNotu.style.fontWeight = '600';
+
+      const url = new URL(window.location);
+      url.searchParams.delete('tab');
+      window.history.replaceState({}, '', url);
+    }
+  }
+
+  // Auto switch tab if ?tab=notulen in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tab') === 'notulen') {
+    switchTab('notulen');
+  }
+
+  async function deleteInfographic(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus infografis ini?')) return;
+    try {
+      const res = await fetch('/api/infographics/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Gagal menghapus: ' + data.message);
+      }
+    } catch (e) {
+      alert('Terjadi kesalahan jaringan.');
+    }
+  }
+
+  async function deleteNotulen(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus notulen ini?')) return;
+    try {
+      const res = await fetch('/api/notulen/' + id, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', 'notulen');
+        window.location.href = url.toString();
+      } else {
+        alert('Gagal menghapus notulen: ' + data.message);
+      }
+    } catch (e) {
+      alert('Terjadi kesalahan jaringan.');
+    }
+  }
+</script>
+
+<%- include('layouts/footer') %>

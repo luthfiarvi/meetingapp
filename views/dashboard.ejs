@@ -108,16 +108,21 @@
                     <span></span>
                 </div>
 
-                <div class="profile-info">
-                    <strong>Administrator</strong>
-                    <small>Pengguna Sistem</small>
-                </div>
+                <div class="profile">
+                    <div class="notification">
+                        🔔
+                        <span></span>
+                    </div>
 
-                <div class="avatar">
-                    A
-                </div>
+                    <div class="profile-info">
+                        <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
+                        <small><%= (typeof user !== 'undefined' && user && user.role) ? user.role.toUpperCase() : "PENGGUNA SISTEM" %></small>
+                    </div>
 
-            </div>
+                    <div class="avatar" title="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
+                        <img src="<%= (typeof user !== 'undefined' && user && user.avatar_path) ? user.avatar_path : '/images/default_avatar.png' %>" alt="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
+                    </div>
+                </div>
 
         </header>
 
