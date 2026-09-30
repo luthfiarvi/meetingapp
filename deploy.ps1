@@ -7,7 +7,7 @@
 $SERVER   = "84.247.160.55"
 $USER     = "magangit"
 $DEST     = "/home/magangit/meetingapp"
-$LOCAL    = "c:\Users\ThinkPad\OneDrive\Dokumen\BKN\meetingapp"
+$LOCAL    = if ($PSScriptRoot) { $PSScriptRoot } else { "c:\Users\ThinkPad\OneDrive\Dokumen\BKN\meetingapp" }
 
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host "  DEPLOY MEETINGAPP KE SERVER" -ForegroundColor Cyan
