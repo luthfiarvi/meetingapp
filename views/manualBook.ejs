@@ -561,26 +561,73 @@
 
         .video-stage {
             position: relative;
-            background: linear-gradient(135deg, #090e1a 0%, #0d1b33 100%);
-            min-height: 380px;
+            background: #0b1329;
+            min-height: 440px;
+            height: 440px;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            align-items: stretch;
+            justify-content: stretch;
             overflow: hidden;
         }
 
-        .video-cover-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.2) 0%, rgba(9, 14, 26, 0.94) 80%);
+        /* Real UI Simulation Styles */
+        .sim-ui-canvas {
+            flex: 1;
+            background: #f1f5f9;
+            overflow-y: auto;
+            position: relative;
+            padding: 0.85rem;
             display: flex;
             flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .sim-mock-header {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.5rem 0.85rem;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            text-align: center;
-            z-index: 5;
-            transition: opacity 0.3s;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .sim-mock-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+            position: relative;
+        }
+
+        .sim-focus-box {
+            outline: 2.5px solid #2563eb !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.25), 0 6px 16px rgba(37, 99, 235, 0.3) !important;
+            animation: simPulseGlow 1.8s infinite alternate !important;
+        }
+
+        @keyframes simPulseGlow {
+            0% { outline-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+            100% { outline-color: #3b82f6; box-shadow: 0 0 0 7px rgba(59, 130, 246, 0.45); }
+        }
+
+        .sim-animated-cursor {
+            position: absolute;
+            z-index: 50;
+            font-size: 1.5rem;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+            transform: translate(-30%, -30%);
+            animation: simCursorFloat 1.6s ease-in-out infinite;
+        }
+
+        @keyframes simCursorFloat {
+            0%, 100% { transform: translate(-30%, -30%); }
+            50% { transform: translate(-30%, -42%); }
         }
 
         .play-btn-circle {
@@ -811,6 +858,26 @@
 
             <div class="manual-container">
 
+                <% if (typeof msg !== 'undefined' && msg) { %>
+                <div style="background: #ecfdf5; border-left: 4.5px solid #10b981; color: #065f46; padding: 0.9rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <span style="font-size: 1.2rem;">✅</span>
+                        <strong><%= msg %></strong>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#065f46;font-weight:bold;">&times;</button>
+                </div>
+                <% } %>
+
+                <% if (typeof error !== 'undefined' && error) { %>
+                <div style="background: #fef2f2; border-left: 4.5px solid #ef4444; color: #991b1b; padding: 0.9rem 1.25rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <span style="font-size: 1.2rem;">⚠️</span>
+                        <strong><%= error %></strong>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#991b1b;font-weight:bold;">&times;</button>
+                </div>
+                <% } %>
+
                 <!-- 1. HERO CARD -->
                 <div class="manual-hero-card">
                     <div class="hero-left">
@@ -824,12 +891,14 @@
                             <span>🎬</span> Tonton Video Panduan
                         </a>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <a href="/manual-book/pdf/user" target="_blank" class="btn-print-doc" style="background: #ffffff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka & Cetak PDF Buku Panduan Khusus Pegawai / User">
-                                <span>📘</span> Cetak PDF Panduan User
+                            <a href="/docs/manual-book-user.pdf" target="_blank" class="btn-print-doc" style="background: #ffffff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka Dokumen Panduan Khusus Pegawai (Format PDF)">
+                                <span>📘</span> Cetak PDF / Word User
                             </a>
-                            <a href="/manual-book/pdf/admin" target="_blank" class="btn-print-doc" style="background: #fef2f2; color: #b91c1c; text-decoration: none; border: 1.5px solid #fecaca; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka & Cetak PDF Buku Pedoman Khusus Administrator Tim Sidigi">
-                                <span>📕</span> Cetak PDF Panduan Admin
+                            <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                            <a href="/docs/manual-book-admin.pdf" target="_blank" class="btn-print-doc" style="background: #fef2f2; color: #b91c1c; text-decoration: none; border: 1.5px solid #fecaca; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka Dokumen Pedoman Khusus Administrator (Format PDF)">
+                                <span>📕</span> Cetak PDF / Word Admin
                             </a>
+                            <% } %>
                         </div>
                     </div>
                 </div>
@@ -895,39 +964,51 @@
                                     <!-- HTML5 Video element (jika user memutar file MP4) -->
                                     <video id="realHtml5Video" style="display: none; width: 100%; height: 100%; object-fit: contain;" controls></video>
 
-                                    <!-- SIMULASI VISUAL INTERAKTIF -->
-                                    <div id="simulatedScreen" style="width: 100%; height: 100%; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
-                                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 0.75rem;">
-                                            <div style="display: flex; align-items: center; gap: 0.6rem;">
-                                                <span id="simIcon" style="font-size: 1.5rem;">📹</span>
-                                                <div>
-                                                    <div id="simHeading" style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">Form Request Zoom Meeting</div>
-                                                    <div id="simSubtitle" style="font-size: 0.75rem; color: #94a3b8;">Langkah 1 dari 4: Pengisian Data Rapat</div>
-                                                </div>
+                                    <!-- SIMULASI VISUAL ANTARMUKA ASLI WEBSITE BKN -->
+                                    <div id="simulatedScreen" style="width: 100%; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; background: #0f172a; overflow: hidden; position: relative;">
+                                        
+                                        <!-- URL / OMNIBOX BAR BROWSER -->
+                                        <div style="background: #0b1329; padding: 0.35rem 0.85rem; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; font-family: monospace; z-index: 10;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                <span style="color: #10b981;">🔒</span>
+                                                <span id="mockBrowserUrl" style="color: #cbd5e1;">https://meetingapp.bkn.go.id/request-zoom</span>
                                             </div>
-                                            <span id="simStepPill" style="font-size: 0.72rem; font-weight: 700; background: #2563eb; color: #ffffff; padding: 0.25rem 0.65rem; border-radius: 6px;">
-                                                Langkah 1
+                                            <span style="background: rgba(37,99,235,0.25); color: #93c5fd; padding: 0.1rem 0.45rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; flex-shrink: 0;">
+                                                ⚡ Antarmuka Asli BKN
                                             </span>
                                         </div>
 
-                                        <!-- KARTU VISUAL UTAMA SIMULASI -->
-                                        <div id="simContentBox" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 1.25rem; margin: 1rem 0; backdrop-filter: blur(8px);">
-                                            <div id="simMainText" style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; line-height: 1.4;">
-                                                Mengisi Form Pengajuan Zoom
-                                            </div>
-                                            <p id="simDescText" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 1rem;">
-                                                Pegawai membuka menu Request Zoom, lalu mengisi Judul Rapat, Tanggal, Jam, dan memilih jenis Rapat Biasa atau Webinar.
-                                            </p>
-                                            <div id="simActionPreview" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.8rem; color: #38bdf8; font-family: monospace; display: flex; align-items: center; gap: 0.5rem;">
-                                                <span>👉</span> <span id="simActionText">Input: "Rapat Koordinasi Layanan Kepegawaian BKN"</span>
-                                            </div>
+                                        <!-- REAL WEB UI VIEWPORT -->
+                                        <div id="realWebUiViewport" class="sim-ui-canvas">
+                                            <!-- Konten Antarmuka Asli Web dirender dinamis di sini -->
                                         </div>
 
-                                        <!-- FOOTER STATUS SIMULASI -->
-                                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
-                                            <span>Sistem: <strong style="color: #10b981;">Online & Terhubung</strong></span>
-                                            <span id="simHint">Tekan tombol ▶ Play di bawah untuk memutar simulasi</span>
+                                        <!-- ANIMATED CURSOR POINTER -->
+                                        <div id="simAnimatedCursor" class="sim-animated-cursor" style="left: 50%; top: 50%;">
+                                            👆
                                         </div>
+
+                                        <!-- FLOATING SUBTITLE & STEP BAR -->
+                                        <div style="background: rgba(11, 19, 41, 0.94); backdrop-filter: blur(8px); border-top: 1px solid rgba(255,255,255,0.12); padding: 0.55rem 0.95rem; display: flex; align-items: center; justify-content: space-between; z-index: 30; gap: 0.75rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.55rem; min-width: 0;">
+                                                <span id="simStepBadge" style="background: #2563eb; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: 6px; flex-shrink: 0;">
+                                                    Langkah 1/4
+                                                </span>
+                                                <div style="min-width: 0;">
+                                                    <div id="simStepTitle" style="font-size: 0.8rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                        Judul Langkah
+                                                    </div>
+                                                    <div id="simStepAction" style="font-size: 0.72rem; color: #93c5fd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                        Aksi langkah
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span style="font-size: 0.68rem; color: #10b981; font-weight: 700; flex-shrink: 0; display: flex; align-items: center; gap: 0.35rem; background: rgba(16,185,129,0.15); padding: 0.2rem 0.5rem; border-radius: 9999px;">
+                                                <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981;"></span>
+                                                Live Interaktif
+                                            </span>
+                                        </div>
+
                                     </div>
 
                                     <!-- COVER OVERLAY SEBELUM PLAY -->
@@ -1343,106 +1424,500 @@
 
     <!-- SCRIPT INTERAKSI MANUAL BOOK & VIDEO HUB -->
     <script>
-        // DATA 6 MODUL VIDEO & SIMULASI
+        // DATA 6 MODUL VIDEO DENGAN GENERATOR TAMPILAN ASLI WEBSITE BKN
         const VIDEO_MODULES = [
             {
                 id: 1,
                 title: "1. Pengajuan Zoom Meeting & Webinar",
                 icon: "📹",
-                durationSec: 105,
-                durationText: "01:45",
+                durationSec: 100,
+                durationText: "01:40",
                 desc: "Tata cara permohonan lisensi Zoom ke Tim Sidigi, pengisian formulir, hingga penerbitan tautan resmi.",
+                url: "https://meetingapp.bkn.go.id/request-zoom",
                 steps: [
-                    { title: "Buka Menu Request Zoom", desc: "Masuk ke sidebar dan pilih menu Request Zoom. Formulir otomatis terisi nama & NIP pemohon.", action: '👉 Klik menu "Request Zoom" di sidebar' },
-                    { title: "Isi Rincian Jadwal & Tipe", desc: "Tentukan judul rapat, tanggal, jam mulai–selesai, serta pilih Tipe Kegiatan (Rapat Biasa atau Webinar).", action: '👉 Pilih tipe "Webinar" untuk fitur Kuis Slido' },
-                    { title: "Kirimkan Permohonan", desc: "Klik tombol Kirim Permohonan. Sistem akan meneruskan data ke antrean Tim Sidigi.", action: '👉 Klik "Kirim Permohonan Zoom"' },
-                    { title: "Pantau Status Permohonan", desc: "Klik kartu pada panel Status Permohonan Saya untuk melihat detail link resmi jika telah disetujui.", action: '👉 Klik kartu permohonan untuk membuka tautan' }
+                    {
+                        title: "1. Mengisi Judul Rapat & Divisi",
+                        desc: "Pegawai membuka formulir Request Zoom, lalu mengetikkan judul agenda rapat kedinasan secara lengkap.",
+                        action: '✍️ Input: "Rakor Pembinaan Manajemen ASN Kanreg V"',
+                        cursorPos: { x: "55%", y: "48%" },
+                        renderUI: () => `
+                            <div style="background: linear-gradient(135deg, #0a2558 0%, #1e5bb0 100%); border-radius: 10px; padding: 0.9rem 1.25rem; color: #ffffff; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <span style="font-size: 0.65rem; background: rgba(56,189,248,0.25); color: #bae6fd; padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Layanan Zoom BKN</span>
+                                    <h3 style="margin: 0.3rem 0 0; font-size: 1.05rem; font-weight: 800;">Permohonan Fasilitasi Zoom Meeting</h3>
+                                </div>
+                                <span style="background: rgba(255,255,255,0.15); font-size: 0.72rem; padding: 0.35rem 0.65rem; border-radius: 8px;">👤 Divisi Pemohon</span>
+                            </div>
+                            <div class="sim-mock-card">
+                                <div style="display: flex; flex-direction: column; gap: 0.65rem;">
+                                    <div>
+                                        <label style="font-size: 0.75rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.25rem;">Judul Rapat / Webinar <span style="color:#ef4444;">*</span></label>
+                                        <div class="sim-focus-box" style="background: #ffffff; border: 1.5px solid #2563eb; border-radius: 6px; padding: 0.45rem 0.65rem; font-size: 0.8rem; font-weight: 600; color: #0f172a; display: flex; align-items: center; justify-content: space-between;">
+                                            <span>Rakor Pembinaan Manajemen ASN Kanreg V</span>
+                                            <span style="color: #2563eb; animation: blink 1s infinite;">|</span>
+                                        </div>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                        <div>
+                                            <label style="font-size: 0.72rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.2rem;">Divisi Penyelenggara</label>
+                                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; color: #475569;">Bidang Mutasi & Kepegawaian</div>
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 0.72rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 0.2rem;">PIC / Penanggung Jawab</label>
+                                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; color: #475569;">Luthfi Arvi (Pranata Komputer)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Menentukan Jenis Zoom & Jadwal",
+                        desc: "Pilih opsi 'Zoom Webinar' untuk kapasitas besar s/d 500 peserta dan tentukan jam mulai serta jam selesai rapat.",
+                        action: '🔘 Pilih "Zoom Webinar (500 Peserta)" & Jam: 09:00 - 12:00 WIB',
+                        cursorPos: { x: "42%", y: "52%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="margin-bottom: 0.5rem;">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.4rem;">Pilih Tipe Fasilitas Zoom:</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                                    <div class="sim-focus-box" style="border: 2px solid #2563eb; background: #eff6ff; border-radius: 8px; padding: 0.6rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="font-size: 1.1rem; color: #2563eb;">🔘</span>
+                                        <div>
+                                            <strong style="font-size: 0.78rem; color: #1e40af; display: block;">Zoom Webinar</strong>
+                                            <small style="font-size: 0.68rem; color: #3b82f6;">Kapasitas s/d 500 Peserta + Kuis Slido</small>
+                                        </div>
+                                    </div>
+                                    <div style="border: 1px solid #cbd5e1; background: #ffffff; border-radius: 8px; padding: 0.6rem; display: flex; align-items: center; gap: 0.5rem; opacity: 0.7;">
+                                        <span style="font-size: 1.1rem; color: #94a3b8;">⚪</span>
+                                        <div>
+                                            <strong style="font-size: 0.78rem; color: #475569; display: block;">Zoom Meeting Biasa</strong>
+                                            <small style="font-size: 0.68rem; color: #64748b;">Rapat Koordinasi Internal Divisi</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sim-mock-card">
+                                <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 0.5rem;">
+                                    <div>
+                                        <label style="font-size: 0.72rem; font-weight: 700; color: #334155;">Tanggal Rapat</label>
+                                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600;">📅 30 September 2026</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.72rem; font-weight: 700; color: #334155;">Jam Mulai</label>
+                                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600;">⏰ 09:00 WIB</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.72rem; font-weight: 700; color: #334155;">Jam Selesai</label>
+                                        <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600;">⏰ 12:00 WIB</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Lampiran Berkas Undangan / Surat Tugas",
+                        desc: "Unggah dokumen pendukung disposisi atau surat permohonan resmi berformat PDF/DOCX agar permohonan dapat diverifikasi.",
+                        action: '📎 Upload: "Surat-Tugas-Rakor-2026.pdf" (1.2 MB)',
+                        cursorPos: { x: "50%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <label style="font-size: 0.75rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.35rem;">Surat Permohonan / Disposisi Rapat (.pdf, .docx):</label>
+                                <div class="sim-focus-box" style="border: 2px dashed #2563eb; background: #eff6ff; border-radius: 8px; padding: 1rem; text-align: center;">
+                                    <span style="font-size: 1.6rem; display: block; margin-bottom: 0.3rem;">📄</span>
+                                    <strong style="font-size: 0.82rem; color: #1e40af; display: block;">Surat-Tugas-Rakor-2026.pdf</strong>
+                                    <span style="background: #dcfce7; color: #166534; font-size: 0.68rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; display: inline-block; margin-top: 0.35rem;">
+                                        ✓ Berkas Valid (1.2 MB) Siap Dikirim
+                                    </span>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Kirim Permohonan & Pantau Antrean",
+                        desc: "Klik tombol Kirim Permohonan Zoom. Sistem menerbitkan nomor tiket dan meneruskannya ke antrean Tim Sidigi.",
+                        action: '🚀 Klik tombol "Kirim Permohonan Zoom ke Tim Sidigi"',
+                        cursorPos: { x: "50%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="text-align: center; border: 2px solid #10b981; background: #f0fdf4;">
+                                <span style="font-size: 1.8rem; display: block; margin-bottom: 0.2rem;">✅</span>
+                                <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #065f46;">Permohonan Fasilitasi Berhasil Terkirim!</h4>
+                                <p style="font-size: 0.75rem; color: #047857; margin: 0.3rem 0 0.75rem;">Nomor Registrasi: <strong>#ZOOM-2026-0901</strong> • Status: <strong>⏳ Menunggu Approval Tim Sidigi</strong></p>
+                                <div class="sim-focus-box" style="display: inline-block; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.8rem; padding: 0.45rem 1.1rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(37,99,235,0.3);">
+                                    🚀 Kirim Permohonan Zoom (Selesai)
+                                </div>
+                            </div>
+                        `
+                    }
                 ],
                 quickSteps: [
                     "1. Buka formulir Request Zoom",
                     "2. Tentukan jam & tipe rapat",
-                    "3. Klik Kirim Permohonan",
-                    "4. Pantau kartu status permohonan"
+                    "3. Unggah surat tugas pendukung",
+                    "4. Kirim & pantau antrean"
                 ]
             },
             {
                 id: 2,
                 title: "2. Persetujuan Admin Tim Sidigi",
                 icon: "🛡️",
-                durationSec: 75,
-                durationText: "01:15",
+                durationSec: 80,
+                durationText: "01:20",
                 desc: "Verifikasi ketersediaan ruang rapat Zoom dan penerbitan Meeting ID serta Passcode resmi.",
+                url: "https://meetingapp.bkn.go.id/request-zoom?admin=true",
                 steps: [
-                    { title: "Akses Tab Admin", desc: "Administrator membuka tab 'Kelola Permohonan Masuk' di halaman Request Zoom.", action: '👉 Buka tab "Kelola Permohonan Masuk"' },
-                    { title: "Tinjau Data Rapat", desc: "Periksa jadwal pengajuan agar tidak tumpang tindih dengan agenda divisi lain.", action: '👉 Klik tombol biru "Setujui Permohonan"' },
-                    { title: "Masukkan Kredensial Zoom", desc: "Ketik URL Zoom lengkap, Meeting ID, Passcode, dan catatan konfirmasi.", action: '👉 Input link: https://bkn.zoom.us/j/...' },
-                    { title: "Terbitkan Tautan", desc: "Klik Simpan & Terbitkan. Status pemohon otomatis berubah 'Disetujui' dan tersinkron ke Manajemen Meeting.", action: '👉 Link Zoom & Slido otomatis aktif!' }
+                    {
+                        title: "1. Buka Antrean Permohonan Masuk",
+                        desc: "Admin login dan membuka tab 'Antrean Permohonan Zoom'. Terdapat permohonan baru dari Divisi Kepegawaian.",
+                        action: '🔍 Meninjau antrean: Rakor Pembinaan Manajemen ASN',
+                        cursorPos: { x: "70%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-header">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">🛡️</span>
+                                    <div>
+                                        <strong style="font-size: 0.82rem; color: #0f172a;">Antrean Fasilitasi Zoom Kanreg V</strong>
+                                        <small style="display: block; font-size: 0.68rem; color: #64748b;">Panel Khusus Administrator Tim Sidigi</small>
+                                    </div>
+                                </div>
+                                <span style="background: #fef3c7; color: #92400e; font-size: 0.68rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 6px;">1 Permohonan Baru</span>
+                            </div>
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem; background: #ffffff; display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <strong style="font-size: 0.8rem; color: #1e293b; display: block;">Rakor Pembinaan Manajemen ASN</strong>
+                                        <small style="font-size: 0.68rem; color: #64748b;">Pemohon: Bidang Mutasi • 30 Sep 2026 (09:00 - 12:00 WIB)</small>
+                                    </div>
+                                    <span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 0.68rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 9999px;">⏳ Menunggu Approval</span>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Verifikasi Jadwal & Lisensi Akun",
+                        desc: "Sistem memeriksa jadwal kalender Zoom BKN. Terkonfirmasi akun Zoom Pro 1 kosong pada rentang waktu yang diminta.",
+                        action: '✅ Lisensi Akun Pro 1 Tersedia (Tidak Bentrok)',
+                        cursorPos: { x: "50%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="border-left: 4.5px solid #10b981;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.2rem;">📊</span>
+                                    <strong style="font-size: 0.85rem; color: #065f46;">Pemeriksaan Ketersediaan Lisensi:</strong>
+                                </div>
+                                <div class="sim-focus-box" style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.65rem; font-size: 0.75rem; color: #047857;">
+                                    ✓ <strong>Akun Zoom Pro Kanreg V: KOSONG</strong><br>
+                                    Jadwal 30 Sep 2026 (09:00-12:00 WIB) siap dialokasikan.
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Input Tautan, ID, & Passcode Zoom",
+                        desc: "Admin mengetikkan tautan resmi Zoom Meeting, Meeting ID 10 digit, dan Passcode rapat.",
+                        action: '✍️ Input: https://zoom.us/j/8892102910 | Pass: BKN5JAYA',
+                        cursorPos: { x: "60%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <h4 style="margin: 0 0 0.5rem; font-size: 0.85rem; color: #1e293b;">Penerbitan Kredensial Zoom:</h4>
+                                <div class="sim-focus-box" style="display: flex; flex-direction: column; gap: 0.45rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem;">
+                                    <div style="font-size: 0.72rem; color: #475569;">
+                                        <strong>Link Zoom:</strong> <span style="color: #2563eb; font-family: monospace;">https://zoom.us/j/8892102910</span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: #475569;">
+                                        <strong>Meeting ID:</strong> <span style="font-family: monospace;">889 210 2910</span> • <strong>Passcode:</strong> <span style="color: #d97706; font-family: monospace; font-weight: bold;">BKN5JAYA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Terbitkan Tautan & Aktifkan Slido",
+                        desc: "Klik Simpan & Terbitkan. Status pemohon otomatis berubah 'Disetujui' dan link Zoom langsung aktif.",
+                        action: '🎉 Link Zoom & Forum Slido Berhasil Diterbitkan!',
+                        cursorPos: { x: "50%", y: "50%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="text-align: center; border: 2px solid #10b981; background: #ffffff;">
+                                <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.75rem; border-radius: 9999px; display: inline-block; margin-bottom: 0.5rem;">
+                                    ✓ Disetujui (Tautan Aktif)
+                                </span>
+                                <div class="sim-focus-box" style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.4rem;">
+                                    <button style="background: #2563eb; color: #fff; border: none; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px;">📋 Salin Tautan</button>
+                                    <button style="background: #059669; color: #fff; border: none; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 6px;">💬 Buka Slido BKN</button>
+                                </div>
+                            </div>
+                        `
+                    }
                 ],
                 quickSteps: [
-                    "1. Buka tab Kelola Masuk",
-                    "2. Klik Setujui Permohonan",
+                    "1. Buka tab Antrean Masuk",
+                    "2. Periksa ketersediaan akun",
                     "3. Masukkan ID & Passcode Zoom",
-                    "4. Klik Terbitkan Link"
+                    "4. Terbitkan link & aktifkan Slido"
                 ]
             },
             {
                 id: 3,
                 title: "3. Presensi Online & Tanda Tangan Digital",
                 icon: "✍️",
-                durationSec: 80,
-                durationText: "01:20",
+                durationSec: 85,
+                durationText: "01:25",
                 desc: "Mekanisme pengisian absensi peserta tanpa login dan pembuatan e-sertifikat otomatis.",
+                url: "https://meetingapp.bkn.go.id/presensi?meeting_id=1",
                 steps: [
-                    { title: "Buka Link Presensi", desc: "Peserta membuka tautan presensi via link meeting atau memindai QR Code di layar.", action: '👉 Buka link: /presensi/:meeting_id' },
-                    { title: "Isi Identitas Lengkap", desc: "Masukkan Nama Lengkap, NIP (atau tanda '-' bagi umum), serta Asal Instansi/Divisi.", action: '👉 Ketik Nama, NIP, & Instansi' },
-                    { title: "Goreskan Tanda Tangan", desc: "Tarik goresan tanda tangan digital di kotak canvas layar HP / touchscreen laptop.", action: '👉 Tanda tangan langsung di canvas' },
-                    { title: "Simpan & Unduh Sertifikat", desc: "Klik Kirim Presensi. Khusus webinar, tombol Unduh Sertifikat otomatis muncul!", action: '👉 Klik "📜 Unduh E-Sertifikat"' }
+                    {
+                        title: "1. Scan QR Code atau Buka Tautan Presensi",
+                        desc: "Peserta memindai QR Code yang ditampilkan panitia di layar aula atau membuka tautan presensi di ponsel/laptop.",
+                        action: '📱 Scan QR Code Presensi Rapat BKN',
+                        cursorPos: { x: "50%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="text-align: center;">
+                                <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.2rem 0.55rem; border-radius: 9999px; font-size: 0.68rem; font-weight: 700; color: #1d4ed8; margin-bottom: 0.4rem;">
+                                    <span>🏛️</span> Kantor Regional V BKN Jakarta
+                                </div>
+                                <h4 style="margin: 0 0 0.5rem; font-size: 0.88rem; color: #0f172a;">Presensi Rapat Koordinasi ASN</h4>
+                                <div class="sim-focus-box" style="display: inline-block; background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 2px solid #2563eb;">
+                                    <div style="width: 80px; height: 80px; background: repeating-conic-gradient(#0f172a 0% 25%, #ffffff 0% 50%) 50% / 16px 16px; border-radius: 6px; margin: 0 auto;"></div>
+                                    <small style="display: block; font-size: 0.65rem; font-weight: 700; color: #2563eb; margin-top: 0.3rem;">[ SCAN QR CODE DISINI ]</small>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Masukkan Nama, NIP, & Instansi",
+                        desc: "Isi data diri peserta rapat secara lengkap. Untuk peserta umum atau non-PNS, NIP dapat diisi tanda strip (-).",
+                        action: '✍️ Input: Dr. Ir. Budi Santoso, M.Si (NIP: 19850712...)',
+                        cursorPos: { x: "55%", y: "52%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; flex-direction: column; gap: 0.4rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.6rem;">
+                                    <div>
+                                        <label style="font-size: 0.68rem; font-weight: 700; color: #64748b;">Nama Lengkap (dengan gelar):</label>
+                                        <div style="font-size: 0.78rem; font-weight: 700; color: #0f172a;">Dr. Ir. Budi Santoso, M.Si</div>
+                                    </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
+                                        <div>
+                                            <label style="font-size: 0.68rem; font-weight: 700; color: #64748b;">NIP:</label>
+                                            <div style="font-size: 0.75rem; font-family: monospace; color: #0f172a;">198507122010011004</div>
+                                        </div>
+                                        <div>
+                                            <label style="font-size: 0.68rem; font-weight: 700; color: #64748b;">Asal Instansi:</label>
+                                            <div style="font-size: 0.75rem; color: #0f172a;">Kanreg V BKN Jakarta</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Goreskan Tanda Tangan Digital",
+                        desc: "Goreskan tanda tangan langsung pada canvas digital touch screen di HP atau menggunakan mouse di laptop.",
+                        action: '✍️ Tanda tangan digital resmi tergores di canvas',
+                        cursorPos: { x: "50%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <label style="font-size: 0.72rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.3rem;">Kotak Tanda Tangan Digital Resmi:</label>
+                                <div class="sim-focus-box" style="background: #ffffff; border: 1.5px dashed #2563eb; border-radius: 8px; height: 75px; position: relative; display: flex; align-items: center; justify-content: center;">
+                                    <svg width="120" height="50" viewBox="0 0 120 50">
+                                        <path d="M 10 35 Q 25 10 40 30 T 70 20 T 95 35 T 110 15" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+                                    </svg>
+                                    <span style="position: absolute; right: 6px; bottom: 4px; font-size: 0.65rem; color: #10b981; font-weight: 700;">✓ Tanda Tangan Sah</span>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Presensi Berhasil & Unduh E-Sertifikat",
+                        desc: "Data presensi tersimpan ke database BKN dan tombol unduh E-Sertifikat resmi langsung tersedia.",
+                        action: '🏆 Unduh E-Sertifikat Resmi Ber-QR Code Kanreg V BKN',
+                        cursorPos: { x: "50%", y: "52%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="text-align: center; border: 2px solid #2563eb; background: #eff6ff;">
+                                <span style="font-size: 1.5rem; display: block;">📜</span>
+                                <h4 style="margin: 0; font-size: 0.85rem; color: #1e40af;">Presensi Berhasil Dicatat (09:14 WIB)</h4>
+                                <small style="display: block; font-size: 0.68rem; color: #3b82f6; margin-bottom: 0.45rem;">Sertifikat Keikutsertaan Resmi Diterbitkan:</small>
+                                <div class="sim-focus-box" style="display: inline-block; background: #2563eb; color: #ffffff; font-weight: 700; font-size: 0.78rem; padding: 0.4rem 1rem; border-radius: 6px;">
+                                    🏆 Unduh E-Sertifikat (PDF)
+                                </div>
+                            </div>
+                        `
+                    }
                 ],
                 quickSteps: [
-                    "1. Scan QR / buka link presensi",
-                    "2. Masukkan data diri peserta",
-                    "3. Tanda tangan di canvas",
-                    "4. Dapatkan bukti hadir & sertifikat"
+                    "1. Scan QR Code presensi",
+                    "2. Isi nama lengkap & NIP",
+                    "3. Goreskan tanda tangan digital",
+                    "4. Unduh sertifikat resmi"
                 ]
             },
             {
                 id: 4,
                 title: "4. Manajemen Meeting & Ruang Rapat",
                 icon: "📋",
-                durationSec: 90,
-                durationText: "01:30",
+                durationSec: 80,
+                durationText: "01:20",
                 desc: "Pengelolaan jadwal rapat fisik/hybrid, pemilihan ruang rapat kantor, dan monitoring agenda harian.",
+                url: "https://meetingapp.bkn.go.id/manajemenmeeting",
                 steps: [
-                    { title: "Buka Manajemen Meeting", desc: "Lihat ringkasan jadwal rapat hari ini, ruang terpakai, dan kalender kegiatan BKN.", action: '👉 Buka menu "Manajemen Meeting"' },
-                    { title: "Klik Buat Rapat Baru", desc: "Tentukan nama kegiatan, waktu, pimpinan rapat, dan pilih ruang rapat fisik kantor.", action: '👉 Pilih Ruang Rapat & Tanggal' },
-                    { title: "Bagikan Tautan ke Peserta", desc: "Salin link rapat atau tampilkan QR Code presensi di layar proyektor ruang rapat.", action: '👉 Klik tombol "Salin Tautan Presensi"' },
-                    { title: "Monitor Daftar Kehadiran", desc: "Klik tombol '📝 Lihat Presensi' untuk memantau peserta yang sudah mengisi absensi secara real-time.", action: '👉 Rekap kehadiran otomatis terbarui' }
+                    {
+                        title: "1. Kalender Jadwal Ruangan Rapat Kanreg V",
+                        desc: "Menampilkan ketersediaan Ruang Rapat Aula Utama, R. Cendrawasih, dan R. Garuda secara visual.",
+                        action: '📅 Meninjau slot ruang rapat Aula Utama',
+                        cursorPos: { x: "45%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-header">
+                                <strong style="font-size: 0.82rem; color: #0f172a;">Kalender Ruang Rapat Kanreg V</strong>
+                                <span style="background: #2563eb; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 6px;">➕ Buat Agenda Rapat</span>
+                            </div>
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.45rem;">
+                                        <strong style="font-size: 0.72rem; color: #1e40af; display: block;">🏛️ Aula Utama (Lantai 1)</strong>
+                                        <small style="font-size: 0.65rem; color: #3b82f6;">09:00 - 12:00: Rakor ASN (Terisi)</small>
+                                    </div>
+                                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.45rem;">
+                                        <strong style="font-size: 0.72rem; color: #166534; display: block;">🏢 R. Cendrawasih (Lantai 2)</strong>
+                                        <small style="font-size: 0.65rem; color: #15803d;">Kosong (Siap Digunakan)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Input Formulir Agenda Rapat Baru",
+                        desc: "Isi nama kegiatan, pilih ruangan fisik, penanggung jawab rapat, dan tentukan kapasitas kursi peserta.",
+                        action: '✍️ Booking: Aula Utama untuk 100 Orang',
+                        cursorPos: { x: "60%", y: "50%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                    <div>
+                                        <label style="font-size: 0.68rem; font-weight: 700; color: #64748b;">Nama Agenda Kegiatan:</label>
+                                        <div style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">Evaluasi Kinerja ASN Triwulan III</div>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.68rem; font-weight: 700; color: #64748b;">Pilihan Ruangan:</label>
+                                        <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600; color: #2563eb;">🏛️ Aula Utama (Kapasitas 100 Kursi)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Checklist Fasilitas Rapat",
+                        desc: "Centang perlengkapan ruangan yang dibutuhkan seperti proyektor LED, sound system & mic, hingga konsumsi.",
+                        action: '☑️ Centang: Proyektor + Sound System + Presensi QR',
+                        cursorPos: { x: "45%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <label style="font-size: 0.72rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.35rem;">Fasilitas Ruangan Disiapkan:</label>
+                                <div class="sim-focus-box" style="display: flex; flex-direction: column; gap: 0.35rem; background: #f8fafc; padding: 0.5rem; border-radius: 6px; font-size: 0.72rem;">
+                                    <div style="color: #166534; font-weight: 600;">☑️ Layar Proyektor LED & Kabel HDMI</div>
+                                    <div style="color: #166534; font-weight: 600;">☑️ Sound System Ruangan & 4 Wireless Mic</div>
+                                    <div style="color: #166534; font-weight: 600;">☑️ Layar Monitor Presensi QR Code Digital</div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Jadwal Terbit di TV Display Gedung",
+                        desc: "Agenda otomatis tersinkronisasi dan tampil pada monitor display informasi di aula gedung Kanreg V BKN.",
+                        action: '📺 Sinkronisasi ke Layar Display Aula Lantai 1',
+                        cursorPos: { x: "50%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="border: 2px solid #2563eb; background: #0f172a; color: #ffffff; text-align: center;">
+                                <small style="color: #38bdf8; font-weight: 700; font-size: 0.65rem; text-transform: uppercase;">Monitor Display Informasi Gedung</small>
+                                <h4 style="margin: 0.2rem 0; font-size: 0.9rem; color: #ffffff;">Evaluasi Kinerja ASN Triwulan III</h4>
+                                <div class="sim-focus-box" style="background: rgba(37,99,235,0.3); border: 1px solid #3b82f6; border-radius: 6px; padding: 0.35rem; font-size: 0.72rem; margin-top: 0.4rem;">
+                                    📍 <strong>Aula Utama Lantai 1</strong> • ⏰ 09:00 - 12:00 WIB
+                                </div>
+                            </div>
+                        `
+                    }
                 ],
                 quickSteps: [
-                    "1. Buka menu Manajemen Meeting",
-                    "2. Jadwalkan rapat & ruangan",
-                    "3. Tampilkan QR Code absensi",
-                    "4. Pantau kehadiran peserta"
+                    "1. Buka kalender ruangan",
+                    "2. Isi agenda & pilih ruangan",
+                    "3. Pilih checklist fasilitas",
+                    "4. Sinkronkan ke display gedung"
                 ]
             },
             {
                 id: 5,
                 title: "5. Notulen Rapat & Cetak Rekap PDF",
                 icon: "📄",
-                durationSec: 70,
-                durationText: "01:10",
+                durationSec: 80,
+                durationText: "01:20",
                 desc: "Dokumentasi hasil rapat, pengunggahan foto kegiatan, serta pencetakan berita acara resmi ber-tanda tangan.",
+                url: "https://meetingapp.bkn.go.id/notulen?id=1",
                 steps: [
-                    { title: "Pilih Rapat Selesai", desc: "Buka kartu rapat yang telah selesai dilaksanakan, lalu klik tombol 'Lihat Detail'.", action: '👉 Buka detail rapat' },
-                    { title: "Tuliskan Notulen Rapat", desc: "Ketik poin kesepakatan dan hasil keputusan rapat pada form catatan notulen.", action: '👉 Tulis risalah rapat penting' },
-                    { title: "Unggah Dokumentasi Foto", desc: "Pilih foto dokumentasi suasana rapat untuk disimpan sebagai arsip visual.", action: '👉 Upload foto dokumentasi' },
-                    { title: "Cetak Rekap Berita Acara", desc: "Klik tombol 'Cetak PDF / Ekspor Excel' untuk mengunduh daftar hadir bertanda tangan lengkap.", action: '👉 Unduh Berita Acara PDF resmi' }
+                    {
+                        title: "1. Buka Notulen Rapat Selesai",
+                        desc: "Pilih kegiatan yang telah selesai dilaksanakan, lalu klik tombol 'Kelola Notulen & Berita Acara'.",
+                        action: '📝 Membuka lembar notulen: 42 Pegawai Hadir',
+                        cursorPos: { x: "50%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <strong style="font-size: 0.82rem; color: #0f172a; display: block;">Rakor Penataan Jabatan Fungsional</strong>
+                                        <small style="font-size: 0.68rem; color: #059669; font-weight: 700;">✓ Rapat Selesai Dilaksanakan (42 Peserta Hadir)</small>
+                                    </div>
+                                    <span style="background: #2563eb; color: #fff; font-size: 0.7rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px;">Kelola Notulen</span>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Ketik Kesepakatan & Arahan Rapat",
+                        desc: "Tuliskan poin-poin hasil kesepakatan, arahan pimpinan rapat, dan penugasan tindak lanjut.",
+                        action: '✍️ Ketik risalah hasil keputusan rapat kedinasan',
+                        cursorPos: { x: "55%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <label style="font-size: 0.72rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.25rem;">Catatan Risalah Kesepakatan Rapat:</label>
+                                <div class="sim-focus-box" style="background: #f8fafc; border: 1.5px solid #2563eb; border-radius: 6px; padding: 0.5rem; font-size: 0.72rem; color: #1e293b; line-height: 1.4;">
+                                    1. Usulan kenaikan pangkat diselesaikan paling lambat 15 Oktober 2026.<br>
+                                    2. Verifikasi berkas SKP wajib terintegrasi dengan portal MyASN.
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Unggah Foto Dokumentasi Acara",
+                        desc: "Lampirkan foto-foto suasana kegiatan rapat di aula sebagai bukti fisik pertanggungjawaban visual.",
+                        action: '📸 Lampirkan 3 Foto Dokumentasi Rapat Aula',
+                        cursorPos: { x: "50%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <label style="font-size: 0.72rem; font-weight: 700; color: #334155; display: block; margin-bottom: 0.35rem;">Galeri Foto Dokumentasi Kegiatan:</label>
+                                <div class="sim-focus-box" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;">
+                                    <div style="height: 50px; background: #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">📷</div>
+                                    <div style="height: 50px; background: #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">👥</div>
+                                    <div style="height: 50px; background: #cbd5e1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">🏛️</div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Cetak Berita Acara Rekap PDF Resmi",
+                        desc: "Klik tombol Cetak PDF. Sistem menghasilkan dokumen Berita Acara A4 ber-Kop Surat Kanreg V BKN dan bertanda tangan lengkap.",
+                        action: '🖨️ Cetak Berita Acara Rekap PDF (A4) Ber-Kop Resmi',
+                        cursorPos: { x: "50%", y: "50%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="text-align: center; border: 2px solid #10b981; background: #f0fdf4;">
+                                <strong style="font-size: 0.85rem; color: #065f46; display: block;">Berita Acara & Daftar Hadir Siap Cetak</strong>
+                                <small style="font-size: 0.68rem; color: #047857; display: block; margin: 0.2rem 0 0.5rem;">Lengkap dengan Kop Kanreg V BKN & Daftar TTD 42 Peserta</small>
+                                <div class="sim-focus-box" style="display: inline-block; background: #166534; color: #ffffff; font-weight: 700; font-size: 0.78rem; padding: 0.4rem 1rem; border-radius: 6px;">
+                                    🖨️ Unduh Berita Acara PDF Resmi (A4)
+                                </div>
+                            </div>
+                        `
+                    }
                 ],
                 quickSteps: [
-                    "1. Buka detail rapat selesai",
-                    "2. Simpan risalah & notulen",
-                    "3. Unggah foto arsip rapat",
-                    "4. Cetak Berita Acara & presensi"
+                    "1. Buka rapat yang telah selesai",
+                    "2. Simpan poin risalah rapat",
+                    "3. Unggah foto dokumentasi",
+                    "4. Cetak Berita Acara PDF resmi"
                 ]
             },
             {
@@ -1452,17 +1927,81 @@
                 durationSec: 85,
                 durationText: "01:25",
                 desc: "Interaksi tanya jawab live webinar, pemungutan suara (voting), dan respon narasumber terverifikasi.",
+                url: "https://meetingapp.bkn.go.id/webinar-quiz/zoom-1",
                 steps: [
-                    { title: "Buka Ruang Slido BKN", desc: "Peserta membuka link `/webinar-quiz/zoom-:id` yang dibagikan panitia di room chat Zoom.", action: '👉 Buka tautan ruang Slido BKN' },
-                    { title: "Kirim Pertanyaan Peserta", desc: "Ketik pertanyaan dan opsi switch '🔒 Kirim Anonim' jika ingin merahasiakan nama.", action: '👉 Ajukan pertanyaan materi webinar' },
-                    { title: "Dukung Pertanyaan (Upvote)", desc: "Klik tombol panah atas (▲) untuk mendukung pertanyaan penting agar naik ke tab Populer.", action: '👉 Tekan tombol Upvote vertikal' },
-                    { title: "Jawaban Resmi Narasumber", desc: "Narasumber login ke sistem dan memberikan jawaban yang berlabel perisai hijau resmi.", action: '👉 Jawaban narasumber terverifikasi terbit' }
-                ],
-                quickSteps: [
-                    "1. Masuk ruang Slido via link",
-                    "2. Ajukan pertanyaan audiens",
-                    "3. Upvote pertanyaan teratas",
-                    "4. Tampilkan jawaban narasumber"
+                    {
+                        title: "1. Buka Ruang Slido BKN di Browser",
+                        desc: "Peserta membuka link Slido BKN yang dibagikan panitia di room chat Zoom untuk mengajukan pertanyaan.",
+                        action: '💬 Masuk ke Ruang Interaktif Q&A Slido BKN',
+                        cursorPos: { x: "40%", y: "45%" },
+                        renderUI: () => `
+                            <div class="sim-mock-header" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff;">
+                                <strong style="font-size: 0.85rem;">💬 Slido BKN • Forum Q&A Live</strong>
+                                <span style="font-size: 0.68rem; background: rgba(255,255,255,0.2); padding: 0.2rem 0.5rem; border-radius: 4px;">120 Peserta Online</span>
+                            </div>
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; gap: 0.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem;">
+                                    <span style="font-size: 0.78rem; font-weight: 800; color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 0.2rem;">Pertanyaan Populer</span>
+                                    <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">Pertanyaan Terbaru</span>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "2. Ajukan Pertanyaan (Bisa Anonim)",
+                        desc: "Ketik pertanyaan materi webinar dan aktifkan opsi 'Kirimkan secara Anonim' jika ingin merahasiakan identitas.",
+                        action: '✍️ Input: "Bagaimana integrasi SKP pada sistem terbaru?"',
+                        cursorPos: { x: "55%", y: "55%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                    <div style="background: #ffffff; border: 1.5px solid #2563eb; border-radius: 6px; padding: 0.45rem; font-size: 0.72rem; color: #0f172a;">
+                                        Bagaimana integrasi SKP pada sistem e-Kinerja terbaru BKN 2026?
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span style="font-size: 0.68rem; color: #2563eb; font-weight: 700;">🔒 Kirim sebagai Anonim: ON</span>
+                                        <button style="background: #2563eb; color: #fff; border: none; font-size: 0.7rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 6px;">Kirim 🚀</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "3. Dukung Pertanyaan Penting (Upvote ▲)",
+                        desc: "Peserta lain menekan tombol panah atas (▲) untuk mendukung pertanyaan penting agar naik ke daftar prioritas narasumber.",
+                        action: '▲ Tekan Upvote: Pertanyaan naik ke peringkat 1',
+                        cursorPos: { x: "75%", y: "52%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card">
+                                <div class="sim-focus-box" style="display: flex; align-items: center; justify-content: space-between; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.6rem;">
+                                    <div>
+                                        <strong style="font-size: 0.75rem; color: #1e3a8a; display: block;">Bagaimana integrasi SKP pada sistem e-Kinerja 2026?</strong>
+                                        <small style="font-size: 0.65rem; color: #64748b;">Diajukan oleh: Peserta Anonim</small>
+                                    </div>
+                                    <div style="background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.75rem; padding: 0.35rem 0.65rem; border-radius: 6px;">
+                                        ▲ 38 Dukungan
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: "4. Tanggapan Resmi Narasumber BKN",
+                        desc: "Narasumber menjawab langsung di forum. Jawaban tampil dengan lencana perisai hijau terverifikasi resmi Kanreg V BKN.",
+                        action: '🛡️ Respon Terverifikasi Narasumber Kanreg V BKN',
+                        cursorPos: { x: "50%", y: "50%" },
+                        renderUI: () => `
+                            <div class="sim-mock-card" style="border-left: 4.5px solid #10b981; background: #f0fdf4;">
+                                <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem;">
+                                    <span style="font-size: 1rem;">🛡️</span>
+                                    <strong style="font-size: 0.75rem; color: #166534;">Jawaban Resmi Narasumber BKN Kanreg V:</strong>
+                                </div>
+                                <div class="sim-focus-box" style="font-size: 0.72rem; color: #15803d; line-height: 1.4; background: #ffffff; padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid #a7f3d0;">
+                                    Integrasi e-Kinerja telah terhubung otomatis melalui Single Sign-On (SSO) BKN sehingga data SKP terverifikasi secara realtime.
+                                </div>
+                            </div>
+                        `
+                    }
                 ]
             }
         ];
@@ -1492,7 +2031,7 @@
                 </div>
             `).join('');
 
-            // Update Simulation view
+            // Render Step 0
             renderSimulationStep(0);
         }
 
@@ -1501,13 +2040,26 @@
             const step = mod.steps[stepIdx];
             if (!step) return;
 
-            document.getElementById('simIcon').innerText = mod.icon;
-            document.getElementById('simHeading').innerText = mod.title;
-            document.getElementById('simSubtitle').innerText = `Langkah ${stepIdx + 1} dari ${mod.steps.length}: ${step.title}`;
-            document.getElementById('simStepPill').innerText = `Langkah ${stepIdx + 1}`;
-            document.getElementById('simMainText').innerText = step.title;
-            document.getElementById('simDescText').innerText = step.desc;
-            document.getElementById('simActionText').innerText = step.action;
+            // Update Mock Browser URL
+            document.getElementById('mockBrowserUrl').innerText = mod.url;
+
+            // Render Real UI HTML into Viewport
+            const viewport = document.getElementById('realWebUiViewport');
+            if (viewport && typeof step.renderUI === 'function') {
+                viewport.innerHTML = step.renderUI();
+            }
+
+            // Update Animated Cursor Position
+            const cursor = document.getElementById('simAnimatedCursor');
+            if (cursor && step.cursorPos) {
+                cursor.style.left = step.cursorPos.x;
+                cursor.style.top = step.cursorPos.y;
+            }
+
+            // Update Subtitle Bar
+            document.getElementById('simStepBadge').innerText = `Langkah ${stepIdx + 1}/${mod.steps.length}`;
+            document.getElementById('simStepTitle').innerText = step.title;
+            document.getElementById('simStepAction').innerText = step.action;
         }
 
         function selectVideo(index) {
@@ -1707,7 +2259,106 @@
                 window.location.href = "/logout";
             }
         }
+
+        function openUploadPdfModal() {
+            const modal = document.getElementById('uploadPdfModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeUploadPdfModal() {
+            const modal = document.getElementById('uploadPdfModal');
+            if (modal) modal.style.display = 'none';
+        }
     </script>
+
+    <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+    <!-- MODAL GANTI FILE PDF SENDIRI (KHUSUS ADMIN) -->
+    <div id="uploadPdfModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto;">
+        <div style="background: #ffffff; width: 100%; max-width: 680px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid #e2e8f0; overflow: hidden;">
+            
+            <!-- Modal Header -->
+            <div style="background: linear-gradient(135deg, #0d2b5c 0%, #1d4ed8 100%); color: #ffffff; padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.4rem;">📑</span>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800;">Kelola File PDF Manual Book Sendiri</h3>
+                        <small style="color: #bfdbfe; font-size: 0.75rem;">Gunakan berkas file PDF (.pdf) resmi milik Anda untuk tombol panduan</small>
+                    </div>
+                </div>
+                <button type="button" onclick="closeUploadPdfModal()" style="background: rgba(255,255,255,0.15); border: none; color: #ffffff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div style="padding: 1.5rem 1.75rem; display: flex; flex-direction: column; gap: 1.25rem;">
+
+                <!-- Section 1: PDF User -->
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <strong style="font-size: 0.92rem; color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">
+                            <span>📘</span> 1. File PDF Manual Book Pegawai (User)
+                        </strong>
+                        <% if (typeof hasCustomUserPdf !== 'undefined' && hasCustomUserPdf) { %>
+                            <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 9999px;">✓ PDF Custom Aktif</span>
+                        <% } else { %>
+                            <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 9999px;">Template Standar</span>
+                        <% } %>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.85rem; line-height: 1.45;">
+                        File ini akan dibuka saat pegawai mengeklik tombol <strong>Cetak / Unduh PDF User</strong>.
+                    </p>
+                    <form action="/manual-book/upload-pdf" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                        <input type="hidden" name="type" value="user">
+                        <input type="file" name="pdf_file" accept=".pdf" required style="font-size: 0.8rem; color: #475569; flex: 1; min-width: 220px; padding: 0.4rem 0.6rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <button type="submit" style="background: #2563eb; color: #ffffff; border: none; font-weight: 700; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.2s;">
+                            <span>⬆️</span> Unggah PDF User
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Section 2: PDF Admin -->
+                <div style="background: #fffafa; border: 1.5px solid #fee2e2; border-radius: 14px; padding: 1.25rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <strong style="font-size: 0.92rem; color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">
+                            <span>📕</span> 2. File PDF Pedoman Administrator (Admin)
+                        </strong>
+                        <% if (typeof hasCustomAdminPdf !== 'undefined' && hasCustomAdminPdf) { %>
+                            <span style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 9999px;">✓ PDF Custom Aktif</span>
+                        <% } else { %>
+                            <span style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 9999px;">Template Standar</span>
+                        <% } %>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.85rem; line-height: 1.45;">
+                        File ini akan dibuka saat admin mengeklik tombol <strong>Cetak / Unduh PDF Admin</strong>.
+                    </p>
+                    <form action="/manual-book/upload-pdf" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                        <input type="hidden" name="type" value="admin">
+                        <input type="file" name="pdf_file" accept=".pdf" required style="font-size: 0.8rem; color: #475569; flex: 1; min-width: 220px; padding: 0.4rem 0.6rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+                        <button type="submit" style="background: #dc2626; color: #ffffff; border: none; font-weight: 700; font-size: 0.82rem; padding: 0.55rem 1.1rem; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: background 0.2s;">
+                            <span>⬆️</span> Unggah PDF Admin
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Info Box -->
+                <div style="background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #1e40af; line-height: 1.5;">
+                    💡 <strong>Tips Alternatif:</strong> Anda juga dapat langsung menempelkan file PDF Anda secara manual ke folder proyek:<br>
+                    • User: <code>public/docs/manual-book-user.pdf</code><br>
+                    • Admin: <code>public/docs/manual-book-admin.pdf</code>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 0.9rem 1.75rem; display: flex; justify-content: flex-end;">
+                <button type="button" onclick="closeUploadPdfModal()" style="background: #64748b; color: #ffffff; border: none; font-weight: 700; font-size: 0.82rem; padding: 0.55rem 1.25rem; border-radius: 8px; cursor: pointer;">
+                    Tutup
+                </button>
+            </div>
+
+        </div>
+    </div>
+    <% } %>
+
     <script src="/js/sidebar.js"></script>
 </body>
 

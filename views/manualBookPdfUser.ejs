@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panduan Praktik Pengguna (User Walkthrough Guide) - Meeting App BKN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -33,7 +36,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
             border-bottom: 2px solid #2563eb;
         }
 
@@ -66,6 +69,17 @@
             background: #475569;
         }
 
+        .pdf-toolbar-btn.word {
+            background: #185abd;
+            border: 1px solid #1e4ea1;
+        }
+
+        .pdf-toolbar-btn.word:hover {
+            background: #103f8a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 90, 189, 0.4);
+        }
+
         /* Lembar Dokumen A4 */
         .doc-sheet {
             width: 210mm;
@@ -73,7 +87,7 @@
             padding: 18mm 20mm;
             margin: 20px auto;
             background: #ffffff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             position: relative;
             page-break-after: always;
         }
@@ -182,7 +196,7 @@
             text-align: left;
             width: 100%;
             max-width: 440px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
         }
 
         .cover-meta-row {
@@ -250,7 +264,7 @@
             overflow: hidden;
             margin: 12px 0;
             background: #ffffff;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         }
 
         .ss-browser-bar {
@@ -274,9 +288,17 @@
             border-radius: 50%;
         }
 
-        .ss-dot.r { background: #ef4444; }
-        .ss-dot.y { background: #f59e0b; }
-        .ss-dot.g { background: #10b981; }
+        .ss-dot.r {
+            background: #ef4444;
+        }
+
+        .ss-dot.y {
+            background: #f59e0b;
+        }
+
+        .ss-dot.g {
+            background: #10b981;
+        }
 
         .ss-address-bar {
             flex: 1;
@@ -428,6 +450,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- TOOLBAR ATAS (HANYA DITAMPILKAN DI BROWSER) -->
@@ -436,13 +459,24 @@
             <img src="/logo-bkn-asli.png" alt="Logo" style="height: 32px;">
             <div>
                 <strong style="font-size: 0.95rem;">Panduan Praktik Pengguna (User Walkthrough Guide)</strong>
-                <span style="display: block; font-size: 0.75rem; color: #bfdbfe;">Panduan Langkah Nyata Operasional Pegawai dari Awal hingga Selesai</span>
+                <span style="display: block; font-size: 0.75rem; color: #bfdbfe;">Panduan Langkah Nyata Operasional
+                    Pegawai dari Awal hingga Selesai</span>
             </div>
         </div>
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
             <a href="/manual-book" class="pdf-toolbar-btn secondary">
                 ⬅️ Kembali ke Web
             </a>
+            <button type="button" class="pdf-toolbar-btn word" id="btnWordExport" onclick="exportToWord('Panduan-Praktik-Pengguna-BKN.doc')">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>📄 Cetak / Simpan Word (.doc)</span>
+            </button>
             <button type="button" class="pdf-toolbar-btn" onclick="window.print()">
                 🖨️ Cetak / Simpan PDF (A4)
             </button>
@@ -467,7 +501,10 @@
             <h1 class="cover-title">PANDUAN OPERASIONAL PENGGUNA<br>(USER WALKTHROUGH GUIDE)</h1>
             <div class="cover-divider"></div>
             <p class="cover-subtitle">
-                Alur langkah nyata bagi seluruh pegawai BKN: Mulai dari <strong>Login</strong>, <strong>Mengajukan Jadwal Rapat Zoom/Webinar</strong>, <strong>Mengambil & Membagikan Tautan Rapat</strong>, <strong>Menjalankan Presensi Digital Ber-Tanda Tangan</strong>, hingga <strong>Menyusun Notulen Resmi Otomatis Berbasis AI (.docx)</strong>.
+                Alur langkah nyata bagi seluruh pegawai BKN: Mulai dari <strong>Login</strong>, <strong>Mengajukan
+                    Jadwal Rapat Zoom/Webinar</strong>, <strong>Mengambil & Membagikan Tautan Rapat</strong>,
+                <strong>Menjalankan Presensi Digital Ber-Tanda Tangan</strong>, hingga <strong>Menyusun Notulen Resmi
+                    Otomatis Berbasis AI (.docx)</strong>.
             </p>
 
             <img src="/logo-bkn-asli.png" alt="Logo BKN" style="width: 95px; height: 95px; margin-bottom: 25px;">
@@ -479,19 +516,11 @@
                 </div>
                 <div class="cover-meta-row">
                     <span style="color: #64748b;">Peruntukan Pengguna</span>
-                    <strong style="color: #1d4ed8;">Pegawai / Unit Kerja / Peserta (Role: User)</strong>
+                    <strong style="color: #1d4ed8;">Pegawai & Unit Kerja</strong>
                 </div>
                 <div class="cover-meta-row">
                     <span style="color: #64748b;">Model Panduan</span>
                     <strong>Skenario Praktik Nyata Langkah Demi Langkah</strong>
-                </div>
-                <div class="cover-meta-row">
-                    <span style="color: #64748b;">Cakupan Alur</span>
-                    <strong>Login ➔ Ajukan Zoom ➔ Kelola Rapat ➔ Presensi ➔ AI Notulen</strong>
-                </div>
-                <div class="cover-meta-row">
-                    <span style="color: #64748b;">Versi Sistem</span>
-                    <strong>Versi 2.0 (Terbaru - 2026)</strong>
                 </div>
                 <div class="cover-meta-row">
                     <span style="color: #64748b;">Penerbit</span>
@@ -528,7 +557,8 @@
 
         <div class="scenario-box">
             <strong>🎯 Skenario Anda:</strong>
-            Anda baru saja tiba di kantor atau membuka laptop dan ingin memeriksa agenda rapat dinas hari ini serta menyiapkan kegiatan baru untuk divisi Anda.
+            Anda baru saja tiba di kantor atau membuka laptop dan ingin memeriksa agenda rapat dinas hari ini serta
+            menyiapkan kegiatan baru untuk divisi Anda.
         </div>
 
         <!-- DIAGRAM ALUR PEGAWAI -->
@@ -554,31 +584,42 @@
                 </div>
                 <div class="ss-address-bar">https://meeting.bkn.go.id/login ➔ /dashboard</div>
             </div>
-            <div class="ss-viewport" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; align-items: center;">
+            <div class="ss-viewport"
+                style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; align-items: center;">
                 <!-- Kiri: Form Login -->
-                <div style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 12px; position: relative; box-shadow: 0 4px 12px rgba(37,99,235,0.1);">
+                <div
+                    style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 12px; position: relative; box-shadow: 0 4px 12px rgba(37,99,235,0.1);">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
-                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Laman Masuk Pegawai BKN</div>
-                    
+                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Laman Masuk
+                        Pegawai BKN</div>
+
                     <div style="margin-bottom: 4px;">
                         <span style="font-size: 7.5px; font-weight: 700; color: #334155;">NIP RESMI PEGAWAI:</span>
-                        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 6px; font-size: 8.5px; background: #f8fafc;">198705122010121002</div>
+                        <div
+                            style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 6px; font-size: 8.5px; background: #f8fafc;">
+                            198705122010121002</div>
                     </div>
                     <div style="margin-bottom: 6px;">
                         <span style="font-size: 7.5px; font-weight: 700; color: #334155;">KATA SANDI:</span>
-                        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 6px; font-size: 8.5px; background: #f8fafc;">••••••••••••</div>
+                        <div
+                            style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 6px; font-size: 8.5px; background: #f8fafc;">
+                            ••••••••••••</div>
                     </div>
-                    <div style="background: #2563eb; color: white; padding: 5px; border-radius: 4px; font-size: 8.5px; font-weight: 700; text-align: center;">
+                    <div
+                        style="background: #2563eb; color: white; padding: 5px; border-radius: 4px; font-size: 8.5px; font-weight: 700; text-align: center;">
                         Masuk ke Aplikasi ➔
                     </div>
                 </div>
 
                 <!-- Kanan: Dashboard Agenda -->
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
-                    <div style="font-size: 10.5px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">🏠 Dashboard: Agenda Rapat Hari Ini</div>
-                    
-                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 6px; font-size: 8px; margin-bottom: 5px;">
+                    <div style="font-size: 10.5px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">🏠 Dashboard:
+                        Agenda Rapat Hari Ini</div>
+
+                    <div
+                        style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 6px; font-size: 8px; margin-bottom: 5px;">
                         <strong style="color: #1d4ed8;">Rakor Mutasi & Kenaikan Pangkat</strong>
                         <div style="color: #64748b;">⏰ 09.00 - 12.00 WIB • Tipe: Webinar</div>
                     </div>
@@ -595,20 +636,24 @@
                 <span class="callout-badge">1</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Masukkan NIP & Kata Sandi</strong>
-                    <p>Buka alamat web sistem di browser Anda. Masukkan 18 digit NIP resmi dan kata sandi Anda, lalu klik tombol biru <strong>"Masuk ke Aplikasi"</strong>.</p>
+                    <p>Buka alamat web sistem di browser Anda. Masukkan 18 digit NIP resmi dan kata sandi Anda, lalu
+                        klik tombol biru <strong>"Masuk ke Aplikasi"</strong>.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">2</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Cek Jadwal Rapat di Dashboard</strong>
-                    <p>Setelah masuk, layar Dashboard menampilkan agenda rapat dinas yang sedang aktif atau akan datang hari ini. Selanjutnya, arahkan kursor ke menu sebelah kiri untuk memulai pengajuan rapat baru.</p>
+                    <p>Setelah masuk, layar Dashboard menampilkan agenda rapat dinas yang sedang aktif atau akan datang
+                        hari ini. Selanjutnya, arahkan kursor ke menu sebelah kiri untuk memulai pengajuan rapat baru.
+                    </p>
                 </div>
             </div>
         </div>
 
         <div class="info-box">
-            💡 <strong>Tips Cepat:</strong> Jika Anda lupa kata sandi akun, hubungi Administrator Tim Sidigi untuk melakukan *Reset Kata Sandi* dalam hitungan detik.
+            💡 <strong>Tips Cepat:</strong> Jika Anda lupa kata sandi akun, hubungi Administrator Tim Sidigi untuk
+            melakukan *Reset Kata Sandi* dalam hitungan detik.
         </div>
 
         <div class="doc-footer">
@@ -639,7 +684,8 @@
 
         <div class="scenario-box">
             <strong>🎯 Skenario Anda:</strong>
-            Divisi Anda berencana mengadakan pertemuan daring dan membutuhkan lisensi Zoom resmi BKN. Anda ingin mengajukan jadwal agar tidak bentrok dengan divisi lain.
+            Divisi Anda berencana mengadakan pertemuan daring dan membutuhkan lisensi Zoom resmi BKN. Anda ingin
+            mengajukan jadwal agar tidak bentrok dengan divisi lain.
         </div>
 
         <!-- SCREENSHOT MOCKUP 2: FORM REQUEST ZOOM & ACCORDION STATUS -->
@@ -654,51 +700,65 @@
             </div>
             <div class="ss-viewport" style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 12px;">
                 <!-- Kiri: Form -->
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
-                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Formulir Pengajuan Rapat Daring</div>
-                    
+                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Formulir
+                        Pengajuan Rapat Daring</div>
+
                     <div style="margin-bottom: 4px;">
                         <span style="font-size: 7.5px; font-weight: 700; color: #334155;">1. JUDUL RAPAT DINAS *</span>
-                        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 5px; font-size: 8px;">Rapat Koordinasi Layanan Mutasi Pegawai</div>
+                        <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 5px; font-size: 8px;">
+                            Rapat Koordinasi Layanan Mutasi Pegawai</div>
                     </div>
-                    
+
                     <div style="display: flex; gap: 4px; margin-bottom: 4px;">
                         <div style="flex: 1;">
                             <span style="font-size: 7.5px; font-weight: 700;">2. JAM MULAI</span>
-                            <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 8px;">09.00 WIB</div>
+                            <div
+                                style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 8px;">
+                                09.00 WIB</div>
                         </div>
                         <div style="flex: 1;">
                             <span style="font-size: 7.5px; font-weight: 700;">JAM SELESAI</span>
-                            <div style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 8px;">12.00 WIB</div>
+                            <div
+                                style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 8px;">
+                                12.00 WIB</div>
                         </div>
                     </div>
 
                     <div style="margin-bottom: 6px;">
                         <span style="font-size: 7.5px; font-weight: 700; color: #1e3a8a;">3. PILIH TIPE KEGIATAN:</span>
-                        <div style="background: #eff6ff; border: 1.5px solid #2563eb; border-radius: 4px; padding: 4px 6px; font-size: 8px; font-weight: 700; color: #1d4ed8;">
+                        <div
+                            style="background: #eff6ff; border: 1.5px solid #2563eb; border-radius: 4px; padding: 4px 6px; font-size: 8px; font-weight: 700; color: #1d4ed8;">
                             🎯 Webinar (Membutuhkan Forum Slido BKN)
                         </div>
                     </div>
 
-                    <div style="background: #2563eb; color: white; padding: 5px; border-radius: 4px; font-size: 8.5px; font-weight: 700; text-align: center;">
+                    <div
+                        style="background: #2563eb; color: white; padding: 5px; border-radius: 4px; font-size: 8.5px; font-weight: 700; text-align: center;">
                         Kirim Permohonan Rapat ➔
                     </div>
                 </div>
 
                 <!-- Kanan: Status Accordion -->
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
-                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Status Pengajuan Divisi Anda</div>
-                    
+                    <div style="font-size: 10.5px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Status
+                        Pengajuan Divisi Anda</div>
+
                     <!-- Kartu Accordion -->
-                    <div style="border: 1px solid #cbd5e1; border-radius: 5px; padding: 6px; background: #fffbeb; margin-bottom: 6px;">
+                    <div
+                        style="border: 1px solid #cbd5e1; border-radius: 5px; padding: 6px; background: #fffbeb; margin-bottom: 6px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <strong style="font-size: 8.5px; color: #0d2b5c;">Rapat Koordinasi Mutasi</strong>
                                 <div style="font-size: 7.5px; color: #64748b;">📅 30 Sep 2026 • 09:00 WIB</div>
                             </div>
-                            <span style="background: #fef3c7; color: #b45309; font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 3px;">⏳ Menunggu</span>
+                            <span
+                                style="background: #fef3c7; color: #b45309; font-size: 7px; font-weight: 700; padding: 2px 5px; border-radius: 3px;">⏳
+                                Menunggu</span>
                         </div>
                     </div>
 
@@ -714,22 +774,26 @@
                 <span class="callout-badge">1</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Isi Formulir Permohonan dengan Lengkap</strong>
-                    <p>Klik menu <strong>"Request Zoom"</strong> di sidebar. Masukkan judul agenda rapat, tentukan tanggal, jam mulai, dan jam selesai kegiatan.</p>
+                    <p>Klik menu <strong>"Request Zoom"</strong> di sidebar. Masukkan judul agenda rapat, tentukan
+                        tanggal, jam mulai, dan jam selesai kegiatan.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">2</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Pilih Antara "Rapat Biasa" atau "Webinar"</strong>
-                    <p>• Pilih <strong>Rapat Biasa</strong> jika hanya untuk koordinasi internal (link Zoom meeting standar).<br>
-                    • Pilih <strong>Webinar</strong> jika mengundang banyak peserta dan Anda ingin audiens bisa mengirim pertanyaan interaktif serta kuis live melalui <strong>Slido BKN</strong>.</p>
+                    <p>• Pilih <strong>Rapat Biasa</strong> jika hanya untuk koordinasi internal (link Zoom meeting
+                        standar).<br>
+                        • Pilih <strong>Webinar</strong> jika mengundang banyak peserta dan Anda ingin audiens bisa
+                        mengirim pertanyaan interaktif serta kuis live melalui <strong>Slido BKN</strong>.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">3</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Klik "Kirim Permohonan"</strong>
-                    <p>Setelah tombol diklik, pengajuan Anda akan tampil di daftar kanan dengan status <em>"⏳ Menunggu Persetujuan Tim Sidigi"</em>.</p>
+                    <p>Setelah tombol diklik, pengajuan Anda akan tampil di daftar kanan dengan status <em>"⏳ Menunggu
+                            Persetujuan Tim Sidigi"</em>.</p>
                 </div>
             </div>
         </div>
@@ -762,7 +826,8 @@
 
         <div class="scenario-box">
             <strong>🎯 Skenario Anda:</strong>
-            Tim Sidigi telah menyetujui pengajuan Anda. Sekarang Anda ingin menyalin link Zoom resmi untuk dibagikan ke peserta serta mengelola berkas rapat Anda.
+            Tim Sidigi telah menyetujui pengajuan Anda. Sekarang Anda ingin menyalin link Zoom resmi untuk dibagikan ke
+            peserta serta mengelola berkas rapat Anda.
         </div>
 
         <!-- SCREENSHOT MOCKUP 3: ACCORDION TERBUKA & KARTU DI MANAJEMEN MEETING -->
@@ -775,43 +840,61 @@
                 </div>
                 <div class="ss-address-bar">https://meeting.bkn.go.id/manajemenmeeting (Kartu Rapat Resmi)</div>
             </div>
-            <div class="ss-viewport" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; align-items: center;">
+            <div class="ss-viewport"
+                style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; align-items: center;">
                 <!-- Kiri: Accordion Link Zoom yang Sudah Disetujui -->
-                <div style="background: white; border: 1.5px solid #10b981; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1.5px solid #10b981; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                         <strong style="font-size: 9.5px; color: #0d2b5c;">Rapat Koordinasi Mutasi</strong>
-                        <span style="background: #d1fae5; color: #047857; font-size: 7.5px; font-weight: 800; padding: 2px 5px; border-radius: 3px;">✓ Disetujui</span>
+                        <span
+                            style="background: #d1fae5; color: #047857; font-size: 7.5px; font-weight: 800; padding: 2px 5px; border-radius: 3px;">✓
+                            Disetujui</span>
                     </div>
 
                     <!-- Detail Terbuka -->
-                    <div style="background: #f0fdf4; border: 1px dashed #6ee7b7; border-radius: 5px; padding: 6px; margin-top: 4px;">
+                    <div
+                        style="background: #f0fdf4; border: 1px dashed #6ee7b7; border-radius: 5px; padding: 6px; margin-top: 4px;">
                         <span style="font-size: 7.5px; font-weight: 800; color: #047857;">TAUTAN ZOOM RESMI ANDA:</span>
                         <div style="display: flex; gap: 4px; margin-top: 2px;">
-                            <div style="flex:1; background: white; border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 7.5px; font-family: monospace;">https://bkn.zoom.us/j/842918...</div>
-                            <span style="background: #2563eb; color: white; padding: 2px 5px; border-radius: 3px; font-size: 7.5px; font-weight: 700;">Salin</span>
+                            <div
+                                style="flex:1; background: white; border: 1px solid #cbd5e1; padding: 2px 4px; font-size: 7.5px; font-family: monospace;">
+                                https://bkn.zoom.us/j/842918...</div>
+                            <span
+                                style="background: #2563eb; color: white; padding: 2px 5px; border-radius: 3px; font-size: 7.5px; font-weight: 700;">Salin</span>
                         </div>
-                        <div style="font-size: 7.5px; color: #475569; margin-top: 3px;">ID: 842 9182 3910 • Passcode: BKN52026</div>
+                        <div style="font-size: 7.5px; color: #475569; margin-top: 3px;">ID: 842 9182 3910 • Passcode:
+                            BKN52026</div>
                     </div>
                 </div>
 
                 <!-- Kanan: Kartu Rapat di Manajemen Meeting -->
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
-                    <span style="background: #dbeafe; color: #1e40af; font-size: 7.5px; font-weight: 800; padding: 1px 4px; border-radius: 3px;">WEBINAR</span>
+                    <span
+                        style="background: #dbeafe; color: #1e40af; font-size: 7.5px; font-weight: 800; padding: 1px 4px; border-radius: 3px;">WEBINAR</span>
                     <h5 style="font-size: 9.5px; color: #0f172a; margin: 3px 0 2px;">Rapat Koordinasi Mutasi</h5>
                     <div style="font-size: 7.5px; color: #64748b; margin-bottom: 6px;">📅 30 Sep 2026 • 09:00 WIB</div>
 
                     <!-- 4 Tombol Aksi -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">
-                        <span style="background: #eff6ff; color: #2563eb; padding: 3px; border-radius: 3px;">👁️ View Detail</span>
-                        <span style="background: #f1f5f9; color: #475569; padding: 3px; border-radius: 3px;">📝 Presensi</span>
-                        <span style="background: #f1f5f9; color: #475569; padding: 3px; border-radius: 3px;">✏️ Edit Data</span>
-                        <span style="background: #fef3c7; color: #b45309; padding: 3px; border-radius: 3px;">📜 Sertifikat</span>
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">
+                        <span style="background: #eff6ff; color: #2563eb; padding: 3px; border-radius: 3px;">👁️ View
+                            Detail</span>
+                        <span style="background: #f1f5f9; color: #475569; padding: 3px; border-radius: 3px;">📝
+                            Presensi</span>
+                        <span style="background: #f1f5f9; color: #475569; padding: 3px; border-radius: 3px;">✏️ Edit
+                            Data</span>
+                        <span style="background: #fef3c7; color: #b45309; padding: 3px; border-radius: 3px;">📜
+                            Sertifikat</span>
                     </div>
 
                     <!-- Tombol Ungu Slido Hanya Muncul di Webinar -->
-                    <div style="background: linear-gradient(135deg, #7c3aed, #6366f1); color: white; padding: 3px; border-radius: 3px; font-size: 7.5px; font-weight: 800; text-align: center; margin-top: 4px;">
+                    <div
+                        style="background: linear-gradient(135deg, #7c3aed, #6366f1); color: white; padding: 3px; border-radius: 3px; font-size: 7.5px; font-weight: 800; text-align: center; margin-top: 4px;">
                         💬 Forum Q&A & Kuis Slido BKN ↗
                     </div>
                 </div>
@@ -823,20 +906,27 @@
                 <span class="callout-badge">1</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Buka Kartu Accordion & Salin Tautan Rapat</strong>
-                    <p>Di menu <em>Request Zoom</em>, klik kartu permohonan Anda yang telah disetujui. Kartu akan terbuka ke bawah. Klik tombol <strong>Salin</strong> pada URL Zoom, catat Meeting ID dan Passcode untuk disebarkan dalam undangan rapat dinas.</p>
+                    <p>Di menu <em>Request Zoom</em>, klik kartu permohonan Anda yang telah disetujui. Kartu akan
+                        terbuka ke bawah. Klik tombol <strong>Salin</strong> pada URL Zoom, catat Meeting ID dan
+                        Passcode untuk disebarkan dalam undangan rapat dinas.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">2</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Buka Menu Manajemen Meeting untuk Kelola Agenda</strong>
-                    <p>Buka menu <strong>"Manajemen Meeting"</strong> di sidebar. Rapat Anda sudah tercantum rapi. Gunakan tombol:</p>
+                    <p>Buka menu <strong>"Manajemen Meeting"</strong> di sidebar. Rapat Anda sudah tercantum rapi.
+                        Gunakan tombol:</p>
                     <p style="margin-top: 2px;">
-                        • <strong>👁️ View</strong>: Membuka berkas notulen, video rekaman, foto kegiatan, dan link presensi.<br>
-                        • <strong>📝 Lihat Presensi</strong>: Melihat rekap siapa saja yang sudah mengisi daftar hadir.<br>
+                        • <strong>👁️ View</strong>: Membuka berkas notulen, video rekaman, foto kegiatan, dan link
+                        presensi.<br>
+                        • <strong>📝 Lihat Presensi</strong>: Melihat rekap siapa saja yang sudah mengisi daftar
+                        hadir.<br>
                         • <strong>✏️ Edit</strong>: Menyesuaikan judul atau jam rapat jika ada perubahan.<br>
-                        • <strong>📜 Lihat Sertifikat</strong>: Memeriksa e-sertifikat yang diterbitkan untuk peserta.<br>
-                        • <strong>💬 Slido BKN (Tombol Ungu)</strong>: Otomatis tersedia khusus rapat Webinar untuk membuka forum tanya jawab.
+                        • <strong>📜 Lihat Sertifikat</strong>: Memeriksa e-sertifikat yang diterbitkan untuk
+                        peserta.<br>
+                        • <strong>💬 Slido BKN (Tombol Ungu)</strong>: Otomatis tersedia khusus rapat Webinar untuk
+                        membuka forum tanya jawab.
                     </p>
                 </div>
             </div>
@@ -870,7 +960,8 @@
 
         <div class="scenario-box">
             <strong>🎯 Skenario Anda:</strong>
-            Hari-H rapat telah tiba. Peserta rapat sudah bergabung di ruang Zoom atau di ruang aula kantor. Anda ingin membagikan form absensi digital dan mengaktifkan forum tanya-jawab.
+            Hari-H rapat telah tiba. Peserta rapat sudah bergabung di ruang Zoom atau di ruang aula kantor. Anda ingin
+            membagikan form absensi digital dan mengaktifkan forum tanya-jawab.
         </div>
 
         <!-- SCREENSHOT MOCKUP 4: FORM PRESENSI DIGITAL & SLIDO AUDIENS -->
@@ -885,41 +976,56 @@
             </div>
             <div class="ss-viewport" style="display: flex; gap: 12px; justify-content: center;">
                 <!-- Form Presensi Digital -->
-                <div style="background: white; border: 1.5px solid #10b981; border-radius: 8px; padding: 10px; width: 280px; position: relative;">
+                <div
+                    style="background: white; border: 1.5px solid #10b981; border-radius: 8px; padding: 10px; width: 280px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 6px; top: 6px;">1</span>
-                    <div style="font-size: 10px; font-weight: 800; color: #065f46; margin-bottom: 4px;">Formulir Presensi Kehadiran</div>
-                    <div style="font-size: 7.5px; color: #64748b; margin-bottom: 4px;">Nama: Syahroni, S.Pd • NIP: 19870512...</div>
+                    <div style="font-size: 10px; font-weight: 800; color: #065f46; margin-bottom: 4px;">Formulir
+                        Presensi Kehadiran</div>
+                    <div style="font-size: 7.5px; color: #64748b; margin-bottom: 4px;">Nama: Syahroni, S.Pd • NIP:
+                        19870512...</div>
 
                     <div style="margin-bottom: 4px;">
-                        <span style="font-size: 7.5px; font-weight: 700; color: #1e3a8a;">TANDA TANGAN DIGITAL (LAYAR/MOUSE):</span>
-                        <div style="border: 1.5px dashed #93c5fd; background: #f0f7ff; height: 50px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: cursive; font-size: 16px; color: #1d4ed8;">
+                        <span style="font-size: 7.5px; font-weight: 700; color: #1e3a8a;">TANDA TANGAN DIGITAL
+                            (LAYAR/MOUSE):</span>
+                        <div
+                            style="border: 1.5px dashed #93c5fd; background: #f0f7ff; height: 50px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: cursive; font-size: 16px; color: #1d4ed8;">
                             Syahroni
                         </div>
                     </div>
 
-                    <div style="background: #10b981; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
+                    <div
+                        style="background: #10b981; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
                         ✓ Kirim Presensi Kehadiran
                     </div>
                 </div>
 
                 <!-- Slido Q&A Peserta -->
-                <div style="background: white; border: 1.5px solid #fed7aa; border-radius: 8px; padding: 10px; width: 290px; position: relative;">
+                <div
+                    style="background: white; border: 1.5px solid #fed7aa; border-radius: 8px; padding: 10px; width: 290px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 6px; top: 6px;">2</span>
-                    <div style="font-size: 10px; font-weight: 800; color: #c2410c; margin-bottom: 4px;">💬 Slido BKN: Tanya Jawab Audiens</div>
-                    
-                    <div style="background: #fffaf5; border: 1px solid #fed7aa; border-radius: 4px; padding: 4px; margin-bottom: 4px;">
+                    <div style="font-size: 10px; font-weight: 800; color: #c2410c; margin-bottom: 4px;">💬 Slido BKN:
+                        Tanya Jawab Audiens</div>
+
+                    <div
+                        style="background: #fffaf5; border: 1px solid #fed7aa; border-radius: 4px; padding: 4px; margin-bottom: 4px;">
                         <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #9a3412;">
                             <strong>Ahmad (BKPSDM)</strong>
                             <span>2 menit lalu</span>
                         </div>
-                        <p style="font-size: 8px; color: #1e293b; margin: 2px 0 3px;">Bagaimana alur usulan berkas mutasi pegawai antar-instansi?</p>
+                        <p style="font-size: 8px; color: #1e293b; margin: 2px 0 3px;">Bagaimana alur usulan berkas
+                            mutasi pegawai antar-instansi?</p>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 7px; background: #ffedd5; color: #9a3412; padding: 1px 3px; border-radius: 2px;">Topik: Mutasi</span>
-                            <span style="background: #2563eb; color: white; padding: 1px 4px; border-radius: 2px; font-size: 7.5px; font-weight: 700;">▲ 14 Upvote</span>
+                            <span
+                                style="font-size: 7px; background: #ffedd5; color: #9a3412; padding: 1px 3px; border-radius: 2px;">Topik:
+                                Mutasi</span>
+                            <span
+                                style="background: #2563eb; color: white; padding: 1px 4px; border-radius: 2px; font-size: 7.5px; font-weight: 700;">▲
+                                14 Upvote</span>
                         </div>
                     </div>
 
-                    <div style="border: 1px solid #cbd5e1; border-radius: 3px; padding: 3px; font-size: 7.5px; color: #94a3b8;">
+                    <div
+                        style="border: 1px solid #cbd5e1; border-radius: 3px; padding: 3px; font-size: 7.5px; color: #94a3b8;">
                         Tulis pertanyaan untuk narasumber rapat...
                     </div>
                 </div>
@@ -931,27 +1037,34 @@
                 <span class="callout-badge">1</span>
                 <div class="step-item-content">
                     <strong>Tindakan Panitia: Bagikan Link Presensi atau Tampilkan QR Code</strong>
-                    <p>Buka modal <em>View</em> pada rapat Anda, klik tombol *"Buka Link Presensi"*. Anda dapat menyalin tautan untuk di-share di chat Zoom atau menayangkan QR Code di proyektor ruangan.</p>
+                    <p>Buka modal <em>View</em> pada rapat Anda, klik tombol *"Buka Link Presensi"*. Anda dapat menyalin
+                        tautan untuk di-share di chat Zoom atau menayangkan QR Code di proyektor ruangan.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">2</span>
                 <div class="step-item-content">
                     <strong>Tindakan Peserta: Isi Data & Tanda Tangan Langsung di Layar</strong>
-                    <p>Peserta membuka link presensi di HP/laptop tanpa perlu login. Cukup ketik Nama, Instansi, lalu <strong>goreskan tanda tangan digital</strong> di layar menggunakan jari atau mouse, lalu klik <strong>"Kirim Presensi"</strong>.</p>
+                    <p>Peserta membuka link presensi di HP/laptop tanpa perlu login. Cukup ketik Nama, Instansi, lalu
+                        <strong>goreskan tanda tangan digital</strong> di layar menggunakan jari atau mouse, lalu klik
+                        <strong>"Kirim Presensi"</strong>.
+                    </p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">3</span>
                 <div class="step-item-content">
                     <strong>Tindakan Peserta: Menggunakan Slido BKN (Khusus Webinar)</strong>
-                    <p>Buka link Slido BKN. Peserta dapat mengirim pertanyaan ke narasumber (bisa mode *Anonim*), memberi dukungan **▲ Upvote** agar pertanyaan penting naik ke urutan teratas, serta mengikuti kuis interaktif.</p>
+                    <p>Buka link Slido BKN. Peserta dapat mengirim pertanyaan ke narasumber (bisa mode *Anonim*),
+                        memberi dukungan **▲ Upvote** agar pertanyaan penting naik ke urutan teratas, serta mengikuti
+                        kuis interaktif.</p>
                 </div>
             </div>
         </div>
 
         <div class="info-box">
-            📜 <strong>E-Sertifikat Otomatis:</strong> Setelah presensi webinar berhasil terkirim, modal sukses otomatis memunculkan tombol <strong>"Unduh E-Sertifikat"</strong> ber-QR Code validasi resmi BKN.
+            📜 <strong>E-Sertifikat Otomatis:</strong> Setelah presensi webinar berhasil terkirim, modal sukses otomatis
+            memunculkan tombol <strong>"Unduh E-Sertifikat"</strong> ber-QR Code validasi resmi BKN.
         </div>
 
         <div class="doc-footer">
@@ -982,7 +1095,8 @@
 
         <div class="scenario-box">
             <strong>🎯 Skenario Anda:</strong>
-            Rapat telah selesai. Anda perlu mengunduh dokumentasi kegiatan, membuat dokumen resmi risalah notulen dinas untuk ditandatangani pimpinan, lalu keluar dari sistem.
+            Rapat telah selesai. Anda perlu mengunduh dokumentasi kegiatan, membuat dokumen resmi risalah notulen dinas
+            untuk ditandatangani pimpinan, lalu keluar dari sistem.
         </div>
 
         <!-- SCREENSHOT MOCKUP 5: MODAL VIEW BERKAS & GENERATOR NOTULEN AI WORD -->
@@ -997,29 +1111,43 @@
             </div>
             <div class="ss-viewport" style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 12px;">
                 <!-- Kiri: Modal View Unduh Berkas -->
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">1</span>
-                    <div style="font-size: 10px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Unduh Arsip Dokumentasi Rapat</div>
-                    
+                    <div style="font-size: 10px; font-weight: 800; color: #0d2b5c; margin-bottom: 6px;">Unduh Arsip
+                        Dokumentasi Rapat</div>
+
                     <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px;">
-                        <span style="background: #2563eb; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">📄 Unduh Risalah Notulen (PDF)</span>
-                        <span style="background: #059669; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">🎬 Unduh Video Rekaman Rapat</span>
-                        <span style="background: #d97706; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">📸 Buka Album Foto Dokumentasi</span>
+                        <span
+                            style="background: #2563eb; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">📄
+                            Unduh Risalah Notulen (PDF)</span>
+                        <span
+                            style="background: #059669; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">🎬
+                            Unduh Video Rekaman Rapat</span>
+                        <span
+                            style="background: #d97706; color: white; padding: 4px; border-radius: 3px; font-size: 7.5px; font-weight: 700; text-align: center;">📸
+                            Buka Album Foto Dokumentasi</span>
                     </div>
                 </div>
 
                 <!-- Kanan: Generator Notulen AI ke Word -->
-                <div style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 10px; position: relative;">
+                <div
+                    style="background: white; border: 1.5px solid #2563eb; border-radius: 8px; padding: 10px; position: relative;">
                     <span class="callout-badge" style="position: absolute; right: 8px; top: 8px;">2</span>
-                    <div style="font-size: 10px; font-weight: 800; color: #1e3a8a; margin-bottom: 3px;">📝 Generator Risalah Notulen AI</div>
-                    <p style="font-size: 7.5px; color: #64748b; margin-bottom: 5px;">Rangkum hasil rapat otomatis ke format Word (.docx) ber-Kop BKN</p>
-                    
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; font-size: 7.5px; margin-bottom: 5px;">
+                    <div style="font-size: 10px; font-weight: 800; color: #1e3a8a; margin-bottom: 3px;">📝 Generator
+                        Risalah Notulen AI</div>
+                    <p style="font-size: 7.5px; color: #64748b; margin-bottom: 5px;">Rangkum hasil rapat otomatis ke
+                        format Word (.docx) ber-Kop BKN</p>
+
+                    <div
+                        style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; font-size: 7.5px; margin-bottom: 5px;">
                         <span style="color:#64748b;">Ketikkan poin penting rapat:</span>
-                        <div style="color:#0f172a; font-weight:600;">"1. Usulan mutasi disetujui 12 berkas... 2. Batas waktu perbaikan 5 Okt..."</div>
+                        <div style="color:#0f172a; font-weight:600;">"1. Usulan mutasi disetujui 12 berkas... 2. Batas
+                            waktu perbaikan 5 Okt..."</div>
                     </div>
 
-                    <div style="background: #2563eb; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
+                    <div
+                        style="background: #2563eb; color: white; padding: 4px; border-radius: 4px; font-size: 8px; font-weight: 700; text-align: center;">
                         ⚡ Generate & Ekspor Microsoft Word (.docx)
                     </div>
                 </div>
@@ -1031,28 +1159,34 @@
                 <span class="callout-badge">1</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Unduh Berkas Dokumentasi di Menu Manajemen Meeting</strong>
-                    <p>Klik tombol <strong>View</strong> pada rapat Anda untuk mengunduh dokumen risalah resmi (PDF), video rekaman rapat, atau melihat galeri foto kegiatan dinas.</p>
+                    <p>Klik tombol <strong>View</strong> pada rapat Anda untuk mengunduh dokumen risalah resmi (PDF),
+                        video rekaman rapat, atau melihat galeri foto kegiatan dinas.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">2</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Bikin Risalah Rapat Resmi dengan Notulen AI Word</strong>
-                    <p>Buka menu <strong>"App Infografis"</strong> di sidebar. Masukkan catatan inti rapat Anda, lalu klik tombol *Generate*. AI akan merapikannya menjadi susunan notulen kedinasan standar dan langsung dapat diunduh dalam file <strong>Microsoft Word (.docx)</strong> ber-Kop Surat BKN siap ditandatangani.</p>
+                    <p>Buka menu <strong>"App Infografis"</strong> di sidebar. Masukkan catatan inti rapat Anda, lalu
+                        klik tombol *Generate*. AI akan merapikannya menjadi susunan notulen kedinasan standar dan
+                        langsung dapat diunduh dalam file <strong>Microsoft Word (.docx)</strong> ber-Kop Surat BKN siap
+                        ditandatangani.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">3</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Bikin Poster Infografis Kinerja (Opsional)</strong>
-                    <p>Di portal yang sama, buka *Modul Infografis Kinerja* jika Anda ingin mengubah angka capaian rapat menjadi poster visual yang estetik untuk dipresentasikan ke pimpinan.</p>
+                    <p>Di portal yang sama, buka *Modul Infografis Kinerja* jika Anda ingin mengubah angka capaian rapat
+                        menjadi poster visual yang estetik untuk dipresentasikan ke pimpinan.</p>
                 </div>
             </div>
             <div class="step-item">
                 <span class="callout-badge">4</span>
                 <div class="step-item-content">
                     <strong>Tindakan Anda: Selesai & Keluar dari Sistem (Logout)</strong>
-                    <p>Setelah seluruh pekerjaan selesai, klik tombol <strong>"Keluar"</strong> di bagian bawah sidebar lalu klik <em>OK</em> untuk menutup sesi dengan aman.</p>
+                    <p>Setelah seluruh pekerjaan selesai, klik tombol <strong>"Keluar"</strong> di bagian bawah sidebar
+                        lalu klik <em>OK</em> untuk menutup sesi dengan aman.</p>
                 </div>
             </div>
         </div>
@@ -1063,5 +1197,446 @@
         </div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" style="position: fixed; bottom: 25px; right: 25px; z-index: 10000; background: #0f172a; color: #ffffff; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-left: 4px solid #10b981; display: none; align-items: center; gap: 10px; transition: opacity 0.3s;">
+        <span>✅</span> <span id="toastMessage">Dokumen Word (.doc) berhasil diunduh!</span>
+    </div>
+
+    <script>
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (!toast) return;
+            toastMsg.textContent = msg;
+            toast.style.display = 'flex';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 300);
+            }, 4000);
+        }
+
+        async function exportToWord(filename) {
+            const btn = document.getElementById('btnWordExport');
+            const originalContent = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>⏳ Menyiapkan Dokumen Word...</span>';
+            }
+
+            try {
+                // 1. Ambil data base64 logo BKN
+                let logoBase64 = '';
+                const logoImg = document.querySelector('img[src*="logo-bkn-asli.png"]');
+                if (logoImg) {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = logoImg.naturalWidth || 120;
+                        canvas.height = logoImg.naturalHeight || 120;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(logoImg, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        logoBase64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+                    } catch (e) {
+                        console.warn('Canvas toDataURL gagal, mencoba fetch langsung:', e);
+                    }
+                }
+
+                if (!logoBase64) {
+                    try {
+                        const resp = await fetch('/logo-bkn-asli.png');
+                        const blob = await resp.blob();
+                        logoBase64 = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                const res = reader.result;
+                                resolve(res.split(',')[1]);
+                            };
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (err) {
+                        console.warn('Fetch logo gagal:', err);
+                    }
+                }
+
+                // 2. Kloning semua lembar dokumen (.doc-sheet)
+                const sheets = document.querySelectorAll('.doc-sheet');
+                let sheetsHtml = '';
+
+                sheets.forEach((sheet, idx) => {
+                    const clone = sheet.cloneNode(true);
+                    
+                    // Arahkan src gambar logo ke identifier MHTML
+                    const imgs = clone.querySelectorAll('img');
+                    imgs.forEach(img => {
+                        const src = img.getAttribute('src');
+                        if (src && src.includes('logo-bkn-asli.png')) {
+                            img.setAttribute('src', 'logo-bkn-asli.png');
+                        }
+                    });
+
+                    sheetsHtml += '<div class="doc-sheet">' + clone.innerHTML + '</div>';
+                    if (idx < sheets.length - 1) {
+                        sheetsHtml += '<br clear="all" style="page-break-before:always; mso-break-type:section-break">';
+                    }
+                });
+
+                // 3. Konfigurasi styling ramah Microsoft Word
+                const boundary = "----=_NextPart_BKN_MANUAL_" + Date.now();
+                const docTitle = document.title || "Panduan Praktik Pengguna BKN";
+
+                const wordStyles = `
+                    @page Section1 {
+                        size: 595.3pt 841.9pt; /* A4: 210mm x 297mm */
+                        margin: 36.0pt 42.0pt 36.0pt 42.0pt;
+                        mso-header-margin: 35.4pt;
+                        mso-footer-margin: 35.4pt;
+                        mso-paper-source: 0;
+                    }
+                    div.Section1 {
+                        page: Section1;
+                        font-family: 'Segoe UI', Calibri, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+                        color: #1e293b;
+                        font-size: 10pt;
+                        line-height: 1.45;
+                    }
+                    .doc-sheet {
+                        width: 100% !important;
+                        min-height: auto !important;
+                        padding: 0 !important;
+                        margin: 0 0 15pt 0 !important;
+                        box-shadow: none !important;
+                        background: #ffffff !important;
+                    }
+                    .kop-surat {
+                        display: table !important;
+                        width: 100% !important;
+                        border-bottom: 2pt solid #0d2b5c !important;
+                        padding-bottom: 8pt !important;
+                        margin-bottom: 14pt !important;
+                    }
+                    .kop-logo {
+                        display: table-cell !important;
+                        width: 55pt !important;
+                        vertical-align: middle !important;
+                    }
+                    .kop-logo img {
+                        width: 55pt !important;
+                        height: auto !important;
+                    }
+                    .kop-text {
+                        display: table-cell !important;
+                        vertical-align: middle !important;
+                        text-align: center !important;
+                        padding-left: 10pt !important;
+                    }
+                    .kop-text h2 {
+                        font-size: 13pt !important;
+                        font-weight: bold !important;
+                        color: #0d2b5c !important;
+                        margin: 0 0 2pt 0 !important;
+                    }
+                    .kop-text h3 {
+                        font-size: 11pt !important;
+                        font-weight: bold !important;
+                        color: #1e40af !important;
+                        margin: 0 0 2pt 0 !important;
+                    }
+                    .kop-text p {
+                        font-size: 8.5pt !important;
+                        color: #64748b !important;
+                        margin: 0 !important;
+                    }
+                    .cover-page {
+                        text-align: center !important;
+                        border: 1.5pt solid #bfdbfe !important;
+                        padding: 24pt 18pt !important;
+                        background: #f8fafc !important;
+                        margin-bottom: 15pt !important;
+                    }
+                    .cover-badge {
+                        background: #dbeafe !important;
+                        color: #1d4ed8 !important;
+                        font-size: 9.5pt !important;
+                        font-weight: bold !important;
+                        padding: 4pt 12pt !important;
+                        border: 1pt solid #bfdbfe !important;
+                        display: inline-block !important;
+                        margin-bottom: 12pt !important;
+                    }
+                    .cover-title {
+                        font-size: 18pt !important;
+                        font-weight: bold !important;
+                        color: #0d2b5c !important;
+                        line-height: 1.3 !important;
+                        margin: 0 0 10pt 0 !important;
+                    }
+                    .cover-divider {
+                        height: 2pt !important;
+                        background: #2563eb !important;
+                        width: 60pt !important;
+                        margin: 0 auto 12pt auto !important;
+                    }
+                    .cover-subtitle {
+                        font-size: 10pt !important;
+                        color: #334155 !important;
+                        line-height: 1.5 !important;
+                        margin: 0 auto 16pt auto !important;
+                    }
+                    .cover-meta-box {
+                        background: #ffffff !important;
+                        border: 1pt solid #cbd5e1 !important;
+                        padding: 10pt 14pt !important;
+                        width: 85% !important;
+                        margin: 14pt auto 0 auto !important;
+                        text-align: left !important;
+                    }
+                    .cover-meta-row {
+                        display: table !important;
+                        width: 100% !important;
+                        padding: 4pt 0 !important;
+                        border-bottom: 1pt dashed #e2e8f0 !important;
+                    }
+                    .cover-meta-row span {
+                        display: table-cell !important;
+                        width: 45% !important;
+                        color: #64748b !important;
+                        font-size: 9pt !important;
+                    }
+                    .cover-meta-row strong {
+                        display: table-cell !important;
+                        width: 55% !important;
+                        text-align: right !important;
+                        font-size: 9.5pt !important;
+                    }
+                    .chapter-header {
+                        display: table !important;
+                        width: 100% !important;
+                        border-bottom: 1.5pt solid #cbd5e1 !important;
+                        padding-bottom: 6pt !important;
+                        margin-bottom: 10pt !important;
+                    }
+                    .chapter-title {
+                        display: table-cell !important;
+                        font-size: 12.5pt !important;
+                        font-weight: bold !important;
+                        color: #0d2b5c !important;
+                        vertical-align: middle !important;
+                    }
+                    .chapter-badge {
+                        display: table-cell !important;
+                        text-align: right !important;
+                        vertical-align: middle !important;
+                        font-size: 8.5pt !important;
+                        font-weight: bold !important;
+                        color: #2563eb !important;
+                    }
+                    .scenario-box {
+                        background: #eff6ff !important;
+                        border-left: 3.5pt solid #2563eb !important;
+                        padding: 8pt 10pt !important;
+                        color: #1e40af !important;
+                        font-size: 9.5pt !important;
+                        margin-bottom: 10pt !important;
+                    }
+                    .scenario-box strong {
+                        color: #0d2b5c !important;
+                        font-size: 10pt !important;
+                        display: block !important;
+                        margin-bottom: 2pt !important;
+                    }
+                    .workflow-diagram {
+                        display: table !important;
+                        width: 100% !important;
+                        background: #f8fafc !important;
+                        border: 1pt solid #cbd5e1 !important;
+                        padding: 6pt !important;
+                        margin-bottom: 10pt !important;
+                        text-align: center !important;
+                    }
+                    .wf-node {
+                        display: inline-block !important;
+                        font-size: 8pt !important;
+                        font-weight: bold !important;
+                        background: #ffffff !important;
+                        border: 1pt solid #cbd5e1 !important;
+                        padding: 3pt 6pt !important;
+                        margin: 2pt !important;
+                    }
+                    .wf-node.active {
+                        background: #eff6ff !important;
+                        border-color: #2563eb !important;
+                        color: #1d4ed8 !important;
+                    }
+                    .wf-arrow {
+                        display: inline-block !important;
+                        color: #94a3b8 !important;
+                        font-size: 9pt !important;
+                        margin: 0 3pt !important;
+                    }
+                    .step-list {
+                        margin: 8pt 0 !important;
+                    }
+                    .step-item {
+                        display: table !important;
+                        width: 100% !important;
+                        background: #f8fafc !important;
+                        border: 1pt solid #e2e8f0 !important;
+                        padding: 6pt 10pt !important;
+                        margin-bottom: 6pt !important;
+                    }
+                    .callout-badge {
+                        display: table-cell !important;
+                        width: 20pt !important;
+                        vertical-align: top !important;
+                        font-size: 9pt !important;
+                        font-weight: bold !important;
+                        color: #2563eb !important;
+                    }
+                    .step-item-content {
+                        display: table-cell !important;
+                        vertical-align: top !important;
+                        padding-left: 6pt !important;
+                    }
+                    .step-item-content strong {
+                        font-size: 10pt !important;
+                        color: #0f172a !important;
+                        display: block !important;
+                        margin-bottom: 2pt !important;
+                    }
+                    .step-item-content p {
+                        font-size: 9pt !important;
+                        color: #475569 !important;
+                        margin: 0 !important;
+                    }
+                    .info-box {
+                        background: #f0fdf4 !important;
+                        border-left: 3.5pt solid #10b981 !important;
+                        padding: 7pt 10pt !important;
+                        font-size: 9pt !important;
+                        color: #065f46 !important;
+                        margin: 8pt 0 !important;
+                    }
+                    .ss-browser-frame {
+                        border: 1pt solid #cbd5e1 !important;
+                        margin: 10pt 0 !important;
+                        background: #ffffff !important;
+                    }
+                    .ss-browser-bar {
+                        background: #f1f5f9 !important;
+                        padding: 4pt 8pt !important;
+                        border-bottom: 1pt solid #cbd5e1 !important;
+                        font-size: 8pt !important;
+                        color: #475569 !important;
+                    }
+                    .ss-viewport {
+                        padding: 10pt !important;
+                        background: #ffffff !important;
+                    }
+                    .doc-footer {
+                        display: table !important;
+                        width: 100% !important;
+                        margin-top: 15pt !important;
+                        padding-top: 6pt !important;
+                        border-top: 1pt solid #cbd5e1 !important;
+                        font-size: 8pt !important;
+                        color: #94a3b8 !important;
+                        position: static !important;
+                    }
+                    .doc-footer span:first-child {
+                        display: table-cell !important;
+                        text-align: left !important;
+                    }
+                    .doc-footer span:last-child {
+                        display: table-cell !important;
+                        text-align: right !important;
+                    }
+                    table {
+                        border-collapse: collapse !important;
+                        width: 100% !important;
+                        margin: 8pt 0 !important;
+                    }
+                    th, td {
+                        border: 1pt solid #cbd5e1 !important;
+                        padding: 5pt 7pt !important;
+                        font-size: 9pt !important;
+                    }
+                    th {
+                        background: #f1f5f9 !important;
+                        font-weight: bold !important;
+                    }
+                `;
+
+                const mhtml = [
+                    'MIME-Version: 1.0',
+                    'Content-Type: multipart/related; boundary="' + boundary + '"; type="text/html"',
+                    '',
+                    '--' + boundary,
+                    'Content-Type: text/html; charset="utf-8"',
+                    'Content-Transfer-Encoding: 8bit',
+                    '',
+                    '<!DOCTYPE html>',
+                    '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">',
+                    '<head>',
+                    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
+                    '<title>' + docTitle + '</title>',
+                    '<!--[if gte mso 9]>',
+                    '<xml>',
+                    '  <w:WordDocument>',
+                    '    <w:View>Print</w:View>',
+                    '    <w:Zoom>100</w:Zoom>',
+                    '    <w:DoNotOptimizeForBrowser/>',
+                    '  </w:WordDocument>',
+                    '</xml>',
+                    '<![endif]-->',
+                    '<style>' + wordStyles + '</style>',
+                    '</head>',
+                    '<body>',
+                    '<div class="Section1">',
+                    sheetsHtml,
+                    '</div>',
+                    '</body>',
+                    '</html>',
+                    ''
+                ];
+
+                if (logoBase64) {
+                    mhtml.push('--' + boundary);
+                    mhtml.push('Content-Location: logo-bkn-asli.png');
+                    mhtml.push('Content-Transfer-Encoding: base64');
+                    mhtml.push('Content-Type: image/png');
+                    mhtml.push('');
+                    mhtml.push(logoBase64);
+                    mhtml.push('');
+                }
+
+                mhtml.push('--' + boundary + '--');
+
+                const blob = new Blob([mhtml.join('\r\n')], { type: 'application/msword;charset=utf-8' });
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename || 'Panduan-Praktik-Pengguna-BKN.doc';
+                document.body.appendChild(a);
+                a.click();
+
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(downloadUrl);
+                }, 150);
+
+                showToast('Dokumen Word (.doc) berhasil diunduh dan siap diedit/dicetak di Microsoft Word!');
+            } catch (err) {
+                console.error('Gagal mengekspor dokumen Word:', err);
+                alert('Terjadi kendala saat mengekspor ke Word. Anda juga dapat menggunakan tombol Cetak PDF (A4).');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
+            }
+        }
+    </script>
 </body>
+
 </html>

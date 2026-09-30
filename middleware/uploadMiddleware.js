@@ -96,8 +96,40 @@ export const uploadTranscript = multer({
   fileFilter: transcriptFilter
 });
 
+const docsDir = path.join(__dirname, "..", "public", "docs");
+if (!fs.existsSync(docsDir)) {
+  fs.mkdirSync(docsDir, { recursive: true });
+}
+
+const manualPdfStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, docsDir);
+  },
+  filename: function (req, file, cb) {
+    const pdfType = req.body && req.body.type === "admin" ? "admin" : "user";
+    cb(null, `manual-book-${pdfType}.pdf`);
+  }
+});
+
+const pdfFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (ext === ".pdf" || file.mimetype === "application/pdf") {
+    cb(null, true);
+  } else {
+    cb(new Error("Hanya file dokumen PDF (.pdf) yang diperbolehkan."));
+  }
+};
+
+export const uploadManualPdf = multer({
+  storage: manualPdfStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: pdfFilter
+});
+
 export default {
   uploadAvatar,
   uploadEvidence,
-  uploadTranscript
+  uploadTranscript,
+  uploadManualPdf
 };
+

@@ -20,8 +20,10 @@ Write-Host "`n[1/4] Upload file project ke server..." -ForegroundColor Yellow
 $filesToUpload = @(
     "config",
     "controllers",
+    "middleware",
     "models",
     "routes",
+    "services",
     "views",
     "public",
     "meeting.js",
@@ -45,10 +47,10 @@ foreach ($item in $filesToUpload) {
 
 Write-Host "[1/4] Upload file selesai!" -ForegroundColor Green
 
-# ---- 2. Buat folder uploads/ttd di server ----
-Write-Host "`n[2/4] Membuat folder uploads/ttd di server..." -ForegroundColor Yellow
-ssh "${USER}@${SERVER}" "mkdir -p $DEST/public/uploads/ttd && chmod 755 $DEST/public/uploads/ttd"
-Write-Host "[2/4] Folder uploads/ttd siap!" -ForegroundColor Green
+# ---- 2. Buat folder uploads & docs di server ----
+Write-Host "`n[2/4] Memastikan folder uploads dan docs di server..." -ForegroundColor Yellow
+ssh "${USER}@${SERVER}" "mkdir -p $DEST/public/uploads/{ttd,avatars,evidence,sertif,videos,thumbnails} $DEST/public/docs && chmod -R 755 $DEST/public/uploads $DEST/public/docs"
+Write-Host "[2/4] Folder uploads & docs siap!" -ForegroundColor Green
 
 # ---- 3. Install dependencies di server ----
 Write-Host "`n[3/4] Install npm dependencies di server..." -ForegroundColor Yellow
