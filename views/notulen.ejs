@@ -70,8 +70,8 @@
           </label>
           <select id="selectMeetingId" class="form-input" style="font-size: 0.825rem; font-weight: 600; background: #ffffff; border-color: #86EFAC; color: #14532D;">
             <option value="">-- Buat Notula Mandiri (Tanpa Tautan Rapat) --</option>
-            <% (meetings || []).forEach(function(m) { %>
-              <option value="<%= m.meeting_id %>" <%= (selectedMeetingId && String(selectedMeetingId) === String(m.meeting_id)) ? 'selected' : '' %>>
+            <% (typeof meetings !== 'undefined' && Array.isArray(meetings) ? meetings : []).forEach(function(m) { %>
+              <option value="<%= m.meeting_id %>" <%= (typeof selectedMeetingId !== 'undefined' && selectedMeetingId && String(selectedMeetingId) === String(m.meeting_id)) ? 'selected' : '' %>>
                 [ID: <%= m.meeting_id %>] <%= m.meeting_nama %> (<%= m.tanggal ? (m.tanggal.toISOString ? m.tanggal.toISOString().split('T')[0] : String(m.tanggal).split('T')[0]) : '-' %>)
               </option>
             <% }); %>
@@ -358,10 +358,10 @@
 </div>
 
 <script>
-  window.initialNotulenData = <%- JSON.stringify(initialData) %>;
+  window.initialNotulenData = <%- JSON.stringify(typeof initialData !== 'undefined' ? initialData : {}) %>;
   window.todayFormattedString = "<%= typeof todayFormatted !== 'undefined' ? todayFormatted : '' %>";
-  window.availableMeetings = <%- JSON.stringify(meetings || []) %>;
-  window.selectedMeetingId = <%= selectedMeetingId ? JSON.stringify(selectedMeetingId) : 'null' %>;
+  window.availableMeetings = <%- typeof meetings !== 'undefined' ? JSON.stringify(meetings || []) : '[]' %>;
+  window.selectedMeetingId = <%= typeof selectedMeetingId !== 'undefined' && selectedMeetingId ? JSON.stringify(selectedMeetingId) : 'null' %>;
 </script>
 <script src="/js/notulen.js"></script>
 
