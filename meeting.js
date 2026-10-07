@@ -38,10 +38,16 @@ import pool from "./config/database.js";
 import { initWebinarQuizSchema } from "./config/webinar_quiz_schema.js";
 import webinarQuizRouter from "./routes/webinarQuizRouter.js";
 
-// Inisialisasi skema tabel infografis & notulen
-initInfografisSchema();
-initZoomSchema();
-initWebinarQuizSchema();
+// Inisialisasi skema tabel database
+(async () => {
+    try {
+        await initInfografisSchema();
+        await initWebinarQuizSchema();
+        await initZoomSchema();
+    } catch (e) {
+        console.warn("⚠️ Schema init error:", e.message);
+    }
+})();
 
 // Global user locals for templates (only populated if user is actually authenticated)
 app.use(async (req, res, next) => {

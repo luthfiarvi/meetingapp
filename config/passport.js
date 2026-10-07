@@ -18,7 +18,13 @@ passport.use(
 
                 if (!user) {
                     return done(null, false, {
-                        message: "User Not Exist"
+                        message: "User ID / Username / NIP tidak terdaftar di sistem."
+                    });
+                }
+
+                if (!user.password) {
+                    return done(null, false, {
+                        message: "Akun ini belum memiliki password."
                     });
                 }
 
@@ -29,7 +35,7 @@ passport.use(
 
                 if (!passwordCorrect) {
                     return done(null, false, {
-                        message: "Wrong Password!"
+                        message: "Password yang Anda masukkan salah."
                     });
                 }
 

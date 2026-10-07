@@ -29,7 +29,7 @@ router.post("/api/notulen/parse-transcript-file", ensureAuth, uploadTranscript.s
 
 // Modul Infografis Kinerja BKN
 router.get("/generator", ensureAuth, infographicController.getGenerator);
-router.get("/history", ensureAuth, infographicController.getHistory);
+router.get("/history", ensureAuth, (req, res) => res.redirect("/portal"));
 router.get("/preview/:id", ensureAuth, infographicController.getPreview);
 
 // API routes for infographics

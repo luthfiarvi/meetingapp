@@ -52,6 +52,45 @@ export async function initInfografisSchema() {
       END $$;
     `);
 
+    // 2. Pastikan user admin dan user default selalu ada
+    await pool.query(`
+      INSERT INTO users (id, username, password, role, full_name, nip, institution, division)
+      VALUES (
+          'admin',
+          'admin',
+          '$2b$10$/oysItNRvGYgPbT7oodQReeeuAutve0PTyEw3QRnrhka0n53iQ8Sa',
+          'admin',
+          'Divisi Sidigi',
+          '199505122020121005',
+          'Kantor Regional V BKN Jakarta',
+          'Pranata Komputer Ahli Pertama'
+      ) ON CONFLICT (id) DO NOTHING;
+
+      INSERT INTO users (id, username, password, role, full_name, nip, institution, division)
+      VALUES (
+          'user',
+          'user',
+          '$2b$10$PqIK6P.yUE/yBMKZW/A0zOib1cvav9TtGVi4qXvkimdX5JiWjrRIy',
+          'user',
+          'user bkn',
+          '1231236567',
+          'Kantor Regional V BKN Jakarta',
+          'Pegawai BKN'
+      ) ON CONFLICT (id) DO NOTHING;
+
+      INSERT INTO users (id, username, password, role, full_name, nip, institution, division)
+      VALUES (
+          'user2',
+          'user2',
+          '$2b$10$1ROM/aQMS.6iPlR2Fa.t.unYb5VxhnrOLInxxNN6gz2RdLVJ1aQSm',
+          'user',
+          'user 2',
+          '1231236568',
+          'Kantor Regional V BKN Jakarta',
+          'Pegawai BKN'
+      ) ON CONFLICT (id) DO NOTHING;
+    `);
+
     // Pastikan user admin default terisi data lengkap profil, header & footer
     await pool.query(`
       UPDATE users SET
@@ -118,6 +157,9 @@ export async function initInfografisSchema() {
       BEGIN 
           IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='documentation_photos') THEN
               ALTER TABLE notulen ADD COLUMN documentation_photos JSONB DEFAULT '[]';
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='meeting_id') THEN
+              ALTER TABLE notulen ADD COLUMN meeting_id INT;
           END IF;
       END $$;
     `);

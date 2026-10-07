@@ -1,4 +1,3 @@
-
 # ============================================================
 #  DEPLOY SCRIPT - MeetingApp ke Server 84.247.160.55
 #  Jalankan: .\deploy.ps1
@@ -9,75 +8,70 @@ $USER     = "magangit"
 $DEST     = "/home/magangit/meetingapp"
 $LOCAL    = if ($PSScriptRoot) { $PSScriptRoot } else { "c:\Users\ThinkPad\OneDrive\Dokumen\BKN\meetingapp" }
 
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "  DEPLOY MEETINGAPP KE SERVER" -ForegroundColor Cyan
-Write-Host "  Target: $USER@$SERVER`:$DEST" -ForegroundColor Cyan
-Write-Host "======================================" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
+Write-Host "  CLEAN SYNC: CLONE LOKAL KE SERVER (84.247.160.55:3000)" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
 
-# ---- 1. Upload semua file project (kecuali node_modules & uploads) ----
-Write-Host "`n[1/4] Upload file project ke server..." -ForegroundColor Yellow
+# ---- 1. Export database lokal PostgreSQL ----
+Write-Host "`n[1/4] Mengekspor database lokal (PostgreSQL appmeeting)..." -ForegroundColor Yellow
 
-$filesToUpload = @(
-    "config",
-    "controllers",
-    "middleware",
-    "models",
-    "routes",
-    "services",
-    "views",
-    "public",
-    "meeting.js",
-    "package.json",
-    "package-lock.json"
-)
+$pgDump = (Get-ChildItem "C:\Program Files\PostgreSQL" -Recurse -Filter "pg_dump.exe" -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*\bin\pg_dump.exe" } | Select-Object -ExpandProperty FullName -First 1)
 
-foreach ($item in $filesToUpload) {
-    $localPath = "$LOCAL\$item"
-    if (Test-Path $localPath) {
-        Write-Host "  -> Upload $item ..." -ForegroundColor Gray
-        if ((Get-Item $localPath).PSIsContainer) {
-            # Folder: pakai scp -r
-            scp -r "$localPath" "${USER}@${SERVER}:${DEST}/"
-        } else {
-            # File biasa
-            scp "$localPath" "${USER}@${SERVER}:${DEST}/"
-        }
+if (-not $pgDump) {
+    if (Get-Command pg_dump -ErrorAction SilentlyContinue) {
+        $pgDump = "pg_dump"
     }
 }
 
-Write-Host "[1/4] Upload file selesai!" -ForegroundColor Green
+if ($pgDump) {
+    $env:PGPASSWORD = "postgres"
+    & $pgDump -U postgres -h localhost -p 5432 --clean --if-exists appmeeting -f "$LOCAL\backup_local.sql"
+    if ($LASTEXITCODE -eq 0) {
+        (Get-Content "$LOCAL\backup_local.sql") | Where-Object { $_ -notmatch '^\\restrict' } | Set-Content "$LOCAL\backup_local.sql" -Encoding UTF8
+        Write-Host "  [OK] Database lokal berhasil diekspor ke backup_local.sql!" -ForegroundColor Green
+    } else {
+        Write-Host "  [INFO] Menggunakan backup_local.sql yang sudah ada." -ForegroundColor Gray
+    }
+} else {
+    Write-Host "  [INFO] pg_dump tidak terdeteksi, menggunakan backup_local.sql yang sudah ada." -ForegroundColor Gray
+}
 
-# ---- 2. Buat folder uploads & docs di server ----
-Write-Host "`n[2/4] Memastikan folder uploads dan docs di server..." -ForegroundColor Yellow
-ssh "${USER}@${SERVER}" "mkdir -p $DEST/public/uploads/{ttd,avatars,evidence,sertif,videos,thumbnails} $DEST/public/docs && chmod -R 755 $DEST/public/uploads $DEST/public/docs"
-Write-Host "[2/4] Folder uploads & docs siap!" -ForegroundColor Green
+# ---- 2. Hilangkan atribut ReadOnly (OneDrive) dan kompresi ustar POSIX ----
+Write-Host "`n[2/4] Menyiapkan izin berkas dan mengompres paket proyek..." -ForegroundColor Yellow
 
-# ---- 3. Install dependencies di server ----
-Write-Host "`n[3/4] Install npm dependencies di server..." -ForegroundColor Yellow
-ssh "${USER}@${SERVER}" "cd $DEST && npm install --production"
-Write-Host "[3/4] Dependencies terinstall!" -ForegroundColor Green
+attrib -r "$LOCAL\*" /s /d 2>$null
 
-# ---- 4. Restart aplikasi di server ----
-Write-Host "`n[4/4] Restart aplikasi di server..." -ForegroundColor Yellow
-ssh "${USER}@${SERVER}" @"
-cd $DEST
-# Coba restart dengan pm2 dulu
-if command -v pm2 &> /dev/null; then
-    pm2 restart meetingapp 2>/dev/null || pm2 start meeting.js --name meetingapp
-    pm2 save
-    echo 'PM2 restart selesai'
-else
-    # Kalau tidak ada pm2, install dulu
-    npm install -g pm2
-    pm2 start meeting.js --name meetingapp
-    pm2 save
-    pm2 startup
-    echo 'PM2 install & start selesai'
-fi
-"@
-Write-Host "[4/4] Aplikasi berhasil di-restart!" -ForegroundColor Green
+tar --format ustar -czf "$LOCAL\deploy_bundle.tar.gz" config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js backup_local.sql package.json package-lock.json
 
-Write-Host "`n======================================" -ForegroundColor Cyan
-Write-Host "  DEPLOY SELESAI!" -ForegroundColor Green
-Write-Host "  Akses: http://${SERVER}:3000" -ForegroundColor Cyan
-Write-Host "======================================" -ForegroundColor Cyan
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[ERROR] Gagal membuat file arsip kompresi." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+Write-Host "  [OK] Seluruh berkas (dengan izin tulis penuh) berhasil dikompres!" -ForegroundColor Green
+
+# ---- 3. Upload deploy_bundle.tar.gz ke /home/magangit/ ----
+Write-Host "`n[3/4] Mengunggah deploy_bundle.tar.gz ke server..." -ForegroundColor Yellow
+Write-Host "      (Masukkan password user $USER jika diminta)" -ForegroundColor Gray
+
+scp "$LOCAL\deploy_bundle.tar.gz" "${USER}@${SERVER}:/home/${USER}/"
+
+if (Test-Path "$LOCAL\deploy_bundle.tar.gz") {
+    Remove-Item "$LOCAL\deploy_bundle.tar.gz" -Force
+}
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "`n[ERROR] Gagal mengunggah arsip. Pastikan password benar." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+Write-Host "  [OK] Berkas arsip berhasil diunggah!" -ForegroundColor Green
+
+# ---- 4. Eksekusi remote di server (1 sesi SSH) ----
+Write-Host "`n[4/4] Melakukan sinkronisasi total di server..." -ForegroundColor Yellow
+Write-Host "      (Masukkan password user $USER jika diminta)" -ForegroundColor Gray
+
+ssh -t "${USER}@${SERVER}" "bash -c 'set -e; rm -rf /home/magangit/meetingapp_new 2>/dev/null || true; mv /home/magangit/meetingapp /home/magangit/trash_app_\$(date +%s) 2>/dev/null || true; mkdir -p /home/magangit/meetingapp; tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/; rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash /home/magangit/meetingapp/deploy_server.sh; rm -rf /home/magangit/trash_app_* 2>/dev/null || true'"
+
+Write-Host "`n============================================================" -ForegroundColor Cyan
+Write-Host "  SINKRONISASI SELESAI!" -ForegroundColor Green
+Write-Host "  Buka aplikasi di: http://${SERVER}:3000" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan

@@ -30,6 +30,198 @@ function getCurrentUser(req) {
   };
 }
 
+// Helper untuk menghasilkan file HTML dokumen notula resmi BKN siap cetak / unduh PDF
+function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
+  const meetingDateObj = new Date(docData.meetingDate);
+  const formattedDate = !isNaN(meetingDateObj)
+    ? meetingDateObj.toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
+    : docData.meetingDate;
+
+  const agenda = Array.isArray(docData.agenda) ? docData.agenda : [];
+  const attendees = Array.isArray(docData.attendees) ? docData.attendees : [];
+  const activities = Array.isArray(docData.activities) ? docData.activities : [];
+  const actionItems = Array.isArray(docData.actionItems) ? docData.actionItems : [];
+  const conclusions = Array.isArray(docData.conclusions) ? docData.conclusions : [];
+  const documentationPhotos = Array.isArray(docData.documentationPhotos) ? docData.documentationPhotos : [];
+
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notula - ${docData.title}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #E2E8F0;
+      margin: 0;
+      padding: 2rem 1rem;
+      font-family: 'Times New Roman', Times, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #000;
+    }
+    .preview-actions {
+      width: 100%;
+      max-width: 820px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #2563EB; color: white; border: none; box-shadow: 0 4px 10px rgba(37,99,235,0.25); }
+    .btn-primary:hover { background: #1D4ED8; }
+    .btn-secondary { background: white; color: #1E293B; border: 1px solid #CBD5E1; }
+    .btn-secondary:hover { background: #F8FAFC; }
+    .notula-paper {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 820px;
+      min-height: 1120px;
+      padding: 20mm 25mm;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      line-height: 1.5;
+      font-size: 11pt;
+    }
+    .notula-kop { text-align: center; margin-bottom: 15px; }
+    .notula-garuda { width: 68px; height: auto; display: block; margin: 0 auto 8px; }
+    .notula-kop-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; }
+    .notula-kop-address { font-size: 8.5pt; line-height: 1.35; }
+    .notula-kop-divider { border-bottom: 3px double #000; margin: 10px 0 18px; }
+    .notula-title-block { text-align: center; margin-bottom: 18px; }
+    .notula-main-title { font-size: 13pt; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+    .notula-sub-title { font-size: 11pt; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+    .notula-meta-line { font-size: 10.5pt; font-weight: bold; margin-bottom: 3px; }
+    .notula-box-header { font-weight: bold; text-transform: uppercase; margin-top: 14px; margin-bottom: 6px; font-size: 11pt; }
+    .notula-list { margin: 0 0 14px 20px; padding: 0; }
+    .notula-list li { margin-bottom: 4px; text-align: justify; }
+    .notula-activity-item { margin-bottom: 12px; }
+    .notula-speaker { font-weight: bold; margin-bottom: 3px; }
+    .notula-closing { text-align: justify; margin: 14px 0; }
+    .notula-signature { width: 280px; margin-left: auto; text-align: left; margin-top: 25px; }
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .preview-actions { display: none !important; }
+      .notula-paper { box-shadow: none !important; padding: 15mm 20mm !important; width: 100% !important; max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-actions">
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/manajemenmeeting" class="btn btn-secondary">
+        ← Kembali ke Manajemen Meeting
+      </a>
+      <a href="/notulen?id=${notulenId || ''}" class="btn btn-secondary">
+        ✏️ Edit di App Infografis
+      </a>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      ${notulenId ? `<a href="/notulen/export-docx/${notulenId}" class="btn btn-secondary" style="color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+        📥 Unduh Word (.docx)
+      </a>` : ''}
+      <button type="button" onclick="window.print()" class="btn btn-primary">
+        🖨️ Cetak / Unduh PDF (A4)
+      </button>
+    </div>
+  </div>
+
+  <div class="notula-paper">
+    <div class="notula-kop">
+      <img src="/images/garuda_pancasila.png" alt="Garuda Pancasila" class="notula-garuda">
+      <div class="notula-kop-title">${user.institution_kop || 'BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V'}</div>
+      <div class="notula-kop-address">
+        ${user.kop_address || 'Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730'}<br>
+        ${user.kop_contact || 'Telepon (021) 87721084 - 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id'}
+      </div>
+      <div class="notula-kop-divider"></div>
+    </div>
+
+    <div class="notula-title-block">
+      <div class="notula-main-title">NOTULA</div>
+      <div class="notula-sub-title">(${docData.title})</div>
+      <div class="notula-meta-line">${formattedDate}, Waktu: ${docData.meetingTime || '-'}</div>
+      <div class="notula-meta-line">Tempat: ${docData.meetingPlace || '-'}</div>
+    </div>
+
+    <div class="notula-box-header">1. AGENDA KEGIATAN</div>
+    <ul class="notula-list">
+      ${agenda.map(item => `<li>${item}</li>`).join('')}
+    </ul>
+
+    <div class="notula-box-header">2. PESERTA / UNSUR YANG HADIR</div>
+    <ul class="notula-list">
+      ${attendees.map(item => `<li>${item}</li>`).join('')}
+    </ul>
+
+    <div class="notula-box-header">3. URAIAN KEGIATAN & PAPARAN</div>
+    ${activities.map((act, idx) => `
+      <div class="notula-activity-item">
+        <div class="notula-speaker">${act.sectionTitle || `${idx + 1}. Paparan`} ${act.speaker ? `(${act.speaker})` : ''}</div>
+        <ul class="notula-list">
+          ${(act.points || []).map(pt => `<li>${pt}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('')}
+
+    <div class="notula-box-header">4. POKOK TINDAK LANJUT</div>
+    <ul class="notula-list">
+      ${actionItems.map(item => `<li>${item}</li>`).join('')}
+    </ul>
+
+    <div class="notula-box-header">5. KESIMPULAN RAPAT</div>
+    <ul class="notula-list">
+      ${conclusions.map(item => `<li>${item}</li>`).join('')}
+    </ul>
+
+    <div class="notula-closing">
+      ${docData.closingText || 'Demikian notula rapat kedinasan ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.'}
+    </div>
+
+    <div class="notula-signature">
+      <div>${user.sig_city || 'Jakarta'}, ${formattedDate}</div>
+      <div style="margin-top: 4px; font-weight: bold;">Notulis,</div>
+      <div style="height: 60px;"></div>
+      <div style="font-weight: bold; text-decoration: underline;">${docData.notulisName || user.full_name}</div>
+      <div>NIP. ${user.nip || '-'}</div>
+      <div style="font-size: 9.5pt; color: #333;">${docData.notulisRole || user.division}</div>
+    </div>
+
+    ${documentationPhotos.length > 0 ? `
+      <div style="margin-top: 30px; page-break-before: auto;">
+        <div class="notula-box-header" style="border-top: 1px dashed #ccc; padding-top: 15px;">DOKUMENTASI FOTO KEGIATAN:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+          ${documentationPhotos.map((photo, i) => `
+            <div style="border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; padding: 4px; background: #f8fafc; text-align: center;">
+              <img src="${photo.dataUrl || photo.previewUrl}" style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 4px;" alt="Dokumentasi ${i + 1}">
+              ${photo.caption ? `<div style="font-size: 8.5pt; margin-top: 4px; color: #475569;">${photo.caption}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+  </div>
+</body>
+</html>`;
+}
+
 export const notulenController = {
   // GET /notulen
   getNotulenGenerator: async (req, res) => {
@@ -39,6 +231,15 @@ export const notulenController = {
       const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
       const formattedDate = today.toLocaleDateString("id-ID", options);
       const isoDate = today.toISOString().split("T")[0];
+
+      // Ambil daftar rapat BKN dari Manajemen Meeting untuk dropdown integrasi
+      let meetingsList = [];
+      try {
+        const mRes = await pool.query("SELECT meeting_id, meeting_nama, tanggal, tipe_meeting FROM meetings ORDER BY meeting_id DESC");
+        meetingsList = mRes.rows;
+      } catch (mErr) {
+        console.warn("Notice: meetings query err:", mErr.message);
+      }
 
       let latestDoc = null;
       try {
@@ -53,8 +254,11 @@ export const notulenController = {
         console.warn("Notice: notulen query err:", dbErr.message);
       }
 
+      let selectedMeetingId = req.query.meetingId || latestDoc?.meeting_id || null;
+
       const defaultData = latestDoc ? {
         id: latestDoc.id,
+        meetingId: latestDoc.meeting_id || null,
         title: latestDoc.title,
         meetingDate: latestDoc.meeting_date,
         formattedDate: formattedDate,
@@ -71,6 +275,7 @@ export const notulenController = {
         notulisRole: latestDoc.notulis_role || user.division
       } : {
         id: null,
+        meetingId: null,
         title: "BKN MENYAPA ASN : PENGUATAN IMPLEMENTASI MANAJEMEN TALENTA MELALUI SIMATA DAN MYASN",
         meetingDate: isoDate,
         formattedDate: formattedDate,
@@ -124,11 +329,30 @@ export const notulenController = {
         notulisRole: user.division
       };
 
+      // Jika dibuka dengan parameter meetingId tapi tanpa id notula tertentu, prefill dari rapat tersebut
+      if (req.query.meetingId && !req.query.id) {
+        const chosen = meetingsList.find(m => String(m.meeting_id) === String(req.query.meetingId));
+        if (chosen) {
+          defaultData.title = chosen.meeting_nama;
+          defaultData.meetingId = chosen.meeting_id;
+          if (chosen.tanggal) {
+            defaultData.meetingDate = chosen.tanggal instanceof Date 
+              ? chosen.tanggal.toISOString().split("T")[0] 
+              : String(chosen.tanggal).split("T")[0];
+          }
+          if (chosen.tipe_meeting && (chosen.tipe_meeting.toLowerCase().includes("zoom") || chosen.tipe_meeting.toLowerCase().includes("webinar"))) {
+            defaultData.meetingPlace = "Daring melalui Zoom Meeting";
+          }
+        }
+      }
+
       res.render("notulen", {
         title: "Pembuat Notulen Rapat Kedinasan - BKN",
         user: user,
         initialData: defaultData,
-        todayFormatted: formattedDate
+        todayFormatted: formattedDate,
+        meetings: meetingsList,
+        selectedMeetingId: selectedMeetingId
       });
     } catch (err) {
       console.error("Notulen generator error:", err);
@@ -136,12 +360,13 @@ export const notulenController = {
     }
   },
 
-  // POST /api/notulen (Simpan / Perbarui Notulen)
+  // POST /api/notulen (Simpan / Perbarui Notulen & Auto-Integrasi ke Manajemen Meeting)
   saveNotulen: async (req, res) => {
     try {
       const user = getCurrentUser(req);
       const {
         id,
+        meetingId,
         title,
         meetingDate,
         meetingTime,
@@ -161,6 +386,7 @@ export const notulenController = {
         return res.status(400).json({ success: false, message: "Judul rapat dan tanggal rapat wajib diisi." });
       }
 
+      const targetMeetingId = meetingId ? parseInt(meetingId, 10) : null;
       const agendaJson = JSON.stringify(Array.isArray(agenda) ? agenda : []);
       const attendeesJson = JSON.stringify(Array.isArray(attendees) ? attendees : []);
       const activitiesJson = JSON.stringify(Array.isArray(activities) ? activities : []);
@@ -184,12 +410,14 @@ export const notulenController = {
             closing_text = $10,
             documentation_photos = $11,
             notulis_name = $12,
-            notulis_role = $13
-          WHERE id = $14
+            notulis_role = $13,
+            meeting_id = COALESCE($14, meeting_id)
+          WHERE id = $15
         `, [
           title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
+          targetMeetingId,
           id
         ]);
         savedId = id;
@@ -198,21 +426,75 @@ export const notulenController = {
           INSERT INTO notulen (
             user_id, title, meeting_date, meeting_time, meeting_place,
             agenda_data, attendees_data, activities_data, action_items, conclusions,
-            closing_text, documentation_photos, notulis_name, notulis_role
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            closing_text, documentation_photos, notulis_name, notulis_role, meeting_id
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
           RETURNING id
         `, [
           user.id, title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
-          closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division
+          closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
+          targetMeetingId
         ]);
         savedId = insertRes.rows[0]?.id;
       }
 
+      // Generate berkas dokumen notula fisik di folder uploads/notulen/
+      let fileUrl = null;
+      let targetMeetingName = null;
+      try {
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "notulen");
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const fileName = `notulen_rapat_${targetMeetingId || savedId}_${Date.now()}.html`;
+        const filePath = path.join(uploadDir, fileName);
+        fileUrl = `/uploads/notulen/${fileName}`;
+
+        const htmlContent = generateNotulenHtmlFile({
+          docData: {
+            title, meetingDate, meetingTime, meetingPlace,
+            agenda: Array.isArray(agenda) ? agenda : [],
+            attendees: Array.isArray(attendees) ? attendees : [],
+            activities: Array.isArray(activities) ? activities : [],
+            actionItems: Array.isArray(actionItems) ? actionItems : [],
+            conclusions: Array.isArray(conclusions) ? conclusions : [],
+            closingText, documentationPhotos: Array.isArray(documentationPhotos) ? documentationPhotos : [],
+            notulisName, notulisRole
+          },
+          user,
+          notulenId: savedId,
+          meetingId: targetMeetingId
+        });
+
+        fs.writeFileSync(filePath, htmlContent, "utf-8");
+
+        // Jika rapat tujuan dipilih, simpan nama berkas ke kolom notulen_pdf tabel meetings
+        if (targetMeetingId) {
+          await pool.query(
+            "UPDATE meetings SET notulen_pdf = $1 WHERE meeting_id = $2",
+            [fileUrl, targetMeetingId]
+          );
+
+          const mQuery = await pool.query(
+            "SELECT meeting_nama FROM meetings WHERE meeting_id = $1",
+            [targetMeetingId]
+          );
+          targetMeetingName = mQuery.rows[0]?.meeting_nama || null;
+        }
+      } catch (fileErr) {
+        console.warn("⚠️ Gagal generate berkas notulen fisik:", fileErr.message);
+      }
+
       return res.json({
         success: true,
-        message: "Notulen rapat kedinasan berhasil disimpan!",
-        id: savedId
+        message: targetMeetingName 
+          ? `Notula berhasil disimpan & otomatis terhubung ke rapat "${targetMeetingName}" di Manajemen Meeting!`
+          : "Notulen rapat kedinasan berhasil disimpan!",
+        id: savedId,
+        meetingId: targetMeetingId,
+        notulenFile: fileUrl,
+        integratedMeetingTitle: targetMeetingName
       });
     } catch (err) {
       console.error("Save notulen error:", err);

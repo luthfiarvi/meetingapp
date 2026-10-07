@@ -315,6 +315,9 @@
                     <a id="btnOpenPresensiForm" href="#" target="_blank" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s;">
                         ✍️ Buka Link Form Presensi Peserta ↗
                     </a>
+                    <a id="btnCreateNotulenApp" href="/notulen" target="_blank" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s; margin-top:10px;">
+                        📝 Susun / Buat Notula di App Infografis ↗
+                    </a>
                     <a id="btnWebinarQa" href="#" target="_blank" style="display:none; width:100%; align-items:center; justify-content:center; gap:8px; padding:12px 16px; background:linear-gradient(135deg, #7c3aed, #6366f1); color:#ffffff; border:none; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; cursor:pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.25); transition: 0.2s; margin-top:10px; box-sizing: border-box;">
                         <span>💬</span> Forum Q&A & Kuis Interaktif (Slido BKN) ↗
                     </a>
@@ -904,9 +907,19 @@
 
             if (currentActivePdfBlob) {
                 pdfBtn.href = currentActivePdfBlob;
-                pdfBtn.download = `Notulen_${title.substring(0, 20)}.pdf`;
+                if (currentActivePdfBlob.endsWith('.html') || currentActivePdfBlob.includes('/uploads/notulen/')) {
+                    pdfBtn.removeAttribute('download');
+                    pdfBtn.target = '_blank';
+                    pdfBtn.innerHTML = '📄 Buka & Cetak Notulen (Resmi)';
+                } else {
+                    pdfBtn.download = `Notulen_${title.substring(0, 20)}.pdf`;
+                    pdfBtn.removeAttribute('target');
+                    pdfBtn.innerHTML = '📄 Unduh Notulen (PDF)';
+                }
             } else {
                 pdfBtn.href = "#";
+                pdfBtn.removeAttribute('target');
+                pdfBtn.innerHTML = '📄 Unduh Notulen (PDF)';
             }
 
             if (currentActiveVideoBlob) {
@@ -921,6 +934,12 @@
             const presensiLinkBtn = document.getElementById('btnOpenPresensiForm');
             if (presensiLinkBtn) {
                 presensiLinkBtn.href = '/presensi/' + meetingId;
+            }
+
+            // Link ke Generator Notulen di App Infografis untuk rapat ini
+            const notulenAppBtn = document.getElementById('btnCreateNotulenApp');
+            if (notulenAppBtn) {
+                notulenAppBtn.href = '/notulen?meetingId=' + meetingId;
             }
 
             // Tampilkan tombol Forum Q&A & Kuis Interaktif (Slido BKN) HANYA untuk tipe Webinar
@@ -983,16 +1002,7 @@
         function triggerPdfDownload(e) {
             if (!currentActivePdfBlob) {
                 e.preventDefault();
-                const dummyContent = "BERITA ACARA & NOTULEN RAPAT BKN REGIONAL V\n\nTanggal: " + document.getElementById('viewDate').textContent + "\nAgenda: " + document.getElementById('viewTitle').textContent + "\n\nCatatan Hasil Rapat:\n1. Pembahasan poin utama agenda kerja BKN.\n2. Penetapan tindak lanjut dan rekomendasi teknis.\n\nKantor Regional V BKN Jakarta.";
-                const blob = new Blob([dummyContent], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Notulen_${document.getElementById('viewTitle').textContent.substring(0, 25)}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                showToast('Belum ada berkas notulen untuk rapat ini. Silakan klik "Susun / Buat Notula di App Infografis" di bawah atau unggah berkas melalui menu Edit.', 'info', 'Notulen Belum Tersedia');
             }
         }
 

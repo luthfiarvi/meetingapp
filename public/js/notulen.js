@@ -5,6 +5,7 @@
 // State dokumen notulen
 let notulenState = window.initialNotulenData || {
   id: null,
+  meetingId: null,
   title: 'BKN MENYAPA ASN : Penguatan Implementasi Manajemen Talenta melalui SIMATA dan MyASN',
   meetingDate: new Date().toISOString().split('T')[0],
   formattedDate: '',
@@ -20,6 +21,10 @@ let notulenState = window.initialNotulenData || {
   notulisRole: '',
   documentationPhotos: []
 };
+
+if (window.selectedMeetingId && !notulenState.meetingId) {
+  notulenState.meetingId = window.selectedMeetingId;
+}
 
 if (!Array.isArray(notulenState.documentationPhotos)) {
   notulenState.documentationPhotos = [];
@@ -42,7 +47,11 @@ function initFormValues() {
   const fClosing = document.getElementById('notulaClosing');
   const fNotulisName = document.getElementById('notulisName');
   const fNotulisRole = document.getElementById('notulisRole');
+  const fMeeting = document.getElementById('selectMeetingId');
 
+  if (fMeeting && notulenState.meetingId) {
+    fMeeting.value = String(notulenState.meetingId);
+  }
   if (fTitle) fTitle.value = notulenState.title || '';
   if (fDate) fDate.value = notulenState.meetingDate || '';
   if (fTime) fTime.value = notulenState.meetingTime || '';
@@ -67,6 +76,48 @@ function initFormValues() {
 }
 
 function setupEventListeners() {
+  // Pilihan Link ke Manajemen Meeting
+  const fMeeting = document.getElementById('selectMeetingId');
+  if (fMeeting) {
+    fMeeting.addEventListener('change', (e) => {
+      const chosenId = e.target.value ? parseInt(e.target.value, 10) : null;
+      notulenState.meetingId = chosenId;
+
+      if (chosenId && Array.isArray(window.availableMeetings)) {
+        const found = window.availableMeetings.find(m => String(m.meeting_id) === String(chosenId));
+        if (found) {
+          const fTitle = document.getElementById('notulaTitle');
+          if (fTitle) {
+            fTitle.value = found.meeting_nama;
+            notulenState.title = found.meeting_nama;
+          }
+          if (found.tanggal) {
+            const tglStr = typeof found.tanggal === 'string' 
+              ? found.tanggal.split('T')[0] 
+              : (found.tanggal.toISOString ? found.tanggal.toISOString().split('T')[0] : '');
+            if (tglStr) {
+              const fDate = document.getElementById('notulaDate');
+              if (fDate) fDate.value = tglStr;
+              notulenState.meetingDate = tglStr;
+              formatIndonesianDate(tglStr);
+            }
+          }
+          if (found.tipe_meeting && (found.tipe_meeting.toLowerCase().includes('zoom') || found.tipe_meeting.toLowerCase().includes('webinar'))) {
+            const fPlace = document.getElementById('notulaPlace');
+            if (fPlace) {
+              fPlace.value = 'Daring melalui Zoom Meeting';
+              notulenState.meetingPlace = 'Daring melalui Zoom Meeting';
+            }
+          }
+          updateLivePreview();
+          showNotificationToast(`🔗 Terhubung ke rapat: ${found.meeting_nama}`);
+        }
+      } else {
+        showNotificationToast('Mode notula mandiri aktif.');
+      }
+    });
+  }
+
   // Input teks dasar
   const fTitle = document.getElementById('notulaTitle');
   if (fTitle) {
@@ -630,7 +681,7 @@ async function handleSaveNotulen() {
     }
 
     if (data.id) notulenState.id = data.id;
-    showNotificationToast('✅ Dokumen notulen berhasil disimpan ke database!');
+    showNotificationToast(data.message || '✅ Dokumen notulen berhasil disimpan ke database!');
     return data.id;
   } catch (err) {
     console.error('Save error:', err);

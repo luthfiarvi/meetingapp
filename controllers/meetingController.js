@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import meetingModel from "../models/meetingModel.js";  
 import zoomModel from "../models/zoomModel.js";
+import { syncApprovedZoomToMeetings } from "../config/zoom_schema.js";
 
 export const formMeeting = (req, res) => {
     const currentUser = req.user || res.locals.user;
@@ -14,6 +15,14 @@ export const formMeeting = (req, res) => {
 export const showMeeting = async (req, res) => {
     try {
         const currentUser = req.user || res.locals.user || { role: "user" };
+
+        // Auto-sinkronisasi pengajuan Zoom yang disetujui (Rapat Biasa & Webinar)
+        try {
+            await syncApprovedZoomToMeetings();
+        } catch (sErr) {
+            console.warn("⚠️ [AUTO-SYNC] Warning syncApprovedZoomToMeetings:", sErr.message);
+        }
+
         const meetings = await meetingModel.getAllMeeting();
         
         let pendingZoomCount = 0;

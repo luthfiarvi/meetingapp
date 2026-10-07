@@ -129,14 +129,26 @@ export const approveZoomRequest = async (req, res) => {
         // Sinkronisasi otomatis ke Manajemen Meeting untuk SEMUA permohonan yang disetujui
         if (reqData) {
             try {
-                const tipeMeeting = effectiveTipe.toLowerCase() === "webinar" ? "Webinar" : "Zoom";
+                const reqId = parseInt(id, 10);
+                const reqDateStr = reqData.tanggal_rapat instanceof Date 
+                    ? reqData.tanggal_rapat.toISOString().split('T')[0] 
+                    : String(reqData.tanggal_rapat).split('T')[0];
+
+                const isWebinar = effectiveTipe.toLowerCase().includes("webinar");
+                const tipeMeeting = isWebinar ? "Webinar" : "Zoom";
+
                 const timeInfo = (reqData.waktu_mulai && reqData.waktu_selesai) ? `Waktu: ${String(reqData.waktu_mulai).substring(0, 5)} - ${String(reqData.waktu_selesai).substring(0, 5)} WIB. ` : "";
                 const pemohonInfo = reqData.nama_pemohon ? `Pemohon: ${reqData.nama_pemohon} (${reqData.divisi || '-'}). ` : "";
                 const fullDesc = `${timeInfo}${pemohonInfo}${reqData.keterangan || ''}`.trim() || `Rapat daring resmi BKN via Zoom: ${reqData.judul_rapat}`;
 
+                // Perbaiki sequence ID meetings agar tidak duplicate key
+                await pool.query(`
+                    SELECT setval('meetings_meeting_id_seq', COALESCE((SELECT MAX(meeting_id) FROM meetings), 0) + 1, false);
+                `).catch(() => {});
+
                 const meetingCheck = await pool.query(
-                    "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1 OR (meeting_nama = $2 AND tanggal = $3)",
-                    [id, reqData.judul_rapat, reqData.tanggal_rapat]
+                    "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1 OR (meeting_nama = $2 AND tanggal = $3::date)",
+                    [reqId, reqData.judul_rapat, reqDateStr]
                 );
 
                 if (meetingCheck.rows.length === 0) {
@@ -144,24 +156,25 @@ export const approveZoomRequest = async (req, res) => {
                         `INSERT INTO meetings (
                             meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
                             zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id
-                        ) VALUES ($1, $2, $3, $4, CURRENT_DATE, $5, $6, $7, $8)`,
+                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8)`,
                         [
                             reqData.judul_rapat,
                             fullDesc,
-                            reqData.tanggal_rapat,
+                            reqDateStr,
                             tipeMeeting,
                             (zoom_link || "").trim(),
                             (meeting_id || "").trim(),
                             (passcode || "").trim(),
-                            id
+                            reqId
                         ]
                     );
+                    console.log(`✅ [SYNC APPROVE] Rapat "${reqData.judul_rapat}" (${tipeMeeting}) ditambahkan ke Manajemen Meeting.`);
                 } else {
                     await pool.query(
                         `UPDATE meetings 
                          SET meeting_nama = $1,
                              deskripsi = $2,
-                             tanggal = $3,
+                             tanggal = $3::date,
                              tipe_meeting = $4,
                              zoom_link = $5,
                              zoom_meeting_id = $6,
@@ -171,18 +184,19 @@ export const approveZoomRequest = async (req, res) => {
                         [
                             reqData.judul_rapat,
                             fullDesc,
-                            reqData.tanggal_rapat,
+                            reqDateStr,
                             tipeMeeting,
                             (zoom_link || "").trim(),
                             (meeting_id || "").trim(),
                             (passcode || "").trim(),
-                            id,
+                            reqId,
                             meetingCheck.rows[0].meeting_id
                         ]
                     );
+                    console.log(`✅ [SYNC APPROVE] Rapat "${reqData.judul_rapat}" diperbarui di Manajemen Meeting.`);
                 }
             } catch (syncErr) {
-                console.warn("⚠️ Gagal sinkronisasi rapat ke Manajemen Meeting:", syncErr.message);
+                console.error("⚠️ Gagal sinkronisasi rapat ke Manajemen Meeting:", syncErr);
             }
         }
 

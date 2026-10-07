@@ -2,15 +2,15 @@ import pool from "../config/database.js";
 
 const findById = async (id) => {
     try {
+        const cleanId = String(id || "").trim();
         const result = await pool.query(
-            "SELECT * FROM users WHERE id = $1",
-            [id]
+            "SELECT * FROM users WHERE id = $1 OR username = $1 OR nip = $1",
+            [cleanId]
         );
-        return result.rows[0];
+        return result.rows[0] || null;
     } catch (err) {
-        console.warn("⚠️ [DEV MODE] PostgreSQL database error in findById:", err.message);
-        // Fallback user for dev mode so app never crashes
-        return { id: id || "admin", username: "Administrator", role: "admin" };
+        console.warn("⚠️ [DATABASE ERROR] Error in findById:", err.message);
+        return null;
     }
 };
 

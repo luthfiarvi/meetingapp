@@ -4,4 +4,8 @@ node_modules/
 *.before_*
 *.backup.ejs
 backup_dummy_data.json
+backup_local.sql
+deploy_bundle.tar.gz
+*.tar.gz
+*.sql
 $null
