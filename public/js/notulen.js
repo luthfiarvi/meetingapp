@@ -49,8 +49,12 @@ function initFormValues() {
   const fNotulisRole = document.getElementById('notulisRole');
   const fMeeting = document.getElementById('selectMeetingId');
 
-  if (fMeeting && notulenState.meetingId) {
-    fMeeting.value = String(notulenState.meetingId);
+  if (fMeeting) {
+    if (notulenState.meetingId) {
+      fMeeting.value = String(notulenState.meetingId);
+    } else if (fMeeting.value) {
+      notulenState.meetingId = parseInt(fMeeting.value, 10);
+    }
   }
   if (fTitle) fTitle.value = notulenState.title || '';
   if (fDate) fDate.value = notulenState.meetingDate || '';
@@ -665,6 +669,35 @@ async function handleAiGenerate() {
 async function handleSaveNotulen() {
   const btn = document.getElementById('btnSaveNotulen');
   const orig = btn.innerHTML;
+
+  // Baca pilihan rapat tujuan dari dropdown
+  const fMeeting = document.getElementById('selectMeetingId');
+  if (fMeeting && fMeeting.value) {
+    notulenState.meetingId = parseInt(fMeeting.value, 10);
+  }
+
+  // Jika rapat tujuan belum terpilih, konfirmasikan ke pengguna
+  if (!notulenState.meetingId && Array.isArray(window.availableMeetings) && window.availableMeetings.length > 0) {
+    const firstMeeting = window.availableMeetings[0];
+    const wantToLink = confirm(
+      '⚠️ Anda belum memilih rapat tujuan di Manajemen Meeting.\n\n' +
+      'Apakah Anda ingin otomatis menghubungkan notula ini ke rapat "' + firstMeeting.meeting_nama + '"?\n\n' +
+      '- Klik [OK] untuk langsung menghubungkan ke rapat "' + firstMeeting.meeting_nama + '".\n' +
+      '- Klik [Batal] jika ingin memilih rapat lain pada dropdown.'
+    );
+
+    if (wantToLink) {
+      notulenState.meetingId = firstMeeting.meeting_id;
+      if (fMeeting) fMeeting.value = String(firstMeeting.meeting_id);
+    } else {
+      if (fMeeting) {
+        fMeeting.focus();
+        fMeeting.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return null;
+    }
+  }
+
   btn.disabled = true;
   btn.innerHTML = 'Menyimpan...';
 

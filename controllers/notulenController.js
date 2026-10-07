@@ -255,10 +255,13 @@ export const notulenController = {
       }
 
       let selectedMeetingId = req.query.meetingId || latestDoc?.meeting_id || null;
+      if (!selectedMeetingId && meetingsList.length > 0) {
+        selectedMeetingId = meetingsList[0].meeting_id;
+      }
 
       const defaultData = latestDoc ? {
         id: latestDoc.id,
-        meetingId: latestDoc.meeting_id || null,
+        meetingId: selectedMeetingId,
         title: latestDoc.title,
         meetingDate: latestDoc.meeting_date,
         formattedDate: formattedDate,
