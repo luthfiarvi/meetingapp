@@ -11,7 +11,7 @@ echo "============================================================"
 # 1. Menyiapkan struktur folder uploads & docs
 echo ""
 echo "[1/4] Memastikan struktur folder penampung file bersih & siap..."
-mkdir -p public/uploads/{ttd,avatars,evidence,sertif,videos,thumbnails,transcripts} public/docs
+mkdir -p public/uploads/{ttd,avatars,evidence,sertif,videos,thumbnails,transcripts,notulen} public/docs
 chmod -R 775 public/uploads public/docs 2>/dev/null || true
 echo "  [OK] Seluruh folder penampung uploads & docs siap!"
 
@@ -39,6 +39,8 @@ if [ -f backup_local.sql ]; then
         GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO magangit;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO magangit;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO magangit;
+        ALTER TABLE notulen ALTER COLUMN user_id TYPE VARCHAR(100);
+        ALTER TABLE infographics ALTER COLUMN user_id TYPE VARCHAR(100);
         SELECT setval('meetings_meeting_id_seq', COALESCE((SELECT MAX(meeting_id) FROM meetings), 0) + 1, false);
         SELECT setval('zoom_requests_id_seq', COALESCE((SELECT MAX(id) FROM zoom_requests), 0) + 1, false);
     " 2>/dev/null || true

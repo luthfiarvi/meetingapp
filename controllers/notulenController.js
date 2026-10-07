@@ -430,7 +430,7 @@ export const notulenController = {
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
           RETURNING id
         `, [
-          user.id, title, meetingDate, meetingTime || "-", meetingPlace || "-",
+          String(user?.id || "user"), title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
           targetMeetingId
