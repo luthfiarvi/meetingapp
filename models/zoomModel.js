@@ -62,7 +62,37 @@ export const createRequest = async (data) => {
         const result = await pool.query(query, values);
         return result.rows[0];
     } catch (err) {
-        console.warn("⚠️ [DEV MODE] PostgreSQL error in createRequest:", err.message);
+        console.error("⚠️ PostgreSQL error in createRequest:", err.message);
+        if (err.message && err.message.includes("user_id")) {
+            try {
+                await pool.query("ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);").catch(() => {});
+                const fallbackQuery = `
+                    INSERT INTO zoom_requests (
+                        nip, nama_pemohon, divisi, judul_rapat, tanggal_pengajuan,
+                        tanggal_rapat, waktu_mulai, waktu_selesai, keterangan, tipe_rapat, status
+                    )
+                    VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE), $6, $7, $8, $9, $10, 'menunggu')
+                    RETURNING *;
+                `;
+                const fallbackValues = [
+                    nip,
+                    nama_pemohon || "",
+                    divisi || "",
+                    judul_rapat,
+                    tanggal_pengajuan || new Date().toISOString().split('T')[0],
+                    tanggal_rapat,
+                    waktu_mulai || null,
+                    waktu_selesai || null,
+                    keterangan || "",
+                    tipe_rapat || "Rapat Biasa"
+                ];
+                const fbRes = await pool.query(fallbackQuery, fallbackValues);
+                console.log("✅ Berhasil insert zoom_requests (fallback tanpa user_id)");
+                return fbRes.rows[0];
+            } catch (err2) {
+                console.error("⚠️ Gagal fallback insert zoom_requests:", err2.message);
+            }
+        }
         const newReq = {
             id: fallbackZoomRequests.length + 1,
             nip,

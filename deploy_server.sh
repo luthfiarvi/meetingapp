@@ -33,8 +33,7 @@ if [ -f backup_local.sql ]; then
     fi
 
     # Berikan hak akses penuh ke user magangit & perbaiki sequence ID
-    psql -h localhost -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE appmeeting TO magangit;" 2>/dev/null || true
-    psql -h localhost -U postgres -d appmeeting -c "
+    SQL_PERMS="
         GRANT ALL ON ALL TABLES IN SCHEMA public TO magangit;
         GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO magangit;
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO magangit;
@@ -47,7 +46,15 @@ if [ -f backup_local.sql ]; then
         UPDATE meetings SET user_id = 'user' WHERE zoom_request_id IN (SELECT id FROM zoom_requests WHERE nip = '1231236567') AND (user_id IS NULL OR user_id = '');
         SELECT setval('meetings_meeting_id_seq', COALESCE((SELECT MAX(meeting_id) FROM meetings), 0) + 1, false);
         SELECT setval('zoom_requests_id_seq', COALESCE((SELECT MAX(id) FROM zoom_requests), 0) + 1, false);
-    " 2>/dev/null || true
+    "
+    (psql -h localhost -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE appmeeting TO magangit;" 2>/dev/null) || (sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE appmeeting TO magangit;" 2>/dev/null) || true
+    (psql -h localhost -U postgres -d appmeeting -c "$SQL_PERMS" 2>/dev/null) || (sudo -u postgres psql -d appmeeting -c "$SQL_PERMS" 2>/dev/null) || true
+fi
+
+# Jalankan diagnosa & sinkronisasi database
+if [ -f check_db.js ]; then
+    echo "  -> Menjalankan diagnosa & sinkronisasi database..."
+    node check_db.js 2>/dev/null || true
 fi
 
 # Memastikan akun user & admin terdaftar dan aktif

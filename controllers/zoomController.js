@@ -156,23 +156,43 @@ export const approveZoomRequest = async (req, res) => {
 
                 if (meetingCheck.rows.length === 0) {
                     const creatorUserId = reqData.user_id || 'user';
-                    await pool.query(
-                        `INSERT INTO meetings (
-                            meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
-                            zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
-                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
-                        [
-                            reqData.judul_rapat,
-                            fullDesc,
-                            reqDateStr,
-                            tipeMeeting,
-                            (zoom_link || "").trim(),
-                            (meeting_id || "").trim(),
-                            (passcode || "").trim(),
-                            reqId,
-                            creatorUserId
-                        ]
-                    );
+                    try {
+                        await pool.query(
+                            `INSERT INTO meetings (
+                                meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
+                                zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
+                            ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
+                            [
+                                reqData.judul_rapat,
+                                fullDesc,
+                                reqDateStr,
+                                tipeMeeting,
+                                (zoom_link || "").trim(),
+                                (meeting_id || "").trim(),
+                                (passcode || "").trim(),
+                                reqId,
+                                creatorUserId
+                            ]
+                        );
+                    } catch (insErr) {
+                        console.warn("⚠️ Insert meetings dengan user_id gagal, mencoba insert dasar:", insErr.message);
+                        await pool.query(
+                            `INSERT INTO meetings (
+                                meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
+                                zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id
+                            ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8)`,
+                            [
+                                reqData.judul_rapat,
+                                fullDesc,
+                                reqDateStr,
+                                tipeMeeting,
+                                (zoom_link || "").trim(),
+                                (meeting_id || "").trim(),
+                                (passcode || "").trim(),
+                                reqId
+                            ]
+                        );
+                    }
                     console.log(`✅ [SYNC APPROVE] Rapat "${reqData.judul_rapat}" (${tipeMeeting}) ditambahkan ke Manajemen Meeting.`);
                 } else {
                     await pool.query(

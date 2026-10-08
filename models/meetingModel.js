@@ -61,8 +61,14 @@ export const getAllMeeting = async () => {
         `);
         return result.rows;
     } catch (err) {
-        console.warn("⚠️ [DEV MODE] PostgreSQL database error in getAllMeeting:", err.message);
-        return [];
+        console.warn("⚠️ PostgreSQL database error in getAllMeeting (mencoba fallback query sederhana):", err.message);
+        try {
+            const simpleRes = await pool.query("SELECT *, 'admin' AS creator_user_id FROM meetings ORDER BY meeting_id DESC");
+            return simpleRes.rows;
+        } catch (err2) {
+            console.error("⚠️ Gagal mengambil daftar meeting:", err2.message);
+            return [];
+        }
     }
 };
 

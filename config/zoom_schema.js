@@ -65,23 +65,43 @@ export async function syncApprovedZoomToMeetings() {
                     SELECT setval('meetings_meeting_id_seq', COALESCE((SELECT MAX(meeting_id) FROM meetings), 0) + 1, false);
                 `).catch(() => {});
 
-                await pool.query(
-                    `INSERT INTO meetings (
-                        meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
-                        zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
-                    ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
-                    [
-                        req.judul_rapat,
-                        fullDesc,
-                        reqDateStr,
-                        tipeMeeting,
-                        req.zoom_link || "",
-                        req.meeting_id || "",
-                        req.passcode || "",
-                        reqId,
-                        creatorUserId
-                    ]
-                );
+                try {
+                    await pool.query(
+                        `INSERT INTO meetings (
+                            meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
+                            zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
+                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
+                        [
+                            req.judul_rapat,
+                            fullDesc,
+                            reqDateStr,
+                            tipeMeeting,
+                            req.zoom_link || "",
+                            req.meeting_id || "",
+                            req.passcode || "",
+                            reqId,
+                            creatorUserId
+                        ]
+                    );
+                } catch (insErr) {
+                    console.warn("⚠️ [SYNC] Insert meetings dengan user_id gagal, mencoba insert fallback:", insErr.message);
+                    await pool.query(
+                        `INSERT INTO meetings (
+                            meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
+                            zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id
+                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8)`,
+                        [
+                            req.judul_rapat,
+                            fullDesc,
+                            reqDateStr,
+                            tipeMeeting,
+                            req.zoom_link || "",
+                            req.meeting_id || "",
+                            req.passcode || "",
+                            reqId
+                        ]
+                    );
+                }
                 console.log(`✅ [SYNC] Permohonan Zoom "${req.judul_rapat}" (${tipeMeeting}) berhasil disinkronkan ke Manajemen Meeting.`);
             } else {
                 await pool.query(
@@ -140,9 +160,11 @@ export async function initZoomSchema() {
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_meeting_id VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_passcode VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_request_id INT;
+            ALTER TABLE meetings ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
 
             CREATE TABLE IF NOT EXISTS zoom_requests (
                 id SERIAL PRIMARY KEY,
+                user_id VARCHAR(100),
                 nip VARCHAR(50) NOT NULL,
                 nama_pemohon VARCHAR(150),
                 divisi VARCHAR(150),
@@ -162,6 +184,7 @@ export async function initZoomSchema() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS tipe_rapat VARCHAR(50) DEFAULT 'Rapat Biasa';
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS quiz_link TEXT;
         `);

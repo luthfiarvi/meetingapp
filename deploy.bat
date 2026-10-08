@@ -30,7 +30,7 @@ if %ERRORLEVEL% EQU 0 (
 echo.
 echo [2/4] Menyiapkan izin berkas dan mengompres paket proyek...
 attrib -r * /s /d >nul 2>&1
-tar --format ustar -czf deploy_bundle.tar.gz config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js backup_local.sql package.json package-lock.json
+tar --format ustar -czf deploy_bundle.tar.gz config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js check_db.js backup_local.sql package.json package-lock.json
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Gagal membuat arsip kompresi.
     pause
