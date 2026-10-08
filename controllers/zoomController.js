@@ -155,11 +155,12 @@ export const approveZoomRequest = async (req, res) => {
                 );
 
                 if (meetingCheck.rows.length === 0) {
+                    const creatorUserId = reqData.user_id || 'user';
                     await pool.query(
                         `INSERT INTO meetings (
                             meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
-                            zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id
-                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8)`,
+                            zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
+                        ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
                         [
                             reqData.judul_rapat,
                             fullDesc,
@@ -168,7 +169,8 @@ export const approveZoomRequest = async (req, res) => {
                             (zoom_link || "").trim(),
                             (meeting_id || "").trim(),
                             (passcode || "").trim(),
-                            reqId
+                            reqId,
+                            creatorUserId
                         ]
                     );
                     console.log(`✅ [SYNC APPROVE] Rapat "${reqData.judul_rapat}" (${tipeMeeting}) ditambahkan ke Manajemen Meeting.`);
@@ -182,8 +184,9 @@ export const approveZoomRequest = async (req, res) => {
                              zoom_link = $5,
                              zoom_meeting_id = $6,
                              zoom_passcode = $7,
-                             zoom_request_id = $8
-                         WHERE meeting_id = $9`,
+                             zoom_request_id = $8,
+                             user_id = COALESCE(user_id, $9)
+                         WHERE meeting_id = $10`,
                         [
                             reqData.judul_rapat,
                             fullDesc,
@@ -193,6 +196,7 @@ export const approveZoomRequest = async (req, res) => {
                             (meeting_id || "").trim(),
                             (passcode || "").trim(),
                             reqId,
+                            reqData.user_id || 'user',
                             meetingCheck.rows[0].meeting_id
                         ]
                     );
