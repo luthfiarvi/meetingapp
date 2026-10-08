@@ -9,7 +9,7 @@ const pool = new Pool({
     port: parseInt(process.env.DB_PORT || "5432"),
     user: process.env.DB_USER || (isWindows ? "postgres" : (process.env.PGUSER || "magangit")),
     password: process.env.DB_PASSWORD || (isWindows ? "postgres" : (process.env.PGPASSWORD || "K@nreg5")),
-    database: process.env.DB_NAME || "appmeeting"
+    database: process.env.DB_NAME || (isWindows ? "appmeeting" : "meeting")
 });
 
 export default pool;
