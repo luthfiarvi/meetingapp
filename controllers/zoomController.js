@@ -150,8 +150,8 @@ export const approveZoomRequest = async (req, res) => {
                 `).catch(() => {});
 
                 const meetingCheck = await pool.query(
-                    "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1 OR (meeting_nama = $2 AND tanggal = $3::date)",
-                    [reqId, reqData.judul_rapat, reqDateStr]
+                    "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1",
+                    [reqId]
                 );
 
                 if (meetingCheck.rows.length === 0) {

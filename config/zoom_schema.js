@@ -31,7 +31,7 @@ export async function syncApprovedZoomToMeetings() {
 
         // 4. Ambil semua permohonan Zoom yang disetujui (baik Rapat Biasa maupun Webinar)
         const approvedRequests = await pool.query(
-            "SELECT * FROM zoom_requests WHERE status = 'disetujui' ORDER BY id ASC"
+            "SELECT * FROM zoom_requests WHERE LOWER(TRIM(status)) = 'disetujui' ORDER BY id ASC"
         );
 
         for (const req of approvedRequests.rows) {
@@ -55,8 +55,8 @@ export async function syncApprovedZoomToMeetings() {
             const creatorUserId = req.user_id || 'user';
 
             const exists = await pool.query(
-                "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1 OR (meeting_nama = $2 AND tanggal = $3::date)",
-                [reqId, req.judul_rapat, reqDateStr]
+                "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1",
+                [reqId]
             );
 
             if (exists.rows.length === 0) {
