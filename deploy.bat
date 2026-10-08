@@ -57,7 +57,7 @@ echo   [OK] Arsip proyek berhasil diunggah!
 echo.
 echo [4/4] Mengekstrak bersih, merestore database, dan merestart aplikasi di server...
 echo       (Masukkan password user %USER% jika diminta)
-ssh -t %USER%@%SERVER% "bash -c 'set -e; rm -rf /home/magangit/meetingapp_new 2>/dev/null || true; mv /home/magangit/meetingapp /home/magangit/trash_app_\$\(date +%s\) 2>/dev/null || true; mkdir -p /home/magangit/meetingapp; tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/; rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash /home/magangit/meetingapp/deploy_server.sh; rm -rf /home/magangit/trash_app_* 2>/dev/null || true'"
+ssh -t %USER%@%SERVER% "bash -c 'tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/ 2>/dev/null || (mkdir -p /home/magangit/meetingapp && tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/); rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp 2>/dev/null || true; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash /home/magangit/meetingapp/deploy_server.sh'"
 
 echo.
 echo ============================================================
