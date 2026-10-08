@@ -63,7 +63,13 @@ export const inputMeeting = async (req,res) => {
     
     console.log("Input Meeting:", { m_nama, deskripsi, tanggal, m_tipe });
     
-    await meetingModel.createMeeting({m_nama,deskripsi,tanggal,m_tipe});
+    await meetingModel.createMeeting({
+        m_nama,
+        deskripsi,
+        tanggal,
+        m_tipe,
+        user_id: currentUser?.id || "admin"
+    });
     console.log("Data meeting berhasil diinput!");
 
     res.redirect("/manajemenmeeting");
@@ -102,6 +108,7 @@ function saveBase64File(base64Data, subfolder, prefix, meetingId) {
 
 export const updateMeetingController = async (req, res) => {
     try {
+        const currentUser = req.user || res.locals.user || { role: "user" };
         let {
             meeting_id,
             m_nama,
@@ -115,6 +122,18 @@ export const updateMeetingController = async (req, res) => {
 
         if (!meeting_id) {
             return res.status(400).json({ success: false, message: "Meeting ID wajib diisi" });
+        }
+
+        // Cek hak akses: hanya admin atau pembuat rapat yang berhak mengedit
+        if (currentUser.role !== "admin") {
+            const currentMeeting = await meetingModel.getMeetingById(meeting_id);
+            const creator = currentMeeting?.creator_user_id || currentMeeting?.user_id;
+            if (!currentMeeting || creator !== currentUser.id) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Akses ditolak: Anda hanya dapat mengubah rapat yang Anda buat sendiri."
+                });
+            }
         }
 
         // Normalisasi tipe meeting

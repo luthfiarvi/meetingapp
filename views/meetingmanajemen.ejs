@@ -147,13 +147,20 @@
                             let formattedTgl = '21 Agustus 2026';
                             if (m.tanggal) {
                                 const d = new Date(m.tanggal);
-                                formattedTgl = !isNaN(d) ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : m.tanggal;
+                                 formattedTgl = !isNaN(d) ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : m.tanggal;
                             }
+                            
+                            let currentUserId = (typeof user !== 'undefined' && user) ? (user.id || user.username || '') : '';
+                            let currentUserRole = (typeof user !== 'undefined' && user) ? (user.role || 'user') : 'user';
+                            let meetingCreator = m.creator_user_id || m.user_id || '';
+                            let canManageMeeting = (currentUserRole === 'admin') || (meetingCreator && String(meetingCreator).toLowerCase() === String(currentUserId).toLowerCase());
                         %>
                         <div class="meeting-card" 
                              data-meeting-id="<%= m.meeting_id || m.m_id || m.id %>"
                              data-tipe-meeting="<%= tipeDisplay %>"
                              data-title="<%= m.meeting_nama || m.m_nama || 'Agenda Rapat BKN' %>"
+                             data-creator="<%= meetingCreator %>"
+                             data-can-manage="<%= canManageMeeting ? 'true' : 'false' %>"
                              data-zoom-link="<%= m.zoom_link || '' %>"
                              data-zoom-id="<%= m.zoom_meeting_id || '' %>"
                              data-zoom-pass="<%= m.zoom_passcode || '' %>"
@@ -176,9 +183,11 @@
                                     <button type="button" class="btn-card-presensi" onclick="window.location.href='/daftar-presensi/' + this.closest('.meeting-card').dataset.meetingId">
                                         📝 Lihat Presensi
                                     </button>
+                                    <% if (canManageMeeting) { %>
                                     <button type="button" class="btn-card-edit" onclick="openEditModal(this)">
                                         ✏️ Edit
                                     </button>
+                                    <% } %>
                                     <button type="button" class="btn-card-sertif" onclick="openSertifikatModal(this.closest('.meeting-card').dataset.meetingId, this.closest('.meeting-card').dataset.title)">
                                         📜 Lihat Sertifikat
                                     </button>
@@ -315,7 +324,7 @@
                     <a id="btnOpenPresensiForm" href="#" target="_blank" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s;">
                         ✍️ Buka Link Form Presensi Peserta ↗
                     </a>
-                    <a id="btnCreateNotulenApp" href="/notulen" target="_blank" style="width:100%; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s; margin-top:10px;">
+                    <a id="btnCreateNotulenApp" href="/notulen" target="_blank" style="display:none; width:100%; align-items:center; justify-content:center; gap:8px; padding:11px 16px; background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; transition: 0.2s; margin-top:10px;">
                         📝 Susun / Buat Notula di App Infografis ↗
                     </a>
                     <a id="btnWebinarQa" href="#" target="_blank" style="display:none; width:100%; align-items:center; justify-content:center; gap:8px; padding:12px 16px; background:linear-gradient(135deg, #7c3aed, #6366f1); color:#ffffff; border:none; border-radius:10px; font-size:12.5px; font-weight:700; text-decoration:none; cursor:pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.25); transition: 0.2s; margin-top:10px; box-sizing: border-box;">
@@ -936,10 +945,17 @@
                 presensiLinkBtn.href = '/presensi/' + meetingId;
             }
 
-            // Link ke Generator Notulen di App Infografis untuk rapat ini
+            // Link ke Generator Notulen di App Infografis untuk rapat ini (HANYA untuk pembuat rapat atau admin)
+            const canManage = card.dataset.canManage === 'true';
             const notulenAppBtn = document.getElementById('btnCreateNotulenApp');
             if (notulenAppBtn) {
-                notulenAppBtn.href = '/notulen?meetingId=' + meetingId;
+                if (canManage) {
+                    notulenAppBtn.style.display = 'inline-flex';
+                    notulenAppBtn.href = '/notulen?meetingId=' + meetingId;
+                } else {
+                    notulenAppBtn.style.display = 'none';
+                    notulenAppBtn.href = '#';
+                }
             }
 
             // Tampilkan tombol Forum Q&A & Kuis Interaktif (Slido BKN) HANYA untuk tipe Webinar

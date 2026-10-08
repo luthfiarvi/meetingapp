@@ -41,6 +41,10 @@ if [ -f backup_local.sql ]; then
         ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO magangit;
         ALTER TABLE notulen ALTER COLUMN user_id TYPE VARCHAR(100);
         ALTER TABLE infographics ALTER COLUMN user_id TYPE VARCHAR(100);
+        ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
+        ALTER TABLE meetings ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
+        UPDATE zoom_requests SET user_id = 'user' WHERE nip = '1231236567' AND (user_id IS NULL OR user_id = '');
+        UPDATE meetings SET user_id = 'user' WHERE zoom_request_id IN (SELECT id FROM zoom_requests WHERE nip = '1231236567') AND (user_id IS NULL OR user_id = '');
         SELECT setval('meetings_meeting_id_seq', COALESCE((SELECT MAX(meeting_id) FROM meetings), 0) + 1, false);
         SELECT setval('zoom_requests_id_seq', COALESCE((SELECT MAX(id) FROM zoom_requests), 0) + 1, false);
     " 2>/dev/null || true

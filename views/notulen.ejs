@@ -70,11 +70,15 @@
           </label>
           <select id="selectMeetingId" class="form-input" style="font-size: 0.825rem; font-weight: 600; background: #ffffff; border-color: #86EFAC; color: #14532D;">
             <option value="">-- Buat Notula Mandiri (Tanpa Tautan Rapat) --</option>
-            <% (typeof meetings !== 'undefined' && Array.isArray(meetings) ? meetings : []).forEach(function(m) { %>
-              <option value="<%= m.meeting_id %>" <%= (typeof selectedMeetingId !== 'undefined' && selectedMeetingId && String(selectedMeetingId) === String(m.meeting_id)) ? 'selected' : '' %>>
-                [ID: <%= m.meeting_id %>] <%= m.meeting_nama %> (<%= m.tanggal ? (m.tanggal.toISOString ? m.tanggal.toISOString().split('T')[0] : String(m.tanggal).split('T')[0]) : '-' %>)
-              </option>
-            <% }); %>
+            <% if (typeof meetings !== 'undefined' && Array.isArray(meetings) && meetings.length > 0) { %>
+              <% meetings.forEach(function(m) { %>
+                <option value="<%= m.meeting_id %>" <%= (typeof selectedMeetingId !== 'undefined' && selectedMeetingId && String(selectedMeetingId) === String(m.meeting_id)) ? 'selected' : '' %>>
+                  [ID: <%= m.meeting_id %>] <%= m.meeting_nama %> (<%= m.tanggal ? (m.tanggal.toISOString ? m.tanggal.toISOString().split('T')[0] : String(m.tanggal).split('T')[0]) : '-' %>)
+                </option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled>-- Anda belum memiliki agenda rapat terdaftar --</option>
+            <% } %>
           </select>
           <div style="font-size: 0.72rem; color: #166534; margin-top: 4px; line-height: 1.3;">
             💡 Saat Anda klik <strong>Simpan</strong>, berkas notula resmi akan otomatis tersimpan dan langsung terhubung ke tombol <strong>Unduh Notulen</strong> di Manajemen Meeting.

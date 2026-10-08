@@ -4,8 +4,10 @@ export async function syncApprovedZoomToMeetings() {
     try {
         // 1. Pastikan kolom pendukung di zoom_requests & meetings ada
         await pool.query(`
+            ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS tipe_rapat VARCHAR(50) DEFAULT 'Rapat Biasa';
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS quiz_link TEXT;
+            ALTER TABLE meetings ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_link TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_meeting_id VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_passcode VARCHAR(100);
@@ -50,6 +52,8 @@ export async function syncApprovedZoomToMeetings() {
                 : "";
             const fullDesc = `${timeInfo}${pemohonInfo}${desc}`.trim() || `Rapat daring resmi BKN via Zoom: ${req.judul_rapat}`;
 
+            const creatorUserId = req.user_id || 'user';
+
             const exists = await pool.query(
                 "SELECT meeting_id FROM meetings WHERE zoom_request_id = $1 OR (meeting_nama = $2 AND tanggal = $3::date)",
                 [reqId, req.judul_rapat, reqDateStr]
@@ -64,8 +68,8 @@ export async function syncApprovedZoomToMeetings() {
                 await pool.query(
                     `INSERT INTO meetings (
                         meeting_nama, deskripsi, tanggal, tipe_meeting, tgl_buat,
-                        zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id
-                    ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8)`,
+                        zoom_link, zoom_meeting_id, zoom_passcode, zoom_request_id, user_id
+                    ) VALUES ($1, $2, $3::date, $4, CURRENT_DATE, $5, $6, $7, $8, $9)`,
                     [
                         req.judul_rapat,
                         fullDesc,
@@ -74,7 +78,8 @@ export async function syncApprovedZoomToMeetings() {
                         req.zoom_link || "",
                         req.meeting_id || "",
                         req.passcode || "",
-                        reqId
+                        reqId,
+                        creatorUserId
                     ]
                 );
                 console.log(`✅ [SYNC] Permohonan Zoom "${req.judul_rapat}" (${tipeMeeting}) berhasil disinkronkan ke Manajemen Meeting.`);
@@ -86,8 +91,9 @@ export async function syncApprovedZoomToMeetings() {
                          zoom_passcode = COALESCE(NULLIF($3, ''), zoom_passcode),
                          zoom_request_id = $4,
                          tipe_meeting = $5,
-                         deskripsi = COALESCE(NULLIF($6, ''), deskripsi)
-                     WHERE meeting_id = $7`,
+                         deskripsi = COALESCE(NULLIF($6, ''), deskripsi),
+                         user_id = COALESCE(user_id, $7)
+                     WHERE meeting_id = $8`,
                     [
                         req.zoom_link || "",
                         req.meeting_id || "",
@@ -95,6 +101,7 @@ export async function syncApprovedZoomToMeetings() {
                         reqId,
                         tipeMeeting,
                         fullDesc,
+                        creatorUserId,
                         exists.rows[0].meeting_id
                     ]
                 );

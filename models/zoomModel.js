@@ -24,6 +24,7 @@ const fallbackZoomRequests = [
 
 export const createRequest = async (data) => {
     const {
+        user_id,
         nip,
         nama_pemohon,
         divisi,
@@ -39,13 +40,14 @@ export const createRequest = async (data) => {
     try {
         const query = `
             INSERT INTO zoom_requests (
-                nip, nama_pemohon, divisi, judul_rapat, tanggal_pengajuan,
+                user_id, nip, nama_pemohon, divisi, judul_rapat, tanggal_pengajuan,
                 tanggal_rapat, waktu_mulai, waktu_selesai, keterangan, tipe_rapat, status
             )
-            VALUES ($1, $2, $3, $4, COALESCE($5, CURRENT_DATE), $6, $7, $8, $9, $10, 'menunggu')
+            VALUES ($1, $2, $3, $4, $5, COALESCE($6, CURRENT_DATE), $7, $8, $9, $10, $11, 'menunggu')
             RETURNING *;
         `;
         const values = [
+            user_id || null,
             nip,
             nama_pemohon || "",
             divisi || "",

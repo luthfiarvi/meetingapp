@@ -232,10 +232,26 @@ export const notulenController = {
       const formattedDate = today.toLocaleDateString("id-ID", options);
       const isoDate = today.toISOString().split("T")[0];
 
-      // Ambil daftar rapat BKN dari Manajemen Meeting untuk dropdown integrasi
+      // Ambil daftar rapat BKN dari Manajemen Meeting untuk dropdown integrasi (hanya milik user atau semua jika admin)
       let meetingsList = [];
       try {
-        const mRes = await pool.query("SELECT meeting_id, meeting_nama, tanggal, tipe_meeting FROM meetings ORDER BY meeting_id DESC");
+        let mQuery = `
+          SELECT m.meeting_id, m.meeting_nama, m.tanggal, m.tipe_meeting,
+                 COALESCE(m.user_id, z.user_id, u.id, 'admin') AS creator_user_id
+          FROM meetings m
+          LEFT JOIN zoom_requests z ON m.zoom_request_id = z.id
+          LEFT JOIN users u ON (
+              (z.user_id IS NOT NULL AND z.user_id = u.id)
+              OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = u.nip)
+          )
+        `;
+        const mParams = [];
+        if (user.role !== "admin") {
+          mQuery += ` WHERE (m.user_id = $1 OR z.user_id = $1 OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = $2))`;
+          mParams.push(user.id, user.nip || user.id);
+        }
+        mQuery += ` ORDER BY m.meeting_id DESC`;
+        const mRes = await pool.query(mQuery, mParams);
         meetingsList = mRes.rows;
       } catch (mErr) {
         console.warn("Notice: meetings query err:", mErr.message);
@@ -245,9 +261,17 @@ export const notulenController = {
       try {
         let docRes;
         if (req.query.id) {
-          docRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [req.query.id]);
+          if (user.role === "admin") {
+            docRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [req.query.id]);
+          } else {
+            docRes = await pool.query("SELECT * FROM notulen WHERE id = $1 AND user_id = $2", [req.query.id, user.id]);
+          }
         } else {
-          docRes = await pool.query("SELECT * FROM notulen ORDER BY created_at DESC LIMIT 1");
+          if (user.role === "admin") {
+            docRes = await pool.query("SELECT * FROM notulen ORDER BY created_at DESC LIMIT 1");
+          } else {
+            docRes = await pool.query("SELECT * FROM notulen WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1", [user.id]);
+          }
         }
         latestDoc = docRes.rows[0] || null;
       } catch (dbErr) {
@@ -255,6 +279,10 @@ export const notulenController = {
       }
 
       let selectedMeetingId = req.query.meetingId || latestDoc?.meeting_id || null;
+      // Validasi: hanya izinkan selectedMeetingId jika ada di daftar rapat yang boleh diakses user
+      if (selectedMeetingId && !meetingsList.some(m => String(m.meeting_id) === String(selectedMeetingId))) {
+        selectedMeetingId = null;
+      }
       if (!selectedMeetingId && meetingsList.length > 0) {
         selectedMeetingId = meetingsList[0].meeting_id;
       }
@@ -390,6 +418,28 @@ export const notulenController = {
       }
 
       const targetMeetingId = meetingId ? parseInt(meetingId, 10) : null;
+
+      // Cek hak akses ke meeting tujuan jika bukan admin
+      if (targetMeetingId && user.role !== "admin") {
+        const checkMtg = await pool.query(`
+          SELECT m.meeting_id, COALESCE(m.user_id, z.user_id, u.id, 'admin') AS creator_user_id
+          FROM meetings m
+          LEFT JOIN zoom_requests z ON m.zoom_request_id = z.id
+          LEFT JOIN users u ON (
+              (z.user_id IS NOT NULL AND z.user_id = u.id)
+              OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = u.nip)
+          )
+          WHERE m.meeting_id = $1
+        `, [targetMeetingId]);
+
+        if (checkMtg.rows.length === 0 || checkMtg.rows[0].creator_user_id !== user.id) {
+          return res.status(403).json({
+            success: false,
+            message: "Akses ditolak: Anda tidak memiliki hak akses untuk menambahkan notula pada rapat ini."
+          });
+        }
+      }
+
       const agendaJson = JSON.stringify(Array.isArray(agenda) ? agenda : []);
       const attendeesJson = JSON.stringify(Array.isArray(attendees) ? attendees : []);
       const activitiesJson = JSON.stringify(Array.isArray(activities) ? activities : []);

@@ -77,7 +77,10 @@ export const submitZoomRequest = async (req, res) => {
         const effectiveNama = (nama_pemohon || currentUser?.full_name || currentUser?.username || "Pegawai").trim();
         const effectiveDivisi = (divisi || currentUser?.division || "Kantor Regional V BKN").trim();
 
+        const effectiveUserId = (currentUser?.id || currentUser?.username || "user").trim();
+
         await zoomModel.createRequest({
+            user_id: effectiveUserId,
             nip: effectiveNip,
             nama_pemohon: effectiveNama,
             divisi: effectiveDivisi,
