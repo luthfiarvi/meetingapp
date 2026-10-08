@@ -134,9 +134,6 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
       </a>
     </div>
     <div style="display: flex; gap: 0.5rem;">
-      ${notulenId ? `<a href="/notulen/export-docx/${notulenId}" class="btn btn-secondary" style="color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
-        📥 Unduh Word (.docx)
-      </a>` : ''}
       <button type="button" onclick="window.print()" class="btn btn-primary">
         🖨️ Cetak / Unduh PDF (A4)
       </button>
