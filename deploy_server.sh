@@ -15,22 +15,24 @@ mkdir -p public/uploads/{ttd,avatars,evidence,sertif,videos,thumbnails,transcrip
 chmod -R 775 public/uploads public/docs 2>/dev/null || true
 echo "  [OK] Seluruh folder penampung uploads & docs siap!"
 
-# 2. Reset Total Database PostgreSQL Server agar identik 100% dengan lokal
+# 2. Memelihara Database PostgreSQL (TETAP PERTAHANKAN DATA SERVER, JANGAN DI-RESET)
 echo ""
-echo "[2/4] Reset total & sinkronisasi Database PostgreSQL (appmeeting)..."
+echo "[2/4] Memeriksa & memelihara database PostgreSQL (appmeeting)..."
 
 export PGPASSWORD=postgres
-# Reset database (Drop & Create ulang) via PostgreSQL auth (tanpa butuh sudo)
-(psql -h localhost -U postgres -c "DROP DATABASE IF EXISTS appmeeting;" 2>/dev/null) || (sudo -u postgres psql -c "DROP DATABASE IF EXISTS appmeeting;" 2>/dev/null) || true
-(psql -h localhost -U postgres -c "CREATE DATABASE appmeeting;" 2>/dev/null) || (sudo -u postgres psql -c "CREATE DATABASE appmeeting;" 2>/dev/null) || true
+# Buat database HANYA jika database appmeeting belum pernah ada
+DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname = 'appmeeting'" 2>/dev/null || psql -h localhost -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = 'appmeeting'" 2>/dev/null || echo "0")
 
-if [ -f backup_local.sql ]; then
-    echo "  -> Mengimpor struktur & data bersih dari backup_local.sql..."
-    if psql -h localhost -U postgres -d appmeeting -f backup_local.sql > /tmp/db_import.log 2>&1; then
-        echo "  [OK] Database berhasil diimpor bersih!"
-    elif sudo -u postgres psql -d appmeeting -f backup_local.sql > /tmp/db_import.log 2>&1; then
-        echo "  [OK] Database berhasil diimpor bersih!"
+if [ "$DB_EXISTS" != "1" ]; then
+    echo "  -> Database appmeeting belum ada, membuat database baru..."
+    (psql -h localhost -U postgres -c "CREATE DATABASE appmeeting;" 2>/dev/null) || (sudo -u postgres psql -c "CREATE DATABASE appmeeting;" 2>/dev/null) || true
+    if [ -f backup_local.sql ]; then
+        echo "  -> Menginisialisasi struktur awal dari backup_local.sql..."
+        (psql -h localhost -U postgres -d appmeeting -f backup_local.sql 2>/dev/null) || (sudo -u postgres psql -d appmeeting -f backup_local.sql 2>/dev/null) || true
     fi
+else
+    echo "  [OK] Database appmeeting di server sudah ada. Data server dipertahankan (TIDAK di-drop/direset)!"
+fi
 
     # Berikan hak akses penuh ke user magangit & perbaiki sequence ID
     SQL_PERMS="
