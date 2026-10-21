@@ -140,7 +140,13 @@ Hasilkan HANYA objek JSON valid (tanpa markdown blok, tanpa awalan/akhiran apapu
  * Eksekusi panggilan API Gemini dengan multi-model fallback yang tangguh
  */
 async function executeGeminiGenerate(prompt, apiKey) {
-  const models = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
+  const models = [
+    'gemini-3.1-flash-lite',
+    'gemini-3.5-flash-lite',
+    'gemini-3-flash-preview',
+    'gemini-3.8-flash',
+    'gemini-flash-latest'
+  ];
   let lastError = null;
 
   for (const model of models) {
@@ -413,28 +419,28 @@ async function callGeminiNotulenAPI(rawText, user, apiKey) {
 
   const prompt = `
 Anda adalah AI Notulis Kedinasan Resmi untuk Badan Kepegawaian Negara (BKN).
-Tugas Anda adalah membaca transkrip rapat (termasuk rekaman Zoom, Tactiq, atau catatan dinas) berikut ini dan menyusunnya menjadi format Notula Resmi BKN standar tata naskah dinas dalam format JSON.
+Tugas Anda adalah membaca transkrip atau catatan rapat kedinasan berikut ini dan menyusunnya menjadi format Notula Resmi BKN standar tata naskah dinas dalam format JSON.
 
 PANDUAN EKSTRAKSI PENTING:
-1. JUDUL: Ekstrak judul rapat yang SEBENARNYA dari teks (perhatikan baris judul teratas, nama kegiatan, atau instansi yang sedang mengadakan rapat/didampingi). Contoh jika tertera "Pendampingan MT Lamsel", ubah menjadi "PENDAMPINGAN MANAJEMEN TALENTA KABUPATEN LAMPUNG SELATAN". JANGAN PERNAH menyalin judul tiruan jika tidak sesuai teks aslinya.
-2. WAKTU & TANGGAL: Ekstrak hari, tanggal, dan rentang waktu dari teks atau header rapat.
+1. JUDUL: Ekstrak judul rapat yang SEBENARNYA dari teks (perhatikan nama kegiatan atau instansi yang sedang mengadakan rapat/didampingi). Contoh: jika ada "Nama Kegiatan: Pendampingan Pembangunan Manajemen Talenta Kabupaten Lampung Barat" atau "Pendampingan Pembangunan Manajemen Talenta Kabupaten Lambar", gunakan judul tersebut.
+   DILARANG KERAS menggunakan nama instansi umum seperti "BADAN KEPEGAWAIAN NEGARA" atau "KANTOR REGIONAL V" sebagai judul rapat!
+2. WAKTU & TANGGAL: Ekstrak hari, tanggal, dan rentang waktu dari teks atau header rapat (contoh: "Kamis, 15 Oktober 2026", "09.00 – 11.00 WIB").
 3. TEMPAT: Tentukan tempat rapat ("Daring melalui Zoom Meeting" atau nama ruang/lokasi jika pertemuan tatap muka).
-4. AGENDA: Tuliskan 3-5 poin agenda kegiatan rapat yang relevan dengan topik yang dibahas.
-5. PESERTA / UNSUR YANG HADIR (ATURAN KHUSUS - WAJIB): Tuliskan daftar peserta HANYA berdasarkan NAMA TIM KERJA, UNIT KERJA, PERWAKILAN INSTANSI, atau JABATAN STRUKTURAL KELOMPOK. JANGAN PERNAH mencantumkan nama orang pribadi/individu (DILARANG format seperti "Nama Orang (Tim X)", "Budi (Admin)", "Nama Orang - Jabatan"). Cukup sebutkan nama tim/unit kerja/jabatannya saja, contoh:
-   - Tim Manajemen Talenta Kantor Regional V BKN Jakarta
-   - Tim Pembinaan dan Pengelolaan Sistem Informasi Kepegawaian Kanreg V BKN
-   - Kepala BKPSDM Kabupaten [Nama Daerah] beserta jajaran
-   - Tim Admin SI-MATA dan Admin Penkom BKPSDM Kabupaten [Nama Daerah]
-   - Perwakilan Bagian Organisasi Sekretariat Daerah Kabupaten [Nama Daerah]
-   - Para Pejabat Administrator, Pengawas, dan Pejabat Fungsional Terkait
-   (Ringkas menjadi 4 - 7 butir unsur perwakilan tim/unit kerja, tanpa menyebut nama orang satu per satu).
-6. URAIAN KEGIATAN: Bagi pembahasan ke dalam 2-4 sesi logis berdasarkan alur diskusi dan sebutkan narasumber/pembicara yang relevan beserta poin-poin inti apa yang mereka sampaikan.
-7. TINDAK LANJUT: Ekstrak 3-5 poin tindak lanjut penugasan atau arahan yang harus dikerjakan setelah rapat.
+4. AGENDA: Tuliskan 3-5 poin agenda kegiatan rapat yang relevan dengan topik yang dibahas (ambil dari susunan acara atau topik pembahasan).
+5. PESERTA / UNSUR YANG HADIR (ATURAN KHUSUS - WAJIB DIPATUHI):
+   - Tuliskan daftar peserta HANYA berdasarkan NAMA TIM KERJA, UNIT KERJA, PERWAKILAN INSTANSI, atau JABATAN STRUKTURAL KELOMPOK (contoh: "Tim Kerja Pembinaan Manajemen Talenta Kantor Regional V BKN", "Tim Manajemen Talenta BKPSDM Kabupaten Lampung Barat", "Direktorat Pengembangan Talenta dan Karier ASN BKN").
+   - DILARANG KERAS memasukkan nama dokumen, judul kertas kerja, subtopik, atau kata teknis ke dalam Peserta (DILARANG: "Laman", "Kertas kerja dan dokumen", "Persiapan ekspos", "Sumbu X", "Pro ASN", "Jadwal", dll).
+   - DILARANG mencantumkan nama orang pribadi/individu.
+6. URAIAN KEGIATAN:
+   - Bagi pembahasan ke dalam beberapa sesi logis sesuai transkrip (misal: "1. Pembukaan Master of Ceremony", "2. Pengantar Tim BKN", "3. Pengantar BKPSDM", "4. Pembahasan Teknis", dll).
+   - Setiap butir pembahasan HARUS berupa kalimat bersih (DILARANG memasukkan simbol bullet seperti '•', '-', '*' di awal teks agar tidak terjadi double bullet).
+   - DILARANG KERAS memasukkan teks kop surat (alamat kantor BKN Ciracas, nomor telepon, faksimile, pos-el/email, atau website) ke dalam Uraian Kegiatan/Pembahasan!
+7. TINDAK LANJUT: Ekstrak 3-5 poin arahan / tindak lanjut konkret dari hasil rapat.
 8. KESIMPULAN: Tuliskan 2-3 poin kesimpulan rapat secara profesional.
 9. PENUTUP: Tuliskan narasi penutup rapat kedinasan secara formal.
 10. DETEKSI TOPIK KHUSUS MANAJEMEN TALENTA (MT) & TABEL KERTAS KERJA:
     Periksa secara cermat apakah rapat ini membahas MANAJEMEN TALENTA (MT), SIMATA, Kertas Kerja Manajemen Talenta, Pemetaan Talenta / 9 Box, Rencana Suksesi, IDP, atau Pembinaan/Pendampingan MT Instansi:
-    - JIKA BUKAN RAPAT MANAJEMEN TALENTA (misal rapat Jabatan Fungsional, Kenaikan Pangkat, Mutasi, Disiplin, Perencanaan, atau Rapat Umum):
+    - JIKA BUKAN RAPAT MANAJEMEN TALENTA:
       Set:
       "isMT": false,
       "kertasKerjaMT": null
@@ -442,12 +448,8 @@ PANDUAN EKSTRAKSI PENTING:
       Set:
       "isMT": true,
       dan sertakan "kertasKerjaMT" berisi persis 15 item standar BKN (Pilar I: 1.1-1.4, Pilar II: 2.1-2.2, Pilar III: 3.1-3.3).
-      ATURAN PENGISIAN STATUS & KETERANGAN KERTAS KERJA:
-      * Kolom 'no', 'komponen', 'indikator', 'buktiOutput' HARUS BAKU DAN SAMA PERSIS dengan 15 butir standar BKN.
-      * Kolom 'status' HANYA BOLEH bernilai salah satu dari 2 simbol:
-        - "✓" (ceklis) : jika eviden sudah ada / sudah diunggah / sudah lengkap / disetujui dalam rapat.
-        - "-" (strip) : jika eviden belum ada / belum diunggah / masih berupa catatan kekurangan / menunggu perbaikan.
-      * Kolom 'keterangan' HARUS disesuaikan secara cerdas dengan hasil diskusi transkrip rapat (misal: "Sesuai", "Perlu update SS dashboard", "Konfirmasi detil lowongan JPTP", "Perlu SS untuk kotak 9", "IDP manual perlu dilengkapi", "Perlu SS Simata ttd atasan", dll.).
+      * Kolom 'status' HANYA BOLEH bernilai salah satu dari 2 simbol: "✓" (ceklis jika eviden sesuai/disetujui) atau "-" (strip jika eviden belum ada / masih catatan).
+      * Kolom 'keterangan' HARUS disesuaikan secara cerdas dengan hasil diskusi transkrip rapat (misal: "Sesuai", "Perlu update SS dashboard", "Konfirmasi detil lowongan JPTP", "Perlu update SS untuk kotak 9", "Sumbu X perlu ditingkatkan", "Perlu SS Simata dengan dokumen ttd atasan", dll.).
 
 Identitas Notulis:
 - Nama: ${user.full_name || 'Notulis BKN'}
@@ -461,23 +463,22 @@ ${textToSend}
 
 Hasilkan HANYA objek JSON valid (tanpa blok markdown, tanpa awalan/akhiran apapun) dengan format skema:
 {
-  "title": "Judul resmi rapat (HURUF KAPITAL)",
-  "meetingTime": "Rentang waktu rapat (contoh: 08.38 WIB – Selesai)",
+  "title": "Judul resmi kegiatan rapat (HURUF KAPITAL)",
+  "meetingTime": "Rentang waktu rapat (contoh: 09.00 – 11.00 WIB)",
   "meetingPlace": "Daring melalui Zoom Meeting ATAU Di Tempat",
   "agenda": [
     "Poin agenda kegiatan 1",
     "Poin agenda kegiatan 2"
   ],
   "attendees": [
-    "Nama Tim Kerja / Unit Kerja / Jabatan Struktural Instansi (HARUS berupa nama tim/unit, DILARANG mencantumkan nama orang pribadi)"
+    "Nama Tim Kerja / Unit Kerja / Jabatan Struktural Instansi (DILARANG mencantumkan nama orang pribadi atau judul kertas kerja)"
   ],
   "activities": [
     {
       "sectionTitle": "Judul Sesi Pembahasan",
       "speaker": "Nama pembicara / narasumber",
       "points": [
-        "Poin pembahasan atau arahan 1",
-        "Poin pembahasan atau arahan 2"
+        "Poin pembahasan atau arahan bersih tanpa simbol bullet di awal"
       ]
     }
   ],
@@ -510,17 +511,29 @@ Hasilkan HANYA objek JSON valid (tanpa blok markdown, tanpa awalan/akhiran apapu
 
 /**
  * Smart Dynamic Notulen Parser lokal (Fallback Cerdas Tanpa Data Tiruan / Mock)
+ * Mengekstrak seluruh struktur notula secara akurat tanpa memasukkan kop surat atau judul dokumen ke peserta
  */
 function smartLocalNotulenParser(rawText, user = {}) {
   const text = (rawText || '').trim();
 
-  // 1. Ekstraksi Judul Dinamis
+  // 1. Ekstraksi Judul
   let title = '';
-  const firstLines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  if (firstLines.length > 0) {
-    const l0 = firstLines[0];
-    if (!/^(meeting started|view original|transcript|\d{1,2}:\d{2}|notula)/i.test(l0) && l0.length > 3 && l0.length < 130) {
-      title = l0;
+  const namaKegMatch = text.match(/(?:Nama Kegiatan|Judul Kegiatan|Topik)\s*[:\n]\s*([^\n\r]+)/i);
+  if (namaKegMatch && namaKegMatch[1].trim() && !/^(badan kepegawaian|kantor regional)/i.test(namaKegMatch[1].trim())) {
+    title = namaKegMatch[1].trim();
+  }
+
+  if (!title) {
+    const notulenBlock = text.match(/(?:NOTULEN|NOTULA)\s*\n+([^\n\r]+)(?:\n+([^\n\r]+))?/i);
+    if (notulenBlock) {
+      const line1 = (notulenBlock[1] || '').trim();
+      const line2 = (notulenBlock[2] || '').trim();
+      if (line1 && !/^(hari|waktu|tempat|tanggal|peserta)/i.test(line1)) {
+        title = line1;
+        if (line2 && !/^(hari|waktu|tempat|tanggal|peserta)/i.test(line2) && line2.length < 50) {
+          title += ` ${line2}`;
+        }
+      }
     }
   }
 
@@ -532,6 +545,7 @@ function smartLocalNotulenParser(rawText, user = {}) {
   if (title) {
     title = title
       .replace(/\bMT\b/g, 'Manajemen Talenta')
+      .replace(/\bLambar\b/gi, 'Kabupaten Lampung Barat')
       .replace(/\bLamsel\b/gi, 'Kabupaten Lampung Selatan')
       .replace(/\bLamtim\b/gi, 'Kabupaten Lampung Timur')
       .replace(/\bLamteng\b/gi, 'Kabupaten Lampung Tengah')
@@ -540,110 +554,185 @@ function smartLocalNotulenParser(rawText, user = {}) {
       .replace(/[():\-]+$/, '')
       .replace(/^[():\-]+/, '')
       .trim();
-    if (title.length > 90) {
-      title = title.substring(0, 90);
-      const lastSp = title.lastIndexOf(' ');
-      if (lastSp > 30) title = title.substring(0, lastSp);
-    }
+    if (title.length > 100) title = title.substring(0, 97) + '...';
     title = title.toUpperCase();
   } else {
     title = 'RAPAT KOORDINASI DAN EVALUASI LAYANAN KEPEGAWAIAN BKN';
   }
 
   // 2. Waktu & Tanggal
-  let meetingTime = '09.00 – 11.30 WIB';
-  const startMatch = text.match(/Meeting started:\s*([A-Za-z]+ \d{1,2}, \d{4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/i);
-  if (startMatch) {
-    meetingTime = `${startMatch[2]} WIB – Selesai`;
+  let meetingTime = '09.00 – 11.00 WIB';
+  const waktuMatch = text.match(/(?:Hari\/Tanggal\s*\|\s*Waktu|Waktu|Pukul)\s*[:|]?\s*([^\n\r]+)/i);
+  if (waktuMatch) {
+    const rawW = waktuMatch[1].trim();
+    const tm = rawW.match(/(\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}(?:\s*WIB)?)/i);
+    if (tm) {
+      meetingTime = tm[1].trim() + (tm[1].toUpperCase().includes('WIB') ? '' : ' WIB');
+    }
   } else {
-    const timeMatch = text.match(/(\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}\s*(?:WIB|WITA|WIT)?)/i);
-    if (timeMatch) meetingTime = timeMatch[1].trim();
+    const startMatch = text.match(/Meeting started:\s*([A-Za-z]+ \d{1,2}, \d{4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/i);
+    if (startMatch) meetingTime = `${startMatch[2]} WIB – Selesai`;
   }
 
   // 3. Tempat
   let meetingPlace = 'Daring melalui Zoom Meeting';
-  if (/luring|tatap muka|aula|ruang rapat|kantor/i.test(text) && !/zoom|daring|teams/i.test(text)) {
-    meetingPlace = 'Di Tempat';
+  const tempatMatch = text.match(/Tempat\s*[:|]?\s*([^\n\r]+)/i);
+  if (tempatMatch) {
+    meetingPlace = tempatMatch[1].trim();
   }
 
-  // 4. Deteksi Peserta dari Teks Transkrip Nyata
-  let attendees = [];
-  const partMatch = text.match(/Meeting participants:\s*([^\n\r]+)/i);
-  if (partMatch && partMatch[1].trim()) {
-    const rawParts = partMatch[1].split(',');
-    rawParts.forEach(p => {
-      let clean = p.replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (clean && clean.length > 2) attendees.push(clean);
+  // 4. PESERTA
+  let rawAttendees = [];
+  const pesertaSectionMatch = text.match(/(?:Peserta|Unsur yang Hadir|Daftar Hadir|Peserta Rapat)\s*[:\n]([\s\S]*?)(?=\n\s*(?:Pembahasan|Agenda|Susunan Acara|Uraian|1\.\s+Pembukaan|\n\n\n|$))/i);
+  if (pesertaSectionMatch && pesertaSectionMatch[1].trim()) {
+    const lines = pesertaSectionMatch[1].split('\n').map(l => l.trim()).filter(Boolean);
+    lines.forEach(l => {
+      if (l.length > 3 && !/^(hari|waktu|tempat|tanggal)/i.test(l)) {
+        rawAttendees.push(l);
+      }
     });
   }
 
-  if (attendees.length === 0) {
+  if (rawAttendees.length === 0) {
+    const partMatch = text.match(/Meeting participants:\s*([^\n\r]+)/i);
+    if (partMatch && partMatch[1].trim()) {
+      partMatch[1].split(',').forEach(p => {
+        let clean = p.replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
+        if (clean && clean.length > 2) rawAttendees.push(clean);
+      });
+    }
+  }
+
+  if (rawAttendees.length === 0) {
     const speakerRegex = /(?:^|\n)(?:\d{1,2}:\d{2}(?::\d{2})?\s+)?([A-Za-z0-9_.\s]{3,35})\s*:/g;
     const foundSpeakers = new Set();
     let sm;
     while ((sm = speakerRegex.exec(text)) !== null) {
       const sp = sm[1].replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (sp && !/^(transcript|meeting|view|agenda|peserta|waktu|tempat|catatan|sesi)/i.test(sp)) {
-        foundSpeakers.add(sp);
-      }
+      foundSpeakers.add(sp);
     }
-    attendees = Array.from(foundSpeakers).slice(0, 8);
+    rawAttendees = Array.from(foundSpeakers);
   }
 
-  if (attendees.length === 0) {
-    attendees = [
-      `${user.full_name || 'Notulis BKN'} – Notulis`,
-      'Pimpinan Rapat',
-      'Para Pejabat dan Peserta Rapat'
-    ];
+  const attendees = sanitizeAttendees(rawAttendees);
+
+  // 5. AGENDA
+  const agenda = [];
+  const susunanMatch = text.match(/(?:susunan acara|agenda utama|agenda pertemuan)(?:[\s\w,:]*?)(?:yaitu|adalah)\s*([^\n\r.]+)/i);
+  if (susunanMatch && susunanMatch[1]) {
+    const items = susunanMatch[1].split(/,\s*(?:lalu|dan)?\s*/i);
+    items.forEach(it => {
+      const c = it.trim();
+      if (c.length > 5) agenda.push(c.charAt(0).toUpperCase() + c.slice(1));
+    });
+  }
+  if (agenda.length === 0) {
+    agenda.push(
+      `Pembukaan dan pengantar kegiatan ${title.toLowerCase()}`,
+      'Penyampaian materi substansi dan review kertas kerja',
+      'Pembahasan teknis, tindak lanjut, dan kesimpulan rapat'
+    );
   }
 
-  // 5. Agenda Dinamis
-  const agenda = [
-    `Pelaksanaan kegiatan ${title.toLowerCase()} bersama unit kerja terkait.`,
-    'Review pemenuhan kertas kerja, dokumen eviden, dan instrumen pendukung.',
-    'Pembahasan kendala operasional serta strategi percepatan tindak lanjut.'
-  ];
+  // 6. URAIAN PEMBAHASAN / KEGIATAN
+  const activities = [];
+  const sectionRegex = /(?:^|\n)\s*([0-9]+)\.\s+([^\n\r]+)([\s\S]*?)(?=(?:\n\s*[0-9]+\.\s+[^\n\r]+|\n\s*Jakarta,|\n\s*Notulis|$))/gi;
+  let match;
+  while ((match = sectionRegex.exec(text)) !== null) {
+    const secNum = match[1];
+    const secTitleRaw = match[2].trim();
+    const secBody = match[3] || '';
 
-  // 6. Uraian Pembahasan Dinamis dari Dialog Nyata
-  const dialogueLines = text.split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 35 && !/^(meeting|transcript|view original|\d{1,2}:\d{2}\s*$)/i.test(l));
+    if (/^(peserta|hari|waktu|tempat|nama kegiatan|tindak lanjut|kesimpulan|dokumentasi)/i.test(secTitleRaw)) {
+      continue;
+    }
 
-  const mid = Math.ceil(dialogueLines.length / 2);
-  const part1 = dialogueLines.slice(0, Math.min(mid, 4)).map(l => l.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/, ''));
-  const part2 = dialogueLines.slice(mid, Math.min(mid + 4, dialogueLines.length)).map(l => l.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/, ''));
+    if (/kertas kerja.*dipandu oleh/i.test(secTitleRaw) && /(?:tabel|no\s+komponen)/i.test(secBody)) {
+      continue;
+    }
 
-  const activities = [
-    {
+    const points = [];
+    const lines = secBody.split('\n').map(l => l.trim()).filter(Boolean);
+    lines.forEach(l => {
+      let cleanPoint = l.replace(/^[•*\-–—]\s*/, '').replace(/^[0-9]+[.)\-]\s*/, '').trim();
+      if (cleanPoint.length > 10 && !/^(no\s+komponen|pembahasan|kertas kerja dan dokumen:)/i.test(cleanPoint)) {
+        if (!/(?:jalan raya ciracas|telepon \(021\)|pos-el:|jakarta\.bkn\.go\.id)/i.test(cleanPoint)) {
+          points.push(cleanPoint);
+        }
+      }
+    });
+
+    if (points.length > 0) {
+      let speaker = 'Pimpinan Rapat';
+      if (/mc|master of ceremony/i.test(secTitleRaw)) speaker = 'Master of Ceremony';
+      else if (/ketua tim.*kanreg/i.test(secTitleRaw)) speaker = 'Ketua Tim Kerja Pembinaan MASN BKN Kanreg V';
+      else if (/bkpsdm/i.test(secTitleRaw)) speaker = 'Perwakilan BKPSDM';
+      else if (/bangtarier/i.test(secTitleRaw)) speaker = 'Direktorat Bangtarier BKN';
+
+      activities.push({
+        sectionTitle: `${secNum}. ${secTitleRaw}`,
+        speaker: speaker,
+        points: points.slice(0, 6)
+      });
+    }
+  }
+
+  // Fallback Uraian Pembahasan jika teks tidak memiliki penomoran seksi
+  if (activities.length === 0) {
+    const dialogueLines = text.split('\n')
+      .map(l => l.trim().replace(/^[•*\-–—]\s*/, '').replace(/^[0-9]+[.)\-]\s*/, ''))
+      .filter(l => l.length > 30 && !/(?:jalan raya ciracas|telepon \(021\)|pos-el:|jakarta\.bkn\.go\.id|meeting|transcript|view original|\d{1,2}:\d{2}\s*$)/i.test(l));
+
+    const mid = Math.ceil(dialogueLines.length / 2);
+    const part1 = dialogueLines.slice(0, Math.min(mid, 4));
+    const part2 = dialogueLines.slice(mid, Math.min(mid + 4, dialogueLines.length));
+
+    activities.push({
       sectionTitle: '1. Pengantar dan Pembahasan Awal',
       speaker: attendees[0] || 'Pimpinan Rapat',
       points: part1.length > 0 ? part1 : [`Penyampaian arahan dan tujuan pelaksanaan ${title.toLowerCase()}.`]
-    },
-    {
-      sectionTitle: '2. Review Kertas Kerja dan Diskusi Teknis',
+    });
+    activities.push({
+      sectionTitle: '2. Review Dokumen dan Diskusi Teknis',
       speaker: attendees[1] || 'Tim Teknis / Narasumber',
       points: part2.length > 0 ? part2 : ['Pendalaman materi teknis serta inventarisasi eviden pendukung.']
-    }
-  ];
+    });
+  }
 
-  // 7. Tindak Lanjut Dinamis
+  // 7. TINDAK LANJUT
   const actionItems = [];
-  const actionKeywords = text.match(/([^.!?\n\r]*(?:sk |tindak lanjut|harus|akan|segera|koordinasi|lengkapi|upload|percepatan|retensi|idp)[^.!?\n\r]*[.!?])/gi);
-  if (actionKeywords && actionKeywords.length > 0) {
-    const cleanedActions = actionKeywords
-      .map(a => a.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s+[A-Za-z0-9_.\s]+:\s*/, '').trim())
-      .filter(a => a.length > 25 && a.length < 200);
-    const uniqueActions = Array.from(new Set(cleanedActions)).slice(0, 4);
-    if (uniqueActions.length > 0) actionItems.push(...uniqueActions);
+  const tlSection = text.match(/(?:Tindak Lanjut|Rekomendasi Tindak Lanjut)([\s\S]*?)(?=(?:\n\s*[0-9]+\.\s+[^\n\r]+|\n\s*Kesimpulan|\n\s*Closing|$))/i);
+  if (tlSection && tlSection[1]) {
+    const lines = tlSection[1].split('\n').map(l => l.trim()).filter(Boolean);
+    lines.forEach(l => {
+      let cl = l.replace(/^[•*\-–—]\s*/, '').replace(/^[0-9]+[.)\-]\s*/, '').trim();
+      if (cl.length > 15 && !/^(jadwal|target|isu)/i.test(cl)) {
+        actionItems.push(cl);
+      }
+    });
   }
   if (actionItems.length === 0) {
-    actionItems.push(`Menindaklanjuti rekomendasi hasil kegiatan ${title.toLowerCase()}.`);
-    actionItems.push('Melengkapi dokumen eviden dan berkas administrasi kepegawaian yang diperlukan.');
-    actionItems.push('Melakukan koordinasi berkala dengan tim pendamping.');
+    actionItems.push('Segera mengunggah dan melengkapi dokumen manual ke SIMATA.');
+    actionItems.push('Mendorong ASN untuk melengkapi sertifikat kepesertaan dan penugasan tim kerja.');
+    actionItems.push('Melakukan koordinasi dengan tim pendamping terkait pengajuan kuota Pro ASN.');
   }
 
-  // 9. Deteksi Topik Khusus Manajemen Talenta (MT)
+  // 8. KESIMPULAN
+  const conclusions = [];
+  const kesimpulanSection = text.match(/(?:Kesimpulan|8\.\s+Kesimpulan)([\s\S]*?)(?=(?:\n\s*Jakarta|\n\s*Notulis|$))/i);
+  if (kesimpulanSection && kesimpulanSection[1]) {
+    const lines = kesimpulanSection[1].split('\n').map(l => l.trim()).filter(Boolean);
+    lines.forEach(l => {
+      let cl = l.replace(/^[•*\-–—]\s*/, '').replace(/^[0-9]+[.)\-]\s*/, '').trim();
+      if (cl.length > 20) conclusions.push(cl);
+    });
+  }
+  if (conclusions.length === 0) {
+    conclusions.push(`Kegiatan ${title.toLowerCase()} telah dilaksanakan dengan baik dan menghasilkan rekomendasi konkret.`);
+    conclusions.push('Seluruh pihak yang terlibat berkomitmen untuk mempercepat pemenuhan data dan dokumen pendukung sesuai standar BKN.');
+  }
+
+  // 9. DETEKSI MT
   const isMT = /(?:manajemen talenta|\bmt\b|kertas kerja|simata|si-mata|9 box|sembilan kotak|kotak talenta|bangtarier|akuisisi talenta|retensi talenta)/i.test(text);
   let kertasKerjaMT = null;
   if (isMT) {
@@ -651,44 +740,43 @@ function smartLocalNotulenParser(rawText, user = {}) {
       let st = "-";
       let ket = "";
       if (item.no === "1.1" && /(?:komitmen|surat pernyataan)/i.test(text)) {
-        st = "✓";
-        ket = "Sesuai";
+        st = "✓"; ket = "Sesuai";
       } else if (item.no === "1.2" && /(?:sk tim|tim kerja)/i.test(text)) {
-        st = "✓";
-        ket = "Sesuai";
+        st = "✓"; ket = "Sesuai";
       } else if (item.no === "1.3" && /(?:komite talenta)/i.test(text)) {
-        st = "✓";
-        ket = "Sesuai";
+        st = "✓"; ket = "Sesuai";
       } else if (item.no === "1.4" && /(?:regulasi|perbup|perwal)/i.test(text)) {
-        st = "✓";
-        ket = "Sesuai";
+        st = "✓"; ket = "Sesuai";
       } else if (item.no === "2.1") {
-        st = "✓";
-        ket = /(?:update ss|dashboard)/i.test(text) ? "Sesuai, namun memerlukan update SS dashboard" : "Sesuai";
+        st = "✓"; ket = /(?:update ss|dashboard)/i.test(text) ? "Sesuai, namun memerlukan update SS dashboard" : "Sesuai";
       } else if (item.no === "2.2") {
-        st = "✓";
-        ket = /(?:pemadanan|integrasi)/i.test(text) ? "Sesuai, namun memerlukan update SS pemadanan data" : "Sesuai";
+        st = "✓"; ket = /(?:pemadanan|integrasi)/i.test(text) ? "Sesuai, namun memerlukan update SS pemadanan data" : "Sesuai";
+      } else if (item.no === "3.1") {
+        if (item.indikator.includes("identifikasi jabatan target")) {
+          st = "✓"; ket = /(?:7 jabatan lowong|jptp)/i.test(text) ? "Konfirmasi detil 7 jabatan lowong JPTP" : "Sesuai";
+        } else if (item.indikator.includes("analisis kebutuhan talenta")) {
+          st = "✓"; ket = /(?:kotak 9|update ss)/i.test(text) ? "Perlu update SS untuk kotak 9" : "Sesuai";
+        } else if (item.indikator.includes("pengelompokan berbagai jenis jabatan")) {
+          st = "✓"; ket = "Sesuai";
+        } else if (item.indikator.includes("parameter, komponen")) {
+          st = "✓"; ket = "Sesuai";
+        } else if (item.indikator.includes("profil talenta")) {
+          st = "✓"; ket = /(?:sumbu x)/i.test(text) ? "Sumbu X perlu ditingkatkan" : "Sesuai";
+        } else if (item.indikator.includes("9 kotak talenta")) {
+          st = "✓"; ket = /(?:jptp dan jf madya)/i.test(text) ? "Perlu SS untuk jabatan JPTP dan JF Madya" : "Sesuai";
+        } else if (item.indikator.includes("rencana suksesi")) {
+          st = "✓"; ket = /(?:update kotak 9)/i.test(text) ? "Perlu SS untuk update kotak 9" : "Sesuai";
+        }
       } else if (item.no === "3.2") {
-        ket = /(?:idp manual|ttd atasan)/i.test(text) ? "Perlu SS Simata dengan dokumen ttd atasan" : "Perlu verifikasi";
+        st = "✓"; ket = /(?:idp manual|ttd atasan|simata)/i.test(text) ? "Perlu SS Simata dengan dokumen ttd atasan" : "Perlu verifikasi";
       } else if (item.no === "3.3") {
-        st = "✓";
-        ket = "Sesuai";
+        st = "✓"; ket = "Sesuai";
       }
-      return {
-        ...item,
-        status: st,
-        keterangan: ket
-      };
+      return { ...item, status: st, keterangan: ket };
     });
   }
 
-  // 10. Kesimpulan Dinamis
-  const conclusions = [
-    `Kegiatan ${title.toLowerCase()} telah dilaksanakan dengan baik dan menghasilkan rekomendasi perbaikan yang konkret.`,
-    'Seluruh pihak yang terlibat berkomitmen untuk mempercepat pemenuhan data dan dokumen pendukung sesuai arahan.'
-  ];
-
-  const closingText = `Kegiatan ${title.toLowerCase()} ditutup secara resmi dengan komitmen bersama untuk segera menindaklanjuti seluruh catatan review demi mendukung akuntabilitas kinerja instansi.`;
+  const closingText = `Kegiatan ${title.toLowerCase()} ditutup secara resmi dengan komitmen bersama untuk segera menindaklanjuti seluruh catatan review demi mendukung percepatan implementasi standar manajemen talenta.`;
 
   return {
     title,
@@ -905,9 +993,23 @@ function sanitizeAttendees(list) {
   const results = [];
   const seen = new Set();
 
+  const blacklistedKeywords = [
+    'laman', 'telepon', 'faksimile', 'pos-el', 'email', 'website', 'ciracas', 'jakarta.bkn',
+    'kertas kerja', 'persiapan ekspos', 'dokumen dan kertas', 'isu & risiko', 'isu dan risiko',
+    'pengembangan kompetensi', 'penugasan tim', 'sumbu x', 'sumbu y', 'jadwal', 'target waktu',
+    'pro asn', 'pembahasan', 'agenda', 'uraian', 'tindak lanjut', 'kesimpulan', 'closing statement',
+    'dokumentasi', 'catatan', 'hari/tanggal', 'waktu', 'tempat', 'nama kegiatan'
+  ];
+
   list.forEach(item => {
     if (!item || typeof item !== 'string') return;
-    let val = item.trim();
+    let val = item.replace(/^[0-9]+[.)\-]\s*/, '').replace(/^[•*\-–—]\s*/, '').trim();
+
+    // Cek blacklist kata kunci non-peserta
+    const lower = val.toLowerCase();
+    if (blacklistedKeywords.some(kw => lower.includes(kw))) {
+      return;
+    }
 
     // 1. Jika format: "Nama Orang (Tim/Unit/Jabatan)" -> ambil isi kurung jika berupa jabatan/tim/unit
     const bracketMatch = val.match(/^([A-Za-z\s'.,]+)\s*\(([^)]+)\)$/);
@@ -931,7 +1033,7 @@ function sanitizeAttendees(list) {
     val = val.replace(/^(?:ibu|bapak|pak|bu|sdr|sdri)\s+[A-Za-z\s'.,]{2,25}\s*(?:–|-)\s*/i, '');
     val = val.replace(/\s+/g, ' ').trim();
 
-    if (val.length > 2 && !seen.has(val.toLowerCase())) {
+    if (val.length > 3 && !seen.has(val.toLowerCase())) {
       seen.add(val.toLowerCase());
       results.push(val);
     }
