@@ -3,8 +3,9 @@ import aiService from "../services/aiService.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, ImageRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, ImageRun, Table, TableRow, TableCell, WidthType, ShadingType } from "docx";
 import mammoth from "mammoth";
+import { PDFParse } from "pdf-parse";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,160 @@ function getCurrentUser(req) {
   };
 }
 
+function safeParseJson(val, fallback = []) {
+  if (!val) return fallback;
+  if (Array.isArray(val)) return val;
+  if (typeof val === "object") return val;
+  try {
+    const parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : (parsed || fallback);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+// Helper untuk membaca dan mem-parse dokumen notula dari file HTML fisik jika diperlukan
+function parseNotulenHtml(html) {
+  if (!html || typeof html !== "string") return null;
+
+  const res = {
+    title: "",
+    meetingDate: "",
+    formattedDate: "",
+    meetingTime: "",
+    meetingPlace: "",
+    agenda: [],
+    attendees: [],
+    activities: [],
+    actionItems: [],
+    conclusions: [],
+    closingText: "",
+    notulisName: "",
+    notulisRole: "",
+    documentationPhotos: []
+  };
+
+  // Title
+  const titleM = html.match(/<div class="notula-sub-title">\s*([\s\S]*?)\s*<\/div>/i);
+  if (titleM) {
+    res.title = titleM[1].replace(/^\(+/, '').replace(/\)+$/, '').trim();
+  }
+
+  // Date & Time
+  const dateMetaM = html.match(/<div class="notula-meta-line">\s*([^<]*?),\s*Waktu:\s*([^<]*?)\s*<\/div>/i);
+  if (dateMetaM) {
+    res.formattedDate = dateMetaM[1].trim();
+    res.meetingTime = dateMetaM[2].trim();
+  }
+
+  // Place
+  const placeM = html.match(/<div class="notula-meta-line">\s*Tempat:\s*([^<]*?)\s*<\/div>/i);
+  if (placeM) {
+    res.meetingPlace = placeM[1].trim();
+  }
+
+  const stripTags = (s) => (s || "").replace(/<[^>]*>/g, "").trim();
+
+  // Helper list extractor
+  function extractList(headerRegex) {
+    const sectionM = html.match(new RegExp(headerRegex + "[\\s\\S]*?<ul class=\"notula-list\">([\\s\\S]*?)<\\/ul>", "i"));
+    if (!sectionM) return [];
+    const items = [];
+    const liMatches = sectionM[1].matchAll(/<li>([\s\S]*?)<\/li>/gi);
+    for (const m of liMatches) {
+      const txt = stripTags(m[1]);
+      if (txt) items.push(txt);
+    }
+    return items;
+  }
+
+  res.agenda = extractList('(?:1\\.\\s*)?AGENDA');
+  res.attendees = extractList('(?:2\\.\\s*)?PESERTA');
+  res.actionItems = extractList('(?:4\\.\\s*)?(?:POKOK\\s+)?TINDAK\\s+LANJUT');
+  res.conclusions = extractList('(?:5\\.\\s*)?KESIMPULAN');
+
+  // Activities (3. URAIAN KEGIATAN)
+  const actSectionM = html.match(/(?:3\.\s*)?URAIAN KEGIATAN[\s\S]*?([\s\S]*?)(?:<(?:div|h\d)[^>]*class="(?:notula-box-header|notula-section-heading)"[^>]*>(?:4\.\s*)?(?:POKOK\s+)?TINDAK|<div class="notula-closing"|$)/i);
+  if (actSectionM) {
+    const actItems = Array.from(actSectionM[1].matchAll(/<div class="notula-activity-item">([\s\S]*?)<\/div>\s*(?=<div class="notula-activity-item"|<div class="notula-box-header"|<div class="notula-section-heading"|$)/gi));
+    if (actItems.length > 0) {
+      for (const ai of actItems) {
+        const block = ai[1];
+        const speakerM = block.match(/<div class="(?:notula-speaker|notula-subsection-title)">([\s\S]*?)<\/div>/i);
+        const points = [];
+        const liMatches = block.matchAll(/<li>([\s\S]*?)<\/li>/gi);
+        for (const m of liMatches) {
+          const txt = stripTags(m[1]);
+          if (txt) points.push(txt);
+        }
+        res.activities.push({
+          sectionTitle: speakerM ? stripTags(speakerM[1]) : "Pembahasan",
+          points: points.length > 0 ? points : ["-"]
+        });
+      }
+    } else {
+      // Coba cari langsung ul di dalam blok uraian kegiatan
+      const rawPoints = [];
+      const liMatches = actSectionM[1].matchAll(/<li>([\s\S]*?)<\/li>/gi);
+      for (const m of liMatches) {
+        const txt = stripTags(m[1]);
+        if (txt) rawPoints.push(txt);
+      }
+      if (rawPoints.length > 0) {
+        res.activities.push({
+          sectionTitle: "1. Jalannya Rapat & Pembahasan",
+          points: rawPoints
+        });
+      }
+    }
+  }
+
+  // Closing
+  const closingM = html.match(/<div class="(?:notula-closing|previewClosing)">\s*([\s\S]*?)\s*<\/div>/i) ||
+                   html.match(/<p[^>]*id="previewClosing"[^>]*>\s*([\s\S]*?)\s*<\/p>/i);
+  if (closingM) {
+    res.closingText = stripTags(closingM[1]);
+  }
+
+  // Signature (Notulis)
+  const notulisM = html.match(/<div style="font-weight:\s*bold;\s*text-decoration:\s*underline;">\s*([^<]*?)\s*<\/div>/i);
+  if (notulisM) {
+    res.notulisName = stripTags(notulisM[1]);
+  }
+  const roleM = html.match(/<div style="font-size:\s*9\.5pt;\s*color:\s*#333;">\s*([^<]*?)\s*<\/div>/i);
+  if (roleM) {
+    res.notulisRole = stripTags(roleM[1]);
+  }
+
+  // Documentation photos
+  const photoMatches = html.matchAll(/<img\s+src="([^"]+)"[^>]*alt="Dokumentasi[^"]*"[^>]*>/gi);
+  for (const pm of photoMatches) {
+    res.documentationPhotos.push({
+      url: pm[1],
+      caption: "Dokumentasi Kegiatan"
+    });
+  }
+
+  // Konversi formattedDate ke ISO date (YYYY-MM-DD) jika memungkinkan
+  if (res.formattedDate) {
+    const monthMap = {
+      "januari": "01", "februari": "02", "maret": "03", "april": "04",
+      "mei": "05", "juni": "06", "juli": "07", "agustus": "08",
+      "september": "09", "oktober": "10", "november": "11", "desember": "12"
+    };
+    const tglM = res.formattedDate.match(/(\d{1,2})\s+([a-zA-Z]+)\s+(\d{4})/i);
+    if (tglM) {
+      const day = tglM[1].padStart(2, '0');
+      const moStr = tglM[2].toLowerCase();
+      const month = monthMap[moStr] || "01";
+      const year = tglM[3];
+      res.meetingDate = `${year}-${month}-${day}`;
+    }
+  }
+
+  return res;
+}
+
 // Helper untuk menghasilkan file HTML dokumen notula resmi BKN siap cetak / unduh PDF
 function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
   const meetingDateObj = new Date(docData.meetingDate);
@@ -43,6 +198,91 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
   const actionItems = Array.isArray(docData.actionItems) ? docData.actionItems : [];
   const conclusions = Array.isArray(docData.conclusions) ? docData.conclusions : [];
   const documentationPhotos = Array.isArray(docData.documentationPhotos) ? docData.documentationPhotos : [];
+
+  const rawMt = docData.kertasKerjaMt || docData.kertas_kerja_mt;
+  const kertasKerjaMt = Array.isArray(rawMt) ? rawMt : (typeof rawMt === "string" ? safeParseJson(rawMt, null) : null);
+  let kertasKerjaMtHtml = "";
+  if (kertasKerjaMt && kertasKerjaMt.length > 0) {
+    let rowsHtml = "";
+    let currentPilar = "";
+    kertasKerjaMt.forEach(row => {
+      if (row.pilar && row.pilar !== currentPilar) {
+        currentPilar = row.pilar;
+        rowsHtml += `
+          <tr style="background-color: #FDE8D7; font-weight: bold; border: 1px solid #000;">
+            <td colspan="6" style="padding: 6px 8px; border: 1px solid #000; font-weight: bold; font-size: 9.5pt;">${row.pilar}</td>
+          </tr>
+        `;
+      }
+      rowsHtml += `
+        <tr style="border: 1px solid #000;">
+          <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 9.5pt;">${row.no || "-"}</td>
+          <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt; font-weight: 500;">${row.komponen || "-"}</td>
+          <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${row.indikator || "-"}</td>
+          <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${row.buktiOutput || "-"}</td>
+          <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 11pt; font-weight: bold;">${row.status === "✓" ? "✓" : "-"}</td>
+          <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${row.keterangan || "-"}</td>
+        </tr>
+      `;
+    });
+
+    kertasKerjaMtHtml = `
+      <div style="margin-top: 20px; margin-bottom: 25px; page-break-inside: auto;">
+        <div style="font-weight: bold; margin-bottom: 8px; font-size: 11pt; color: #0A2540;">Penyampaian Kertas Kerja Manajemen Talenta</div>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-family: 'Times New Roman', serif;">
+          <thead>
+            <tr style="background-color: #D9E2EC; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 9.5pt;">
+              <th style="border: 1px solid #000; padding: 6px 4px; width: 35px;">No</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Komponen Penilaian</th>
+              <th style="border: 1px solid #000; padding: 6px 6px;">Indikator Penilaian</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Bukti Output</th>
+              <th style="border: 1px solid #000; padding: 6px 4px; width: 45px; text-align: center;">Status</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 130px;">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Lambang Garuda Pancasila - Otomatis konversi ke Base64 agar selalu tampil baik online maupun offline
+  let garudaSrc = "/images/garuda_pancasila.png";
+  try {
+    const garudaPath = path.join(process.cwd(), "public", "images", "garuda_pancasila.png");
+    if (fs.existsSync(garudaPath)) {
+      const gBuf = fs.readFileSync(garudaPath);
+      garudaSrc = `data:image/png;base64,${gBuf.toString("base64")}`;
+    }
+  } catch (gErr) {}
+
+  // Olah foto dokumentasi agar src tidak pernah 'undefined' dan konversi ke Base64 data URI jika file lokal tersedia di server
+  const processedPhotos = documentationPhotos.map((photo, i) => {
+    const rawUrl = typeof photo === "string" ? photo : (photo.url || photo.dataUrl || photo.previewUrl || photo.path || "");
+    let resolvedSrc = rawUrl;
+    if (rawUrl && !rawUrl.startsWith("data:")) {
+      try {
+        const cleanRelPath = rawUrl.startsWith("/") ? rawUrl.substring(1) : rawUrl;
+        const diskPath = path.join(process.cwd(), "public", cleanRelPath);
+        if (fs.existsSync(diskPath)) {
+          const ext = path.extname(diskPath).toLowerCase().replace(".", "");
+          const mime = ext === "png" ? "image/png" : (ext === "webp" ? "image/webp" : "image/jpeg");
+          const b64 = fs.readFileSync(diskPath).toString("base64");
+          resolvedSrc = `data:${mime};base64,${b64}`;
+        }
+      } catch (e) {
+        resolvedSrc = rawUrl;
+      }
+    }
+    const caption = typeof photo === "object" && photo ? (photo.caption || "") : "";
+    return {
+      src: resolvedSrc,
+      caption: caption,
+      index: i + 1
+    };
+  });
 
   return `<!DOCTYPE html>
 <html lang="id">
@@ -126,10 +366,10 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
 <body>
   <div class="preview-actions">
     <div style="display: flex; gap: 0.5rem;">
-      <a href="/manajemenmeeting" class="btn btn-secondary">
+      <a href="/manajemenmeeting${meetingId ? `?meetingId=${meetingId}` : ''}" class="btn btn-secondary">
         ← Kembali ke Manajemen Meeting
       </a>
-      <a href="/notulen?id=${notulenId || ''}" class="btn btn-secondary">
+      <a href="/notulen?id=${notulenId || ''}${meetingId ? `&meetingId=${meetingId}` : ''}" class="btn btn-secondary">
         ✏️ Edit di App Infografis
       </a>
     </div>
@@ -142,7 +382,7 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
 
   <div class="notula-paper">
     <div class="notula-kop">
-      <img src="/images/garuda_pancasila.png" alt="Garuda Pancasila" class="notula-garuda">
+      <img src="${garudaSrc}" alt="Garuda Pancasila" class="notula-garuda">
       <div class="notula-kop-title">${user.institution_kop || 'BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V'}</div>
       <div class="notula-kop-address">
         ${user.kop_address || 'Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730'}<br>
@@ -178,6 +418,8 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
       </div>
     `).join('')}
 
+    ${kertasKerjaMtHtml}
+
     <div class="notula-box-header">4. POKOK TINDAK LANJUT</div>
     <ul class="notula-list">
       ${actionItems.map(item => `<li>${item}</li>`).join('')}
@@ -201,14 +443,14 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
       <div style="font-size: 9.5pt; color: #333;">${docData.notulisRole || user.division}</div>
     </div>
 
-    ${documentationPhotos.length > 0 ? `
+    ${processedPhotos.length > 0 ? `
       <div style="margin-top: 30px; page-break-before: auto;">
         <div class="notula-box-header" style="border-top: 1px dashed #ccc; padding-top: 15px;">DOKUMENTASI FOTO KEGIATAN:</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-          ${documentationPhotos.map((photo, i) => `
+          ${processedPhotos.map(p => `
             <div style="border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; padding: 4px; background: #f8fafc; text-align: center;">
-              <img src="${photo.dataUrl || photo.previewUrl}" style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 4px;" alt="Dokumentasi ${i + 1}">
-              ${photo.caption ? `<div style="font-size: 8.5pt; margin-top: 4px; color: #475569;">${photo.caption}</div>` : ''}
+              <img src="${p.src}" style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 4px;" alt="Dokumentasi ${p.index}">
+              ${p.caption ? `<div style="font-size: 8.5pt; margin-top: 4px; color: #475569;">${p.caption}</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -234,125 +476,313 @@ export const notulenController = {
       try {
         let mQuery = `
           SELECT m.meeting_id, m.meeting_nama, m.tanggal, m.tipe_meeting,
-                 COALESCE(m.user_id, z.user_id, u.id, 'admin') AS creator_user_id
+                 COALESCE(m.pembuat, z.user_id, z.nip, 'admin') AS creator_user_id
           FROM meetings m
-          LEFT JOIN zoom_requests z ON m.zoom_request_id = z.id
-          LEFT JOIN users u ON (
-              (z.user_id IS NOT NULL AND z.user_id = u.id)
-              OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = u.nip)
+          LEFT JOIN zoom_requests z ON (
+              m.meeting_nama = z.judul_rapat 
+              AND m.tanggal = z.tanggal_rapat
           )
         `;
         const mParams = [];
         if (user.role !== "admin") {
-          mQuery += ` WHERE (m.user_id = $1 OR z.user_id = $1 OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = $2))`;
+          mQuery += ` WHERE (m.pembuat = $1 OR z.user_id = $1 OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = $2))`;
           mParams.push(user.id, user.nip || user.id);
         }
         mQuery += ` ORDER BY m.meeting_id DESC`;
         const mRes = await pool.query(mQuery, mParams);
         meetingsList = mRes.rows;
       } catch (mErr) {
-        console.warn("Notice: meetings query err:", mErr.message);
+        console.warn("Notice: meetings query err (fallback):", mErr.message);
+        try {
+          const fbRes = await pool.query("SELECT meeting_id, meeting_nama, tanggal, tipe_meeting FROM meetings ORDER BY meeting_id DESC");
+          meetingsList = fbRes.rows;
+        } catch (fbErr) {
+          meetingsList = [];
+        }
       }
 
+      const queryMeetingId = req.query.meetingId ? parseInt(req.query.meetingId, 10) : null;
+      const queryNotulenId = (req.query.id || req.query.notulenId) ? parseInt(req.query.id || req.query.notulenId, 10) : null;
+      let selectedMeetingId = queryMeetingId || null;
       let latestDoc = null;
+
       try {
-        let docRes;
-        if (req.query.id) {
-          if (user.role === "admin") {
-            docRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [req.query.id]);
-          } else {
-            docRes = await pool.query("SELECT * FROM notulen WHERE id = $1 AND user_id = $2", [req.query.id, user.id]);
-          }
-        } else {
-          if (user.role === "admin") {
-            docRes = await pool.query("SELECT * FROM notulen ORDER BY created_at DESC LIMIT 1");
-          } else {
-            docRes = await pool.query("SELECT * FROM notulen WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1", [user.id]);
+        // 1. Jika queryMeetingId diberikan, utamakan cari notulen yang terhubung ke rapat tersebut
+        if (queryMeetingId) {
+          const mDocRes = await pool.query(
+            "SELECT * FROM notulen WHERE meeting_id = $1 ORDER BY id DESC LIMIT 1",
+            [queryMeetingId]
+          ).catch(() => ({ rows: [] }));
+          if (mDocRes.rows.length > 0) {
+            latestDoc = mDocRes.rows[0];
           }
         }
-        latestDoc = docRes.rows[0] || null;
+
+        // 2. Jika belum ketemu dan ada queryNotulenId, periksa apakah notulen id tersebut sesuai
+        if (!latestDoc && queryNotulenId) {
+          const idDocRes = await pool.query(
+            "SELECT * FROM notulen WHERE id = $1",
+            [queryNotulenId]
+          ).catch(() => ({ rows: [] }));
+          if (idDocRes.rows.length > 0) {
+            const foundRow = idDocRes.rows[0];
+            // Jika ada queryMeetingId, jangan gunakan row jika meeting_id berbeda rapat
+            if (!queryMeetingId || !foundRow.meeting_id || String(foundRow.meeting_id) === String(queryMeetingId)) {
+              latestDoc = foundRow;
+              if (!selectedMeetingId && foundRow.meeting_id) {
+                selectedMeetingId = foundRow.meeting_id;
+              }
+            }
+          }
+        }
+
+        // 3. Jika tanpa parameter khusus, jangan muat dokumen lama agar form notulen baru tetap bersih
+        if (!latestDoc && !queryMeetingId && !queryNotulenId) {
+          latestDoc = null;
+        }
       } catch (dbErr) {
         console.warn("Notice: notulen query err:", dbErr.message);
       }
 
-      let selectedMeetingId = req.query.meetingId || latestDoc?.meeting_id || null;
-      // Validasi: hanya izinkan selectedMeetingId jika ada di daftar rapat yang boleh diakses user
+      if (!selectedMeetingId && latestDoc?.meeting_id) {
+        selectedMeetingId = latestDoc.meeting_id;
+      }
+
+      // Cek apakah data notulen di database kosong atau perlu di-hydrate dari file HTML fisik
+      let fallbackParsed = null;
+      try {
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "notulen");
+        if (fs.existsSync(uploadDir)) {
+          let targetHtmlPath = null;
+          const allFiles = fs.readdirSync(uploadDir).filter(f => f.endsWith(".html"));
+
+          // 1. Cek dari kolom notulen tabel meetings jika selectedMeetingId ada
+          if (selectedMeetingId) {
+            try {
+              const mtgRes = await pool.query(
+                "SELECT notulen, notulen_pdf FROM meetings WHERE meeting_id = $1",
+                [selectedMeetingId]
+              );
+              const mRow = mtgRes.rows[0];
+              const possibleFile = mRow?.notulen_pdf || mRow?.notulen;
+              if (possibleFile && typeof possibleFile === "string" && possibleFile.endsWith(".html")) {
+                const cleanRel = possibleFile.startsWith("/") ? possibleFile.substring(1) : possibleFile;
+                const fullP = path.join(process.cwd(), "public", cleanRel);
+                if (fs.existsSync(fullP)) targetHtmlPath = fullP;
+              }
+            } catch (mErr) {}
+          }
+
+          // 2. Jika belum ketemu, cari file matching notulen_rapat_${selectedMeetingId}_*.html (pilih timestamp paling baru)
+          if (!targetHtmlPath && selectedMeetingId) {
+            const matchFiles = allFiles
+              .filter(f => f.startsWith(`notulen_rapat_${selectedMeetingId}_`))
+              .sort((a, b) => {
+                const tA = parseInt(a.replace(/[^0-9]/g, '').slice(-13) || '0', 10);
+                const tB = parseInt(b.replace(/[^0-9]/g, '').slice(-13) || '0', 10);
+                return tB - tA;
+              });
+            if (matchFiles.length > 0) {
+              targetHtmlPath = path.join(uploadDir, matchFiles[0]);
+            }
+          }
+
+          // 3. Jika belum ketemu, cari file HTML di folder uploads/notulen yang mereferensikan queryMeetingId atau queryNotulenId
+          if (!targetHtmlPath && (queryMeetingId || queryNotulenId)) {
+            const searchId = queryMeetingId || queryNotulenId;
+            for (const f of allFiles) {
+              try {
+                const p = path.join(uploadDir, f);
+                const text = fs.readFileSync(p, "utf-8");
+                if (
+                  text.includes(`meetingId=${searchId}`) ||
+                  text.includes(`id=${searchId}`) ||
+                  text.includes(`notulen_rapat_${searchId}_`)
+                ) {
+                  targetHtmlPath = p;
+                  const mMtg = f.match(/notulen_rapat_(\d+)_/);
+                  if (mMtg && !selectedMeetingId) {
+                    selectedMeetingId = parseInt(mMtg[1], 10);
+                  }
+                  break;
+                }
+              } catch (e) {}
+            }
+          }
+
+          if (targetHtmlPath && fs.existsSync(targetHtmlPath)) {
+            const htmlContent = fs.readFileSync(targetHtmlPath, "utf-8");
+            fallbackParsed = parseNotulenHtml(htmlContent);
+            const mFileMtg = path.basename(targetHtmlPath).match(/notulen_rapat_(\d+)_/);
+            if (mFileMtg && (!selectedMeetingId || selectedMeetingId === queryNotulenId)) {
+              selectedMeetingId = parseInt(mFileMtg[1], 10);
+            }
+          }
+        }
+      } catch (fErr) {
+        console.warn("Notice: fallback parse err:", fErr.message);
+      }
+
+      // Jika latestDoc belum ada ATAU agenda_data di database kosong/kurang lengkap, tapi file HTML punya data lengkap:
+      const docAgenda = safeParseJson(latestDoc?.agenda_data);
+      const isDummyTitle = latestDoc?.title && latestDoc.title.toUpperCase().includes("BKN MENYAPA ASN");
+      if (fallbackParsed && (queryMeetingId || queryNotulenId) && (!latestDoc || docAgenda.length === 0 || isDummyTitle)) {
+        if (!latestDoc) {
+          latestDoc = {
+            id: req.query.id || null,
+            meeting_id: selectedMeetingId,
+            title: fallbackParsed.title,
+            meeting_date: fallbackParsed.meetingDate || isoDate,
+            formattedDate: fallbackParsed.formattedDate,
+            meeting_time: fallbackParsed.meetingTime,
+            meeting_place: fallbackParsed.meetingPlace,
+            agenda_data: fallbackParsed.agenda,
+            attendees_data: fallbackParsed.attendees,
+            activities_data: fallbackParsed.activities,
+            action_items: fallbackParsed.actionItems,
+            conclusions: fallbackParsed.conclusions,
+            closing_text: fallbackParsed.closingText,
+            documentation_photos: fallbackParsed.documentationPhotos,
+            notulis_name: fallbackParsed.notulisName,
+            notulis_role: fallbackParsed.notulisRole
+          };
+          try {
+            const insRes = await pool.query(`
+              INSERT INTO notulen (
+                user_id, title, meeting_date, meeting_time, meeting_place,
+                agenda_data, attendees_data, activities_data, action_items, conclusions,
+                closing_text, documentation_photos, notulis_name, notulis_role, meeting_id
+              ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+              RETURNING id
+            `, [
+              String(user.id || 'admin'), fallbackParsed.title, fallbackParsed.meetingDate || isoDate,
+              fallbackParsed.meetingTime || '-', fallbackParsed.meetingPlace || '-',
+              JSON.stringify(fallbackParsed.agenda), JSON.stringify(fallbackParsed.attendees),
+              JSON.stringify(fallbackParsed.activities), JSON.stringify(fallbackParsed.actionItems),
+              JSON.stringify(fallbackParsed.conclusions), fallbackParsed.closingText || '',
+              JSON.stringify(fallbackParsed.documentationPhotos), fallbackParsed.notulisName || user.full_name,
+              fallbackParsed.notulisRole || user.division, selectedMeetingId
+            ]);
+            if (insRes.rows.length > 0) {
+              latestDoc.id = insRes.rows[0].id;
+            }
+          } catch (autoInsErr) {
+            console.warn("Notice: auto-sync parsed notulen err:", autoInsErr.message);
+          }
+        } else {
+          // Hydrate data yang lengkap dari file HTML ke latestDoc
+          latestDoc.title = fallbackParsed.title || latestDoc.title;
+          latestDoc.meeting_date = fallbackParsed.meetingDate || latestDoc.meeting_date;
+          latestDoc.formattedDate = fallbackParsed.formattedDate || latestDoc.formattedDate;
+          latestDoc.meeting_time = fallbackParsed.meetingTime || latestDoc.meeting_time;
+          latestDoc.meeting_place = fallbackParsed.meetingPlace || latestDoc.meeting_place;
+          latestDoc.agenda_data = (fallbackParsed.agenda && fallbackParsed.agenda.length > 0) ? fallbackParsed.agenda : latestDoc.agenda_data;
+          latestDoc.attendees_data = (fallbackParsed.attendees && fallbackParsed.attendees.length > 0) ? fallbackParsed.attendees : latestDoc.attendees_data;
+          latestDoc.activities_data = (fallbackParsed.activities && fallbackParsed.activities.length > 0) ? fallbackParsed.activities : latestDoc.activities_data;
+          latestDoc.action_items = (fallbackParsed.actionItems && fallbackParsed.actionItems.length > 0) ? fallbackParsed.actionItems : latestDoc.action_items;
+          latestDoc.conclusions = (fallbackParsed.conclusions && fallbackParsed.conclusions.length > 0) ? fallbackParsed.conclusions : latestDoc.conclusions;
+          latestDoc.closing_text = fallbackParsed.closingText || latestDoc.closing_text;
+          if (selectedMeetingId) latestDoc.meeting_id = selectedMeetingId;
+
+          // Sync update ke DB agar permanen dan tidak kosong lagi di sesi mendatang
+          try {
+            if (latestDoc.id) {
+              await pool.query(`
+                UPDATE notulen SET
+                  title = $1, meeting_date = $2, meeting_time = $3, meeting_place = $4,
+                  agenda_data = $5, attendees_data = $6, activities_data = $7,
+                  action_items = $8, conclusions = $9, closing_text = $10, meeting_id = $11
+                WHERE id = $12
+              `, [
+                latestDoc.title, latestDoc.meeting_date, latestDoc.meeting_time, latestDoc.meeting_place,
+                JSON.stringify(latestDoc.agenda_data), JSON.stringify(latestDoc.attendees_data),
+                JSON.stringify(latestDoc.activities_data), JSON.stringify(latestDoc.action_items),
+                JSON.stringify(latestDoc.conclusions), latestDoc.closing_text, latestDoc.meeting_id,
+                latestDoc.id
+              ]);
+            }
+          } catch (uErr) {
+            console.warn("Notice: sync db update err:", uErr.message);
+          }
+        }
+      }
+
+      // Validasi: pastikan rapat tujuan tersedia dalam meetingsList agar dropdown dapat memilihnya
       if (selectedMeetingId && !meetingsList.some(m => String(m.meeting_id) === String(selectedMeetingId))) {
-        selectedMeetingId = null;
+        try {
+          const singleMtg = await pool.query(
+            "SELECT meeting_id, meeting_nama, tanggal, tipe_meeting FROM meetings WHERE meeting_id = $1",
+            [selectedMeetingId]
+          );
+          if (singleMtg.rows.length > 0) {
+            meetingsList.unshift(singleMtg.rows[0]);
+          }
+        } catch (sErr) {
+          console.warn("Notice: could not fetch target meeting:", sErr.message);
+        }
       }
       if (!selectedMeetingId && meetingsList.length > 0) {
         selectedMeetingId = meetingsList[0].meeting_id;
       }
 
+      let meetingDateStr = isoDate;
+      if (latestDoc && latestDoc.meeting_date) {
+        if (latestDoc.meeting_date instanceof Date) {
+          meetingDateStr = latestDoc.meeting_date.toISOString().split("T")[0];
+        } else {
+          meetingDateStr = String(latestDoc.meeting_date).split("T")[0];
+        }
+      }
+      
+      let meetingDateFormatted = formattedDate;
+      if (latestDoc && latestDoc.formattedDate) {
+        meetingDateFormatted = latestDoc.formattedDate;
+      } else if (meetingDateStr) {
+        const dObj = new Date(meetingDateStr + "T00:00:00");
+        if (!isNaN(dObj.getTime())) {
+          meetingDateFormatted = dObj.toLocaleDateString("id-ID", options);
+        }
+      }
+
+      const rawLatestMt = latestDoc ? latestDoc.kertas_kerja_mt : null;
+      const parsedLatestMt = rawLatestMt ? (Array.isArray(rawLatestMt) ? rawLatestMt : safeParseJson(rawLatestMt, null)) : null;
+
       const defaultData = latestDoc ? {
         id: latestDoc.id,
-        meetingId: selectedMeetingId,
-        title: latestDoc.title,
-        meetingDate: latestDoc.meeting_date,
-        formattedDate: formattedDate,
-        meetingTime: latestDoc.meeting_time,
-        meetingPlace: latestDoc.meeting_place,
-        agenda: typeof latestDoc.agenda_data === "string" ? JSON.parse(latestDoc.agenda_data) : latestDoc.agenda_data,
-        attendees: typeof latestDoc.attendees_data === "string" ? JSON.parse(latestDoc.attendees_data) : latestDoc.attendees_data,
-        activities: typeof latestDoc.activities_data === "string" ? JSON.parse(latestDoc.activities_data) : latestDoc.activities_data,
-        actionItems: typeof latestDoc.action_items === "string" ? JSON.parse(latestDoc.action_items) : latestDoc.action_items,
-        conclusions: typeof latestDoc.conclusions === "string" ? JSON.parse(latestDoc.conclusions) : latestDoc.conclusions,
-        closingText: latestDoc.closing_text,
-        documentationPhotos: latestDoc.documentation_photos ? (typeof latestDoc.documentation_photos === "string" ? JSON.parse(latestDoc.documentation_photos) : latestDoc.documentation_photos) : [],
-        notulisName: latestDoc.notulis_name || user.full_name,
-        notulisRole: latestDoc.notulis_role || user.division
+        meetingId: selectedMeetingId || latestDoc.meeting_id || null,
+        title: latestDoc.title || "",
+        meetingDate: meetingDateStr,
+        formattedDate: meetingDateFormatted,
+        meetingTime: latestDoc.meeting_time || "09.00 – 11.30 WIB",
+        meetingPlace: latestDoc.meeting_place || "Di Tempat",
+        agenda: safeParseJson(latestDoc.agenda_data || latestDoc.agenda),
+        attendees: safeParseJson(latestDoc.attendees_data || latestDoc.attendees),
+        activities: safeParseJson(latestDoc.activities_data || latestDoc.activities),
+        actionItems: safeParseJson(latestDoc.action_items || latestDoc.actionItems),
+        conclusions: safeParseJson(latestDoc.conclusions || latestDoc.conclusions),
+        closingText: latestDoc.closing_text || latestDoc.closingText || "",
+        documentationPhotos: safeParseJson(latestDoc.documentation_photos || latestDoc.documentationPhotos),
+        isMt: Boolean(parsedLatestMt && parsedLatestMt.length > 0),
+        kertasKerjaMt: parsedLatestMt,
+        notulisName: latestDoc.notulis_name || latestDoc.notulisName || user.full_name,
+        notulisRole: latestDoc.notulis_role || latestDoc.notulisRole || user.division
       } : {
         id: null,
         meetingId: null,
-        title: "BKN MENYAPA ASN : PENGUATAN IMPLEMENTASI MANAJEMEN TALENTA MELALUI SIMATA DAN MYASN",
+        title: "",
         meetingDate: isoDate,
         formattedDate: formattedDate,
-        meetingTime: "09.00 - 11.30 WIB",
+        meetingTime: "09.00 – 11.30 WIB",
         meetingPlace: "Daring melalui Zoom Meeting",
-        agenda: [
-          "Mengikuti kegiatan BKN Menyapa ASN dengan tema penguatan implementasi manajemen talenta melalui SIMATA dan MyASN.",
-          "Mendengarkan sambutan dan arahan Kepala BKN mengenai urgensi manajemen talenta, meritokrasi, integritas, dan penempatan talenta sesuai kebutuhan organisasi.",
-          "Mendengarkan paparan mengenai pengelolaan talenta berbasis data, pengukuran kinerja dan potensi, serta pemanfaatan ekosistem data yang terintegrasi.",
-          "Mendengarkan paparan dan demo layanan MyASN/SIMATA, termasuk cara melihat kotak talenta dan melakukan pemutakhiran data.",
-          "Mengikuti sesi tanya jawab mengenai pemutakhiran data, penghargaan, sertifikasi, penugasan tim, umpan balik 360, visibilitas kotak talenta, serta implementasi manajemen talenta di instansi.",
-          "Mencatat arahan dan tindak lanjut bagi ASN serta pengelola kepegawaian untuk memastikan data talenta lengkap, valid, dan mutakhir."
-        ],
-        attendees: [
-          "Kepala BKN, Prof. Dr. Zudan Arif Fakrulloh, S.H., M.H.",
-          "Direktur Pengembangan Talenta dan Karir ASN, Dr. Samsul Hidayat, S.S., M.PSDM.",
-          "Direktur Pengelolaan Sistem Informasi dan Layanan Digitalisasi Manajemen ASN, Bapak Wahyu Firdaus, S.T.",
-          "Tim teknis layanan MyASN/SIMATA.",
-          "Para pejabat pimpinan tinggi pratama di lingkungan BKN, Kepala Kantor Regional BKN, pengelola/pembina kepegawaian, serta ASN dan perwakilan instansi pusat dan daerah."
-        ],
-        activities: [
-          {
-            sectionTitle: "1. Sambutan dan Arahan Kepala BKN",
-            speaker: "Prof. Dr. Zudan Arif Fakrulloh, S.H., M.H. (Kepala BKN)",
-            points: [
-              "Menyampaikan pentingnya pemutakhiran data ASN secara mandiri untuk mendukung akurasi profil talenta nasional.",
-              "Menekankan bahwa sistem merit hanya dapat berjalan optimal apabila basis data kinerja dan kompetensi terintegrasi penuh."
-            ]
-          },
-          {
-            sectionTitle: "2. Paparan Teknis SIMATA dan MyASN",
-            speaker: "Direktur Pengembangan Talenta dan Karir ASN",
-            points: [
-              "Penjelasan tata cara pemetaan 9 Box kuadran talenta aparatur sipil negara.",
-              "Mekanisme penilaian perilaku kerja dan integrasi riwayat pelatihan/sertifikasi."
-            ]
-          }
-        ],
-        actionItems: [
-          "Melengkapi berkas eviden kinerja tahunan pada portal MyASN sebelum akhir bulan.",
-          "Melakukan verifikasi berkas usulan kenaikan jenjang kepegawaian secara berkala.",
-          "Mengikuti sosialisasi teknis lanjutan terkait implementasi SI-MATA di tingkat Kantor Regional."
-        ],
-        conclusions: [
-          "Penguatan manajemen talenta berbasis meritokrasi mutlak membutuhkan akurasi data mandiri dari seluruh pegawai.",
-          "Kanreg V BKN siap mengawal percepatan integrasi data kepegawaian wilayah kerja DKI Jakarta, Jawa Barat, dan Banten."
-        ],
-        closingText: "Kegiatan pertemuan kedinasan ditutup pada pukul 11.30 WIB dengan komitmen penuh untuk percepatan tindak lanjut manajemen talenta di lingkungan instansi.",
+        agenda: [],
+        attendees: [],
+        activities: [],
+        actionItems: [],
+        conclusions: [],
+        closingText: "",
         documentationPhotos: [],
+        isMt: false,
+        kertasKerjaMt: null,
         notulisName: user.full_name,
         notulisRole: user.division
       };
@@ -374,13 +804,17 @@ export const notulenController = {
         }
       }
 
+      const isEditing = Boolean(req.query.id || (latestDoc && latestDoc.id));
+
       res.render("notulen", {
-        title: "Pembuat Notulen Rapat Kedinasan - BKN",
+        title: isEditing ? "Edit Notula Rapat Kedinasan - BKN" : "Pembuat Notulen Rapat Kedinasan - BKN",
         user: user,
         initialData: defaultData,
         todayFormatted: formattedDate,
         meetings: meetingsList,
-        selectedMeetingId: selectedMeetingId
+        selectedMeetingId: selectedMeetingId,
+        fromMeetingManagement: Boolean(req.query.meetingId || (latestDoc && latestDoc.meeting_id)),
+        isEditing: isEditing
       });
     } catch (err) {
       console.error("Notulen generator error:", err);
@@ -407,7 +841,9 @@ export const notulenController = {
         closingText,
         documentationPhotos,
         notulisName,
-        notulisRole
+        notulisRole,
+        kertasKerjaMt,
+        kertas_kerja_mt
       } = req.body;
 
       if (!title || !meetingDate) {
@@ -416,24 +852,21 @@ export const notulenController = {
 
       const targetMeetingId = meetingId ? parseInt(meetingId, 10) : null;
 
-      // Cek hak akses ke meeting tujuan jika bukan admin
-      if (targetMeetingId && user.role !== "admin") {
-        const checkMtg = await pool.query(`
-          SELECT m.meeting_id, COALESCE(m.user_id, z.user_id, u.id, 'admin') AS creator_user_id
-          FROM meetings m
-          LEFT JOIN zoom_requests z ON m.zoom_request_id = z.id
-          LEFT JOIN users u ON (
-              (z.user_id IS NOT NULL AND z.user_id = u.id)
-              OR (z.nip IS NOT NULL AND z.nip <> '' AND z.nip = u.nip)
-          )
-          WHERE m.meeting_id = $1
-        `, [targetMeetingId]);
-
-        if (checkMtg.rows.length === 0 || checkMtg.rows[0].creator_user_id !== user.id) {
-          return res.status(403).json({
-            success: false,
-            message: "Akses ditolak: Anda tidak memiliki hak akses untuk menambahkan notula pada rapat ini."
-          });
+      // Cek apakah rapat tujuan tersedia (setiap pegawai yang login berhak mengisi/menyimpan notulen rapat)
+      if (targetMeetingId) {
+        try {
+          const checkMtg = await pool.query(
+            "SELECT meeting_id FROM meetings WHERE meeting_id = $1",
+            [targetMeetingId]
+          );
+          if (checkMtg.rows.length === 0) {
+            return res.status(404).json({
+              success: false,
+              message: "Rapat tujuan tidak ditemukan dalam sistem."
+            });
+          }
+        } catch (authErr) {
+          console.warn("Notice: meeting existence check warning in saveNotulen:", authErr.message);
         }
       }
 
@@ -443,6 +876,9 @@ export const notulenController = {
       const actionItemsJson = JSON.stringify(Array.isArray(actionItems) ? actionItems : []);
       const conclusionsJson = JSON.stringify(Array.isArray(conclusions) ? conclusions : []);
       const docsJson = JSON.stringify(Array.isArray(documentationPhotos) ? documentationPhotos : []);
+      const rawMt = kertasKerjaMt || kertas_kerja_mt;
+      const mtArray = (Array.isArray(rawMt) && rawMt.length > 0) ? rawMt : null;
+      const mtJson = mtArray ? JSON.stringify(mtArray) : null;
 
       let savedId;
       if (id) {
@@ -461,13 +897,15 @@ export const notulenController = {
             documentation_photos = $11,
             notulis_name = $12,
             notulis_role = $13,
-            meeting_id = COALESCE($14, meeting_id)
-          WHERE id = $15
+            meeting_id = COALESCE($14, meeting_id),
+            kertas_kerja_mt = $15
+          WHERE id = $16
         `, [
           title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
           targetMeetingId,
+          mtJson,
           id
         ]);
         savedId = id;
@@ -476,14 +914,16 @@ export const notulenController = {
           INSERT INTO notulen (
             user_id, title, meeting_date, meeting_time, meeting_place,
             agenda_data, attendees_data, activities_data, action_items, conclusions,
-            closing_text, documentation_photos, notulis_name, notulis_role, meeting_id
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            closing_text, documentation_photos, notulis_name, notulis_role, meeting_id,
+            kertas_kerja_mt
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
           RETURNING id
         `, [
           String(user?.id || "user"), title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
-          targetMeetingId
+          targetMeetingId,
+          mtJson
         ]);
         savedId = insertRes.rows[0]?.id;
       }
@@ -510,6 +950,7 @@ export const notulenController = {
             actionItems: Array.isArray(actionItems) ? actionItems : [],
             conclusions: Array.isArray(conclusions) ? conclusions : [],
             closingText, documentationPhotos: Array.isArray(documentationPhotos) ? documentationPhotos : [],
+            kertasKerjaMt: mtArray,
             notulisName, notulisRole
           },
           user,
@@ -519,18 +960,44 @@ export const notulenController = {
 
         fs.writeFileSync(filePath, htmlContent, "utf-8");
 
-        // Jika rapat tujuan dipilih, simpan nama berkas ke kolom notulen_pdf tabel meetings
-        if (targetMeetingId) {
-          await pool.query(
-            "UPDATE meetings SET notulen_pdf = $1 WHERE meeting_id = $2",
-            [fileUrl, targetMeetingId]
-          );
+        // Jika rapat tujuan belum dipilih secara manual, cocokkan otomatis berdasarkan judul dan tanggal rapat
+        if (!targetMeetingId) {
+          try {
+            const autoMatch = await pool.query(
+              "SELECT meeting_id, meeting_nama FROM meetings WHERE LOWER(TRIM(meeting_nama)) = LOWER(TRIM($1)) AND tanggal = $2::date LIMIT 1",
+              [title, meetingDate]
+            );
+            if (autoMatch.rows.length > 0) {
+              targetMeetingId = autoMatch.rows[0].meeting_id;
+              targetMeetingName = autoMatch.rows[0].meeting_nama;
+              await pool.query("UPDATE notulen SET meeting_id = $1 WHERE id = $2", [targetMeetingId, savedId]);
+            }
+          } catch (amErr) {}
+        }
 
-          const mQuery = await pool.query(
-            "SELECT meeting_nama FROM meetings WHERE meeting_id = $1",
-            [targetMeetingId]
-          );
-          targetMeetingName = mQuery.rows[0]?.meeting_nama || null;
+        // Jika rapat tujuan dipilih/ditemukan, simpan nama berkas ke kolom notulen / notulen_pdf tabel meetings
+        if (targetMeetingId) {
+          try {
+            await pool.query(
+              "UPDATE meetings SET notulen = $1 WHERE meeting_id = $2",
+              [fileUrl, targetMeetingId]
+            );
+          } catch (nErr) {}
+
+          try {
+            await pool.query(
+              "UPDATE meetings SET notulen_pdf = $1 WHERE meeting_id = $2",
+              [fileUrl, targetMeetingId]
+            );
+          } catch (npErr) {}
+
+          if (!targetMeetingName) {
+            const mQuery = await pool.query(
+              "SELECT meeting_nama FROM meetings WHERE meeting_id = $1",
+              [targetMeetingId]
+            );
+            targetMeetingName = mQuery.rows[0]?.meeting_nama || null;
+          }
         }
       } catch (fileErr) {
         console.warn("⚠️ Gagal generate berkas notulen fisik:", fileErr.message);
@@ -570,6 +1037,8 @@ export const notulenController = {
       const actionItems = typeof doc.action_items === "string" ? JSON.parse(doc.action_items) : doc.action_items;
       const conclusions = typeof doc.conclusions === "string" ? JSON.parse(doc.conclusions) : doc.conclusions;
       const documentationPhotos = doc.documentation_photos ? (typeof doc.documentation_photos === "string" ? JSON.parse(doc.documentation_photos) : doc.documentation_photos) : [];
+      const rawMt = doc.kertas_kerja_mt;
+      const kertasKerjaMt = Array.isArray(rawMt) ? rawMt : (typeof rawMt === "string" ? safeParseJson(rawMt, null) : null);
 
       const meetingDateObj = new Date(doc.meeting_date);
       const formattedDate = !isNaN(meetingDateObj)
@@ -587,7 +1056,8 @@ export const notulenController = {
           activities,
           actionItems,
           conclusions,
-          documentationPhotos
+          documentationPhotos,
+          kertasKerjaMt
         }
       });
     } catch (err) {
@@ -643,6 +1113,14 @@ export const notulenController = {
       if (ext === ".docx" || ext === ".doc") {
         const result = await mammoth.extractRawText({ path: filePath });
         extractedText = result.value;
+      } else if (ext === ".pdf") {
+        const fileBuffer = fs.readFileSync(filePath);
+        const parser = new PDFParse({ data: new Uint8Array(fileBuffer) });
+        const result = await parser.getText();
+        extractedText = result.text || "";
+        if (parser.destroy) {
+          try { await parser.destroy(); } catch (e) {}
+        }
       } else {
         extractedText = fs.readFileSync(filePath, "utf8");
       }
@@ -844,6 +1322,115 @@ export const notulenController = {
         });
       });
 
+      // Tabel Kertas Kerja Manajemen Talenta (Khusus Rapat MT)
+      const rawMtExport = docData.kertas_kerja_mt;
+      const kertasKerjaMtExport = Array.isArray(rawMtExport) ? rawMtExport : (typeof rawMtExport === "string" ? safeParseJson(rawMtExport, null) : null);
+
+      if (kertasKerjaMtExport && kertasKerjaMtExport.length > 0) {
+        docChildren.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "PENYAMPAIAN KERTAS KERJA EVALUASI MANAJEMEN TALENTA", bold: true, size: 22, font: "Times New Roman" })
+            ],
+            spacing: { before: 300, after: 150 }
+          })
+        );
+
+        const tableRows = [
+          new TableRow({
+            tableHeader: true,
+            children: [
+              new TableCell({
+                width: { size: 600, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, size: 18, font: "Times New Roman" })] })]
+              }),
+              new TableCell({
+                width: { size: 2000, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Komponen Penilaian", bold: true, size: 18, font: "Times New Roman" })] })]
+              }),
+              new TableCell({
+                width: { size: 2900, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Indikator Penilaian", bold: true, size: 18, font: "Times New Roman" })] })]
+              }),
+              new TableCell({
+                width: { size: 2000, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Bukti Output", bold: true, size: 18, font: "Times New Roman" })] })]
+              }),
+              new TableCell({
+                width: { size: 700, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Status", bold: true, size: 18, font: "Times New Roman" })] })]
+              }),
+              new TableCell({
+                width: { size: 2000, type: WidthType.DXA },
+                shading: { fill: "D9E2EC" },
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Keterangan", bold: true, size: 18, font: "Times New Roman" })] })]
+              })
+            ]
+          })
+        ];
+
+        let currPilar = "";
+        kertasKerjaMtExport.forEach(row => {
+          if (row.pilar && row.pilar !== currPilar) {
+            currPilar = row.pilar;
+            tableRows.push(
+              new TableRow({
+                children: [
+                  new TableCell({
+                    columnSpan: 6,
+                    shading: { fill: "FDE8D7" },
+                    children: [new Paragraph({ children: [new TextRun({ text: row.pilar, bold: true, size: 18, font: "Times New Roman" })] })]
+                  })
+                ]
+              })
+            );
+          }
+
+          tableRows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  width: { size: 600, type: WidthType.DXA },
+                  children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(row.no || "-"), size: 18, font: "Times New Roman" })] })]
+                }),
+                new TableCell({
+                  width: { size: 2000, type: WidthType.DXA },
+                  children: [new Paragraph({ children: [new TextRun({ text: String(row.komponen || "-"), size: 18, font: "Times New Roman" })] })]
+                }),
+                new TableCell({
+                  width: { size: 2900, type: WidthType.DXA },
+                  children: [new Paragraph({ children: [new TextRun({ text: String(row.indikator || "-"), size: 18, font: "Times New Roman" })] })]
+                }),
+                new TableCell({
+                  width: { size: 2000, type: WidthType.DXA },
+                  children: [new Paragraph({ children: [new TextRun({ text: String(row.buktiOutput || "-"), size: 18, font: "Times New Roman" })] })]
+                }),
+                new TableCell({
+                  width: { size: 700, type: WidthType.DXA },
+                  children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: row.status === "✓" ? "✓" : "-", bold: true, size: 18, font: "Times New Roman" })] })]
+                }),
+                new TableCell({
+                  width: { size: 2000, type: WidthType.DXA },
+                  children: [new Paragraph({ children: [new TextRun({ text: String(row.keterangan || "-"), size: 18, font: "Times New Roman" })] })]
+                })
+              ]
+            })
+          );
+        });
+
+        docChildren.push(
+          new Table({
+            rows: tableRows,
+            width: { size: 100, type: WidthType.PERCENTAGE }
+          })
+        );
+      }
+
       // 4. Pokok Tindak Lanjut
       docChildren.push(
         new Paragraph({
@@ -904,6 +1491,60 @@ export const notulenController = {
         })
       );
 
+      // 7. Dokumentasi Foto Kegiatan (Jika Ada)
+      if (documentationPhotos && documentationPhotos.length > 0) {
+        docChildren.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "DOKUMENTASI FOTO KEGIATAN", bold: true, size: 22, font: "Times New Roman" })
+            ],
+            spacing: { before: 300, after: 150 }
+          })
+        );
+
+        for (let idx = 0; idx < documentationPhotos.length; idx++) {
+          const photo = documentationPhotos[idx];
+          const rawUrl = typeof photo === "string" ? photo : (photo.url || photo.dataUrl || photo.previewUrl || photo.path || "");
+          if (rawUrl) {
+            try {
+              const cleanRelPath = rawUrl.startsWith("/") ? rawUrl.substring(1) : rawUrl;
+              const diskPath = path.join(process.cwd(), "public", cleanRelPath);
+              if (fs.existsSync(diskPath)) {
+                const imgBuffer = fs.readFileSync(diskPath);
+                const ext = path.extname(diskPath).toLowerCase().replace(".", "");
+                docChildren.push(
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    children: [
+                      new ImageRun({
+                        data: imgBuffer,
+                        transformation: { width: 380, height: 230 },
+                        type: ext === "png" ? "png" : "jpg"
+                      })
+                    ],
+                    spacing: { before: 150, after: 80 }
+                  })
+                );
+                const caption = typeof photo === "object" && photo ? (photo.caption || "") : "";
+                if (caption) {
+                  docChildren.push(
+                    new Paragraph({
+                      alignment: AlignmentType.CENTER,
+                      children: [
+                        new TextRun({ text: caption, italics: true, size: 18, font: "Times New Roman" })
+                      ],
+                      spacing: { after: 200 }
+                    })
+                  );
+                }
+              }
+            } catch (imgErr) {
+              console.warn("Embed docx photo warning:", imgErr.message);
+            }
+          }
+        }
+      }
+
       // Tanda Tangan
       const sigDateOnly = formattedDate.includes(",") ? formattedDate.split(",")[1].trim() : formattedDate;
       docChildren.push(
@@ -956,7 +1597,76 @@ export const notulenController = {
       console.error("exportDocx error:", err);
       res.status(500).send("Gagal membuat dokumen Word: " + err.message);
     }
-  }
+  },
+
+  generateHtmlDoc: generateNotulenHtmlFile
 };
+
+// Fungsi perbaikan otomatis untuk file HTML notulen yang sudah ada jika terdapat broken image (src="undefined")
+export async function repairExistingNotulenHtmlFiles() {
+  try {
+    const uploadDir = path.join(process.cwd(), "public", "uploads", "notulen");
+    if (!fs.existsSync(uploadDir)) return;
+
+    const files = fs.readdirSync(uploadDir).filter(f => f.endsWith(".html"));
+    for (const file of files) {
+      const fullPath = path.join(uploadDir, file);
+      let content = fs.readFileSync(fullPath, "utf-8");
+      if (content.includes('src="undefined"') || content.includes("src='undefined'")) {
+        const m = file.match(/notulen_rapat_([0-9]+)_/);
+        const targetId = m ? m[1] : null;
+        if (targetId) {
+          const r = await pool.query(
+            "SELECT * FROM notulen WHERE meeting_id = $1 OR id = $1 ORDER BY id DESC LIMIT 1",
+            [targetId]
+          );
+          if (r.rows.length > 0) {
+            const doc = r.rows[0];
+            let userObj = {
+              full_name: doc.notulis_name || "Pegawai BKN",
+              institution: "Kantor Regional V BKN Jakarta",
+              division: doc.notulis_role || "Pengembang Sistem",
+              sig_city: "Jakarta"
+            };
+            try {
+              const uRes = await pool.query("SELECT * FROM users WHERE id = $1", [doc.user_id]);
+              if (uRes.rows.length > 0) userObj = { ...userObj, ...uRes.rows[0] };
+            } catch (ue) {}
+
+            const regeneratedHtml = generateNotulenHtmlFile({
+              docData: {
+                title: doc.title,
+                meetingDate: doc.meeting_date,
+                meetingTime: doc.meeting_time,
+                meetingPlace: doc.meeting_place,
+                agenda: typeof doc.agenda_data === "string" ? JSON.parse(doc.agenda_data) : doc.agenda_data,
+                attendees: typeof doc.attendees_data === "string" ? JSON.parse(doc.attendees_data) : doc.attendees_data,
+                activities: typeof doc.activities_data === "string" ? JSON.parse(doc.activities_data) : doc.activities_data,
+                actionItems: typeof doc.action_items === "string" ? JSON.parse(doc.action_items) : doc.action_items,
+                conclusions: typeof doc.conclusions === "string" ? JSON.parse(doc.conclusions) : doc.conclusions,
+                closingText: doc.closing_text,
+                documentationPhotos: doc.documentation_photos ? (typeof doc.documentation_photos === "string" ? JSON.parse(doc.documentation_photos) : doc.documentation_photos) : [],
+                notulisName: doc.notulis_name,
+                notulisRole: doc.notulis_role
+              },
+              user: userObj,
+              notulenId: doc.id,
+              meetingId: doc.meeting_id
+            });
+            fs.writeFileSync(fullPath, regeneratedHtml, "utf-8");
+            console.log(`[Notulen Repair] Berhasil memperbaiki foto dokumentasi pada file ${file}`);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[Notulen Repair Warning]:", err.message);
+  }
+}
+
+// Jalankan auto-repair 2 detik setelah server berjalan
+setTimeout(() => {
+  repairExistingNotulenHtmlFiles().catch(() => {});
+}, 2000);
 
 export default notulenController;

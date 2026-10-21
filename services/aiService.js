@@ -41,17 +41,36 @@ const aiService = {
     }
 
     const geminiKey = process.env.GEMINI_API_KEY;
+    let result = null;
 
     if (geminiKey && geminiKey.trim() !== '') {
       try {
-        const aiResult = await callGeminiNotulenAPI(rawText, user, geminiKey);
-        if (aiResult) return aiResult;
+        result = await callGeminiNotulenAPI(rawText, user, geminiKey);
       } catch (err) {
         console.warn('⚠️ Gagal memanggil Gemini API untuk Notulen (' + err.message + '). Beralih ke Smart Notulen Parser lokal.');
       }
     }
 
-    return smartLocalNotulenParser(rawText, user);
+    if (!result) {
+      result = smartLocalNotulenParser(rawText, user);
+    }
+
+    // Pastikan daftar peserta selalu dirapikan ke tingkat Tim / Unit Kerja / Jabatan Struktural (tanpa nama orang pribadi)
+    if (result && Array.isArray(result.attendees)) {
+      result.attendees = sanitizeAttendees(result.attendees);
+    }
+
+    // Normalisasi & validasi Tabel Kertas Kerja MT
+    if (result) {
+      if (result.isMT && Array.isArray(result.kertasKerjaMT) && result.kertasKerjaMT.length > 0) {
+        result.kertasKerjaMT = normalizeKertasKerjaMT(result.kertasKerjaMT);
+      } else if (!result.isMT) {
+        result.isMT = false;
+        result.kertasKerjaMT = null;
+      }
+    }
+
+    return result;
   }
 };
 
@@ -121,7 +140,7 @@ Hasilkan HANYA objek JSON valid (tanpa markdown blok, tanpa awalan/akhiran apapu
  * Eksekusi panggilan API Gemini dengan multi-model fallback yang tangguh
  */
 async function executeGeminiGenerate(prompt, apiKey) {
-  const models = ['gemini-3.1-flash-lite', 'gemini-3.6-flash'];
+  const models = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
   let lastError = null;
 
   for (const model of models) {
@@ -130,6 +149,7 @@ async function executeGeminiGenerate(prompt, apiKey) {
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(35000),
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
@@ -382,9 +402,52 @@ function smartLocalParser(rawText, user = {}) {
  * Panggilan Gemini API untuk Notulen Rapat
  */
 async function callGeminiNotulenAPI(rawText, user, apiKey) {
+  // Jika dokumen transkrip sangat panjang (misal > 60.000 karakter),
+  // ambil bagian pembuka (header, metadata, pengantar) dan bagian penutup (tanya jawab, kesimpulan)
+  let textToSend = rawText;
+  if (rawText.length > 70000) {
+    const headPart = rawText.substring(0, 40000);
+    const tailPart = rawText.substring(rawText.length - 30000);
+    textToSend = `${headPart}\n\n[... Bagian tengah transkrip diringkas untuk optimasi performa ...]\n\n${tailPart}`;
+  }
+
   const prompt = `
-Anda adalah AI Notulis Resmi untuk Badan Kepegawaian Negara (BKN).
-Tugas Anda adalah membaca transkrip atau catatan rapat kedinasan berikut dan menyusunnya menjadi format Notula Resmi BKN standar tata naskah dinas dalam format JSON.
+Anda adalah AI Notulis Kedinasan Resmi untuk Badan Kepegawaian Negara (BKN).
+Tugas Anda adalah membaca transkrip rapat (termasuk rekaman Zoom, Tactiq, atau catatan dinas) berikut ini dan menyusunnya menjadi format Notula Resmi BKN standar tata naskah dinas dalam format JSON.
+
+PANDUAN EKSTRAKSI PENTING:
+1. JUDUL: Ekstrak judul rapat yang SEBENARNYA dari teks (perhatikan baris judul teratas, nama kegiatan, atau instansi yang sedang mengadakan rapat/didampingi). Contoh jika tertera "Pendampingan MT Lamsel", ubah menjadi "PENDAMPINGAN MANAJEMEN TALENTA KABUPATEN LAMPUNG SELATAN". JANGAN PERNAH menyalin judul tiruan jika tidak sesuai teks aslinya.
+2. WAKTU & TANGGAL: Ekstrak hari, tanggal, dan rentang waktu dari teks atau header rapat.
+3. TEMPAT: Tentukan tempat rapat ("Daring melalui Zoom Meeting" atau nama ruang/lokasi jika pertemuan tatap muka).
+4. AGENDA: Tuliskan 3-5 poin agenda kegiatan rapat yang relevan dengan topik yang dibahas.
+5. PESERTA / UNSUR YANG HADIR (ATURAN KHUSUS - WAJIB): Tuliskan daftar peserta HANYA berdasarkan NAMA TIM KERJA, UNIT KERJA, PERWAKILAN INSTANSI, atau JABATAN STRUKTURAL KELOMPOK. JANGAN PERNAH mencantumkan nama orang pribadi/individu (DILARANG format seperti "Nama Orang (Tim X)", "Budi (Admin)", "Nama Orang - Jabatan"). Cukup sebutkan nama tim/unit kerja/jabatannya saja, contoh:
+   - Tim Manajemen Talenta Kantor Regional V BKN Jakarta
+   - Tim Pembinaan dan Pengelolaan Sistem Informasi Kepegawaian Kanreg V BKN
+   - Kepala BKPSDM Kabupaten [Nama Daerah] beserta jajaran
+   - Tim Admin SI-MATA dan Admin Penkom BKPSDM Kabupaten [Nama Daerah]
+   - Perwakilan Bagian Organisasi Sekretariat Daerah Kabupaten [Nama Daerah]
+   - Para Pejabat Administrator, Pengawas, dan Pejabat Fungsional Terkait
+   (Ringkas menjadi 4 - 7 butir unsur perwakilan tim/unit kerja, tanpa menyebut nama orang satu per satu).
+6. URAIAN KEGIATAN: Bagi pembahasan ke dalam 2-4 sesi logis berdasarkan alur diskusi dan sebutkan narasumber/pembicara yang relevan beserta poin-poin inti apa yang mereka sampaikan.
+7. TINDAK LANJUT: Ekstrak 3-5 poin tindak lanjut penugasan atau arahan yang harus dikerjakan setelah rapat.
+8. KESIMPULAN: Tuliskan 2-3 poin kesimpulan rapat secara profesional.
+9. PENUTUP: Tuliskan narasi penutup rapat kedinasan secara formal.
+10. DETEKSI TOPIK KHUSUS MANAJEMEN TALENTA (MT) & TABEL KERTAS KERJA:
+    Periksa secara cermat apakah rapat ini membahas MANAJEMEN TALENTA (MT), SIMATA, Kertas Kerja Manajemen Talenta, Pemetaan Talenta / 9 Box, Rencana Suksesi, IDP, atau Pembinaan/Pendampingan MT Instansi:
+    - JIKA BUKAN RAPAT MANAJEMEN TALENTA (misal rapat Jabatan Fungsional, Kenaikan Pangkat, Mutasi, Disiplin, Perencanaan, atau Rapat Umum):
+      Set:
+      "isMT": false,
+      "kertasKerjaMT": null
+    - JIKA MERUPAKAN RAPAT MANAJEMEN TALENTA (MT):
+      Set:
+      "isMT": true,
+      dan sertakan "kertasKerjaMT" berisi persis 15 item standar BKN (Pilar I: 1.1-1.4, Pilar II: 2.1-2.2, Pilar III: 3.1-3.3).
+      ATURAN PENGISIAN STATUS & KETERANGAN KERTAS KERJA:
+      * Kolom 'no', 'komponen', 'indikator', 'buktiOutput' HARUS BAKU DAN SAMA PERSIS dengan 15 butir standar BKN.
+      * Kolom 'status' HANYA BOLEH bernilai salah satu dari 2 simbol:
+        - "✓" (ceklis) : jika eviden sudah ada / sudah diunggah / sudah lengkap / disetujui dalam rapat.
+        - "-" (strip) : jika eviden belum ada / belum diunggah / masih berupa catatan kekurangan / menunggu perbaikan.
+      * Kolom 'keterangan' HARUS disesuaikan secara cerdas dengan hasil diskusi transkrip rapat (misal: "Sesuai", "Perlu update SS dashboard", "Konfirmasi detil lowongan JPTP", "Perlu SS untuk kotak 9", "IDP manual perlu dilengkapi", "Perlu SS Simata ttd atasan", dll.).
 
 Identitas Notulis:
 - Nama: ${user.full_name || 'Notulis BKN'}
@@ -393,25 +456,24 @@ Identitas Notulis:
 
 Transkrip / Catatan Rapat Pengguna:
 """
-${rawText}
+${textToSend}
 """
 
-Hasilkan HANYA objek JSON valid (tanpa markdown blok, tanpa awalan/akhiran apapun) dengan format skema persis seperti ini:
+Hasilkan HANYA objek JSON valid (tanpa blok markdown, tanpa awalan/akhiran apapun) dengan format skema:
 {
-  "title": "Tulis judul lengkap notula (contoh: BKN MENYAPA ASN : Penguatan Implementasi Manajemen Talenta melalui SIMATA dan MyASN)",
-  "meetingTime": "Rentang waktu rapat jika ditemukan (contoh: 09.00 – 11.30 WIB)",
+  "title": "Judul resmi rapat (HURUF KAPITAL)",
+  "meetingTime": "Rentang waktu rapat (contoh: 08.38 WIB – Selesai)",
   "meetingPlace": "Daring melalui Zoom Meeting ATAU Di Tempat",
   "agenda": [
     "Poin agenda kegiatan 1",
     "Poin agenda kegiatan 2"
   ],
   "attendees": [
-    "Nama/Jabatan peserta atau pimpinan yang hadir 1",
-    "Nama/Jabatan peserta atau pimpinan yang hadir 2"
+    "Nama Tim Kerja / Unit Kerja / Jabatan Struktural Instansi (HARUS berupa nama tim/unit, DILARANG mencantumkan nama orang pribadi)"
   ],
   "activities": [
     {
-      "sectionTitle": "Judul Sesi (contoh: Sambutan dan Pembukaan Kepala BKN)",
+      "sectionTitle": "Judul Sesi Pembahasan",
       "speaker": "Nama pembicara / narasumber",
       "points": [
         "Poin pembahasan atau arahan 1",
@@ -427,7 +489,19 @@ Hasilkan HANYA objek JSON valid (tanpa markdown blok, tanpa awalan/akhiran apapu
     "Poin kesimpulan rapat 1",
     "Poin kesimpulan rapat 2"
   ],
-  "closingText": "Paragraf narasi penutup rapat dinas secara formal dan santun."
+  "closingText": "Paragraf narasi penutup rapat dinas secara formal dan santun.",
+  "isMT": true,
+  "kertasKerjaMT": [
+    {
+      "pilar": "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+      "no": "1.1",
+      "komponen": "Komitmen Pimpinan Instansi",
+      "indikator": "Tersedianya dukungan pimpinan instansi dalam penyelenggaraan manajemen talenta yang dinyatakan melalui surat pernyataan yang telah ditandatangani",
+      "buktiOutput": "Surat Pernyataan Pimpinan tentang Komitmen Penerapan Manajemen Talenta Instansi",
+      "status": "✓",
+      "keterangan": "Sesuai"
+    }
+  ]
 }
 `;
 
@@ -435,311 +509,439 @@ Hasilkan HANYA objek JSON valid (tanpa markdown blok, tanpa awalan/akhiran apapu
 }
 
 /**
- * Smart Heuristic Notulen Parser lokal (Offline / Cepat / Tanpa Kuota)
+ * Smart Dynamic Notulen Parser lokal (Fallback Cerdas Tanpa Data Tiruan / Mock)
  */
-function smartLocalNotulenParser(rawText, user) {
+function smartLocalNotulenParser(rawText, user = {}) {
   const text = (rawText || '').trim();
 
-  // 1. Normalisasi teks: Hapus timestamp VTT/Zoom dan pisahkan token
-  let normalized = text
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    // Hapus format timestamp Zoom / WebVTT (misal: 09:19:34 --> 09:19:48 atau 00:01:23.000 --> 00:01:25.000)
-    .replace(/\d{1,2}:\d{2}:\d{2}(?:[.,]\d+)?\s*-->\s*\d{1,2}:\d{2}:\d{2}(?:[.,]\d+)?/g, '')
-    .replace(/^(Mentahan Teks Dokumen|Mentahan Teks|Teks Dokumen)\s*:?\s*/gi, '')
-    .replace(/(Nama|Posisi|Jabatan|Mentor|Pembimbing|Agenda|Peserta|Uraian|Fokus Utama|Output|Hasil Kerja|Detail Peran|Perbedaan|Kesimpulan|Tindak Lanjut|Penutup)\s*:/gi, '\n$1: ')
-    .replace(/(Regulasi\s+Jabatan\s+Fungsional)/gi, '\n$1');
-
-  // 2. Deteksi Nama & Posisi Notulis jika tertulis dalam teks
-  let notulisName = user.full_name || 'Luthfi Arviandi';
-  const nameMatch = normalized.match(/(?:Nama|Notulis|Pegawai)\s*:\s*([^:\n\r,]+)/i);
-  if (nameMatch && nameMatch[1].trim().length > 2 && nameMatch[1].trim().length < 50) {
-    notulisName = nameMatch[1].trim();
-  }
-
-  let notulisRole = user.division || 'Asisten Pengembang Sistem dan Aplikasi Digital';
-  const roleMatch = normalized.match(/(?:Posisi|Jabatan|Divisi)\s*:\s*([^:\n\r]+)/i);
-  if (roleMatch && roleMatch[1].trim().length > 3 && roleMatch[1].trim().length < 60) {
-    notulisRole = roleMatch[1].trim();
-  }
-
-  // Deteksi Mentor / Pembimbing jika ada
-  let mentorName = '';
-  const mentorMatch = normalized.match(/(?:Mentor|Pembimbing|Narasumber|Atasan)\s*:\s*([^:\n\r]+)/i);
-  if (mentorMatch && mentorMatch[1].trim().length > 2 && mentorMatch[1].trim().length < 60) {
-    mentorName = mentorMatch[1].trim();
-  }
-
-  // 3. EKSTRAKSI JUDUL NOTULA SECARA KETAT & RINGKAS (Maks 10-15 kata / 90 karakter)
+  // 1. Ekstraksi Judul Dinamis
   let title = '';
-
-  // Deteksi topik utama berbasis pola kalimat
-  if (/manajemen talenta|simata|nine box|bkn menyapa|umpan balik.*360|sestama.*talenta/i.test(normalized)) {
-    title = 'BKN MENYAPA ASN : PENGUATAN IMPLEMENTASI MANAJEMEN TALENTA MELALUI SIMATA DAN MYASN';
-  } else if (/regulasi jabatan fungsional/i.test(normalized)) {
-    title = 'REGULASI JABATAN FUNGSIONAL DI BIDANG MANAJEMEN ASN';
-  } else {
-    // Cari baris yang secara spesifik menyebutkan tema atau judul
-    const topicPattern = /(?:Tema|Judul|Topik|Membahas|Sosialisasi|Bimtek|Rapat|Koordinasi|Kegiatan)\s*[:\-]?\s*([^\n\r.:]{8,90})/i;
-    const match = normalized.match(topicPattern);
-    if (match && match[1].trim().length > 6) {
-      let candidate = match[1].trim();
-      candidate = candidate.replace(/^(Nama|Posisi|Mentor)[\w\s,.:]*/i, '').trim();
-      if (candidate.length > 6) title = candidate;
+  const firstLines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (firstLines.length > 0) {
+    const l0 = firstLines[0];
+    if (!/^(meeting started|view original|transcript|\d{1,2}:\d{2}|notula)/i.test(l0) && l0.length > 3 && l0.length < 130) {
+      title = l0;
     }
   }
 
   if (!title) {
-    // Cari baris teks pertama yang bermakna dan bukan deklarasi Nama / Posisi / Mentor
-    const linesClean = normalized.split('\n')
-      .map(l => l.trim())
-      .filter(l => l.length > 6 && !/^(nama|posisi|jabatan|mentor|pembimbing|mentahan)\s*:/i.test(l));
-    
-    if (linesClean.length > 0) {
-      title = linesClean[0];
-    }
+    const m = text.match(/(?:Tema|Judul|Topik|Kegiatan|Rapat)\s*[:\-]\s*([^\n\r]+)/i);
+    if (m && m[1].trim()) title = m[1].trim();
   }
 
-  // Bersihkan title dari teks berulang
-  title = title
-    .replace(/^(Mentahan Teks|Dokumen|Laporan|Catatan|Rapat|Tema|Judul)\s*[:\-]?\s*/i, '')
-    .replace(/[():\-]+$/, '')
-    .replace(/^[():\-]+/, '')
-    .trim();
-
-  // PENTING: Batasi maksimal panjang judul agar TIDAK PERNAH numpuk / meluap
-  if (title.length > 90) {
-    title = title.substring(0, 90);
-    const lastSpace = title.lastIndexOf(' ');
-    if (lastSpace > 30) {
-      title = title.substring(0, lastSpace);
+  if (title) {
+    title = title
+      .replace(/\bMT\b/g, 'Manajemen Talenta')
+      .replace(/\bLamsel\b/gi, 'Kabupaten Lampung Selatan')
+      .replace(/\bLamtim\b/gi, 'Kabupaten Lampung Timur')
+      .replace(/\bLamteng\b/gi, 'Kabupaten Lampung Tengah')
+      .replace(/\bKanreg V\b/gi, 'Kantor Regional V BKN')
+      .replace(/^(Notula|Risalah|Catatan|Transkrip|Dokumen)\s*[:\-]?\s*/i, '')
+      .replace(/[():\-]+$/, '')
+      .replace(/^[():\-]+/, '')
+      .trim();
+    if (title.length > 90) {
+      title = title.substring(0, 90);
+      const lastSp = title.lastIndexOf(' ');
+      if (lastSp > 30) title = title.substring(0, lastSp);
     }
-  }
-
-  title = title.toUpperCase();
-  if (!title || title.length < 5) {
+    title = title.toUpperCase();
+  } else {
     title = 'RAPAT KOORDINASI DAN EVALUASI LAYANAN KEPEGAWAIAN BKN';
   }
 
-  // 4. Waktu & Jam
+  // 2. Waktu & Tanggal
   let meetingTime = '09.00 – 11.30 WIB';
-  const timeMatch = normalized.match(/(\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}\s*(?:WIB|WITA|WIT)?)/i);
-  if (timeMatch) meetingTime = timeMatch[1].trim();
+  const startMatch = text.match(/Meeting started:\s*([A-Za-z]+ \d{1,2}, \d{4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM)?)/i);
+  if (startMatch) {
+    meetingTime = `${startMatch[2]} WIB – Selesai`;
+  } else {
+    const timeMatch = text.match(/(\d{1,2}[.:]\d{2}\s*[-–]\s*\d{1,2}[.:]\d{2}\s*(?:WIB|WITA|WIT)?)/i);
+    if (timeMatch) meetingTime = timeMatch[1].trim();
+  }
 
-  // 5. Tempat
-  let meetingPlace = 'Di Tempat';
-  if (/daring|zoom|teams|google meet|meet|webinar|virtual/i.test(normalized)) {
-    meetingPlace = 'Daring melalui Zoom Meeting';
-  } else if (/di tempat|luring|aula|ruang|gedung|kantor|tatap muka/i.test(normalized)) {
+  // 3. Tempat
+  let meetingPlace = 'Daring melalui Zoom Meeting';
+  if (/luring|tatap muka|aula|ruang rapat|kantor/i.test(text) && !/zoom|daring|teams/i.test(text)) {
     meetingPlace = 'Di Tempat';
   }
 
-  // 6. Pengelompokan Agenda, Peserta, Uraian Kegiatan, Tindak Lanjut, Kesimpulan
-  let agenda = [];
+  // 4. Deteksi Peserta dari Teks Transkrip Nyata
   let attendees = [];
-  let activities = [];
-  let actionItems = [];
-  let conclusions = [];
-  let closingText = '';
-
-  // KONDISI SPESIFIK 1: Topik Manajemen Talenta, SIMATA & MyASN (BKN Menyapa ASN)
-  if (/manajemen talenta|simata|nine box|bkn menyapa|umpan balik.*360|sestama.*talenta/i.test(normalized)) {
-    agenda = [
-      'Pemaparan urgensi, dasar regulasi, siklus, dan manfaat penerapan Manajemen Talenta bagi ASN dan instansi.',
-      'Sosialisasi komponen pembobotan Sumbu Y (Kinerja Utama 60% dan Kinerja Penguat 40%: penghargaan, penugasan tim, umpan balik 360°).',
-      'Sosialisasi komponen pembobotan Sumbu X (Kompetensi, potensi profiling/CACT, kualifikasi formal, dan rekam jejak disiplin).',
-      'Penjelasan Nota Dinas Plt. Sestama BKN mengenai tenggat waktu kelengkapan data talenta pada SIMATA dan MyASN.',
-      'Sesi tanya jawab teknis terkait pengisian instrumen umpan balik 360°, pembobotan SK tim kerja, dan pemetaan kuadran Nine Box.'
-    ];
-
-    attendees = [
-      `${notulisName} – ${notulisRole} (Notulis)`,
-      'Kepala Kantor Regional V BKN Jakarta',
-      'Ibu Irma Ningsih – Kepala Bagian Tata Usaha Kanreg V BKN',
-      'Ibu Wiwi / Ambar – Narasumber Manajemen Talenta Kanreg V BKN',
-      'Ibu Ana Nur – Narasumber Manajemen Talenta Kanreg V BKN',
-      'Ibu Nurmiati – Tim Kepegawaian Kanreg V BKN',
-      'Ibu Junita Ekawati – Moderator Acara',
-      'Para Pejabat Pengawas, Ketua Tim Kerja, dan Seluruh Pegawai ASN Kantor Regional V BKN Jakarta'
-    ];
-
-    activities = [
-      {
-        sectionTitle: '1. Urgensi, Regulasi, dan Kerangka Penyelenggaraan Manajemen Talenta ASN',
-        speaker: 'Ibu Wiwi / Ambar (Narasumber)',
-        points: [
-          'Manajemen talenta bukan sekadar tren administrasi kepegawaian, melainkan instrumen strategis untuk memastikan ketersediaan calon pemimpin masa depan serta memperkuat penerapan sistem merit secara adil dan transparan.',
-          'Pengambilan keputusan kepegawaian didasarkan secara terpadu pada kualifikasi, kompetensi, potensi, kinerja, integritas, dan moralitas tanpa diskriminasi.',
-          'Siklus manajemen talenta mencakup lima tahapan terintegrasi: akuisisi talenta, pengembangan kompetensi, retensi talenta, penempatan suksesor (right person in the right place at the right time), serta pemantauan dan evaluasi berkala.'
-        ]
-      },
-      {
-        sectionTitle: '2. Pembobotan Indikator Kuadran Nine Box pada Aplikasi SI-MATA BKN',
-        speaker: 'Ibu Ana Nur (Narasumber)',
-        points: [
-          'Sumbu Y (Kinerja): Kinerja Utama berbobot 60% (hasil e-Kinerja tahunan wajib klik "Kirim SIASN"), didukung Kinerja Penguat 40% yang mencakup penghargaan berkinerja (5 tahun terakhir), penugasan tim kerja resmi (2 tahun terakhir), dan umpan balik 360°.',
-          'Sumbu X (Potensi): Didukung oleh 4 pilar utama yaitu kompetensi (hasil assessment, riwayat pelatihan minimal 8 sertifikat, pengalaman jabatan), penilaian potensi (profiling ASN / CACT), kualifikasi pendidikan formal, dan verifikasi disiplin.',
-          'Penempatan pegawai dalam kuadran Nine Box (kotak 1 sampai 9) pada SI-MATA merupakan instrumen diagnostik kebutuhan pengembangan dan suksesi, bukan sekadar ranking pegawai.'
-        ]
-      },
-      {
-        sectionTitle: '3. Sosialisasi Nota Dinas Plt. Sestama & Tindak Lanjut Pemutakhiran Data',
-        speaker: 'Ibu Nurmiati (Tim Kepegawaian)',
-        points: [
-          'Menindaklanjuti Nota Dinas Plt. Sestama No. 260/KP.05.02/ND/A/2026 dan Kepka BKN No. 411/2025 terkait percepatan kelengkapan data manajemen talenta tahun 2026.',
-          'Pegawai diimbau segera mengunggah piagam/sertifikat penghargaan prestasi kinerja kurun waktu 2022–2026 secara mandiri di MyASN.',
-          'Penugasan dalam tim kerja (2025–2026) diunggah cukup SK dengan kedudukan tertinggi melalui tautan Google Form kepegawaian yang telah dibagikan.',
-          'Penilaian perilaku 360° wajib diselesaikan oleh seluruh pegawai di e-Kinerja paling lambat Selasa, 15 September 2026 agar profil talenta dapat terkalkulasi utuh.'
-        ]
-      },
-      {
-        sectionTitle: '4. Sesi Diskusi, Tanya Jawab, dan Arahan Kabag TU Kanreg V BKN',
-        speaker: 'Peserta Rapat & Ibu Irma Ningsih (Kabag TU)',
-        points: [
-          'Pembahasan pertanyaan peserta mengenai mekanisme revisi pengisian umpan balik 360° jika terjadi kekeliruan pemilihan tingkatan jawaban positif.',
-          'Penjelasan dari Tim Kepegawaian dan Kabag TU bahwa koordinasi dengan Biro SDM dan CDC sedang diintensifkan, termasuk opsi pengajuan reset/restart penilaian melalui pimpinan.',
-          'Penegasan kepada seluruh pegawai untuk proaktif mengelola data kepegawaian masing-masing demi keadilan dan keakuratan profil talenta nasional.'
-        ]
-      }
-    ];
-
-    actionItems = [
-      'Menyelesaikan seluruh pengisian instrumen penilaian perilaku umpan balik 360° pada aplikasi e-Kinerja sebelum tenggat waktu 15 September 2026.',
-      'Mengunggah dokumen piagam/sertifikat penghargaan prestasi kerja periode 2022–2026 secara mandiri melalui aplikasi MyASN.',
-      'Mengunggah SK penugasan tim kerja resmi kedudukan tertinggi (periode 2025–2026) pada tautan formulir pendataan kepegawaian Kanreg V.',
-      'Memeriksa dan memperbarui riwayat sertifikat pengembangan kompetensi di MyASN serta memastikan status telah dikirim ke SIASN.',
-      'Melakukan konsultasi proaktif dengan Tim Kepegawaian Kanreg V BKN apabila menemui kendala teknis dalam integrasi data SI-MATA.'
-    ];
-
-    conclusions = [
-      'Penyelenggaraan Manajemen Talenta melalui SI-MATA dan MyASN merupakan langkah krusial dalam mewujudkan pengelolaan karier ASN yang transparan, terukur, dan berbasis sistem merit.',
-      'Keberhasilan pemetaan kuadran Nine Box yang akurat dan representatif sangat bergantung pada komitmen dan keaktifan masing-masing pegawai dalam memutakhirkan kelengkapan data portofolio kepegawaiannya.'
-    ];
-
-    closingText = 'Kegiatan BKN Menyapa ASN resmi ditutup oleh moderator dengan penegasan kembali komitmen bersama seluruh jajaran pegawai di lingkungan Kantor Regional V BKN Jakarta untuk segera merampungkan pemutakhiran data eviden dan pengisian umpan balik 360° sebelum batas waktu yang ditetapkan.';
+  const partMatch = text.match(/Meeting participants:\s*([^\n\r]+)/i);
+  if (partMatch && partMatch[1].trim()) {
+    const rawParts = partMatch[1].split(',');
+    rawParts.forEach(p => {
+      let clean = p.replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (clean && clean.length > 2) attendees.push(clean);
+    });
   }
-  // KONDISI SPESIFIK 2: Topik Regulasi Jabatan Fungsional (Permenpan 37 & 38)
-  else if (/jabatan fungsional|permenpan|analis sdm|pranata sdm/i.test(normalized)) {
-    agenda = [
-      'Pembahasan Regulasi Jabatan Fungsional di Bidang Manajemen ASN (Permenpan-RB No. 37/2020 dan No. 38/2020).',
-      'Analisis perbedaan kategori keahlian (JF Analis SDM) dan kategori keterampilan (JF Pranata SDM).',
-      'Pemetaan jenjang jabatan, fokus utama tugas, dan pemenuhan output hasil kerja kepegawaian.',
-      'Penegasan detail peran, fungsi formulasi kebijakan makro, dan penatausahaan administrasi operasional.'
-    ];
 
-    attendees = [
-      `${notulisName} – ${notulisRole}`,
-      mentorName ? `${mentorName} – Pembimbing / Mentor` : 'Pembimbing / Mentor Kepegawaian',
-      'Kepala Bidang / Pejabat Penilai Kinerja BKN',
-      'Tim Pembina Jabatan Fungsional Kepegawaian Kanreg V BKN'
-    ];
-
-    activities = [
-      {
-        sectionTitle: '1. Landasan Regulasi Jabatan Fungsional Manajemen ASN',
-        speaker: 'Narasumber / Pembimbing',
-        points: [
-          'JF Analis SDM Aparatur merupakan Jabatan Fungsional Kategori Keahlian berdasarkan Permenpan-RB Nomor 37 Tahun 2020.',
-          'JF Pranata SDM Aparatur merupakan Jabatan Fungsional Kategori Keterampilan berdasarkan Permenpan-RB Nomor 38 Tahun 2020.',
-          'Kedua regulasi membagi secara tegas tanggung jawab antara perumusan kebijakan strategis dan penatausahaan operasional.'
-        ]
-      },
-      {
-        sectionTitle: '2. Perbedaan Kategori, Jenjang Jabatan, dan Fokus Tugas',
-        speaker: 'Narasumber / Tim Teknis',
-        points: [
-          'Kategori Keahlian (Analis SDM): Terdiri dari jenjang Ahli Pertama, Ahli Muda, Ahli Madya, dan Ahli Utama. Fokus tugas pada perumusan, analisis, evaluasi, asistensi, dan rekomendasi kebijakan makro.',
-          'Kategori Keterampilan (Pranata SDM): Terdiri dari jenjang Terampil, Mahir, dan Penyelia. Fokus tugas pada pelayanan teknis, verifikasi berkas, fasilitasi, dan administrasi operasional kepegawaian.'
-        ]
-      },
-      {
-        sectionTitle: '3. Output / Hasil Kerja Utama dan Detail Peran Fungsi',
-        speaker: 'Peserta & Pembahas',
-        points: [
-          'Output Analis SDM: Dokumen kajian strategis, rancangan kebijakan/regulasi, peta strategi, analisis beban kerja/kebutuhan pegawai, dan model manajemen SDM.',
-          'Output Pranata SDM: Dokumen teknis operasional, rekapitulasi data kepegawaian, verifikasi kelengkapan berkas layanan, dan pencatatan riwayat pegawai.',
-          'Fungsi kolaboratif: Analis SDM merancang sistem dan instrumen manajemen talenta, sementara Pranata SDM memastikan keabsahan dan pemutakhiran data eviden kepegawaian.'
-        ]
+  if (attendees.length === 0) {
+    const speakerRegex = /(?:^|\n)(?:\d{1,2}:\d{2}(?::\d{2})?\s+)?([A-Za-z0-9_.\s]{3,35})\s*:/g;
+    const foundSpeakers = new Set();
+    let sm;
+    while ((sm = speakerRegex.exec(text)) !== null) {
+      const sp = sm[1].replace(/[_]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (sp && !/^(transcript|meeting|view|agenda|peserta|waktu|tempat|catatan|sesi)/i.test(sp)) {
+        foundSpeakers.add(sp);
       }
-    ];
-
-    actionItems = [
-      'Melakukan pemetaan jenjang jabatan fungsional Analis SDM dan Pranata SDM sesuai formasi dan analisis beban kerja organisasi.',
-      'Meningkatkan ketertiban penyusunan dokumen kajian kebijakan dan dokumen teknis operasional kepegawaian.',
-      'Memastikan verifikasi kelengkapan berkas layanan kepegawaian berjalan tertib, mutakhir, dan terdokumentasi.'
-    ];
-
-    conclusions = [
-      'Regulasi Permenpan-RB 37/2020 dan 38/2020 memberikan batasan peran yang jelas dan saling melengkapi antara kategori keahlian dan keterampilan.',
-      'Akuntabilitas kinerja pejabat fungsional dinilai dari ketepatan output hasil kerja utama terhadap sasaran strategis instansi.'
-    ];
-
-    closingText = 'Kegiatan pembahasan regulasi jabatan fungsional ditutup dengan komitmen bersama untuk meningkatkan profesionalisme, validitas dokumen kajian, dan ketertiban penatausahaan administrasi kepegawaian di lingkungan instansi.';
-  } else {
-    // KONDISI 2: PARSER GENERIK CERDAS BERDASARKAN BARIS & PARAGRAF
-    const sentences = normalized.split(/[\n\r.]+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 15 && !/^(nama|posisi|jabatan|mentor|pembimbing|mentahan)\s*:/i.test(s));
-
-    // Agenda dari kalimat awal
-    agenda = sentences.slice(0, 4).map(s => s.replace(/^[-•*–\d+.)\s]+/, '').trim());
-    if (agenda.length === 0) {
-      agenda.push(`Membahas pelaksanaan dan evaluasi kegiatan ${title.toLowerCase()}.`);
-      agenda.push('Menyusun langkah koordinasi teknis dan pemetaan kebutuhan kepegawaian.');
     }
-
-    // Peserta
-    attendees = [
-      `${notulisName} – ${notulisRole}`,
-      mentorName ? `${mentorName} – Pembimbing / Mentor` : 'Pejabat Struktural & Pembina Kepegawaian BKN',
-      'Tim Kerja dan Pegawai Terkait'
-    ];
-
-    // Uraian kegiatan dibagi per sesi
-    const midPoint = Math.ceil(sentences.length / 2);
-    const part1 = sentences.slice(0, Math.min(midPoint, 4));
-    const part2 = sentences.slice(midPoint, Math.min(midPoint + 4, sentences.length));
-
-    activities = [
-      {
-        sectionTitle: '1. Pembukaan dan Pembahasan Materi Pokok',
-        speaker: 'Pimpinan Rapat',
-        points: part1.length > 0 ? part1 : [`Pembahasan awal mengenai ${title.toLowerCase()} dan sasaran capaian.`]
-      },
-      {
-        sectionTitle: '2. Diskusi Teknis dan Pendalaman Hasil Kerja',
-        speaker: 'Peserta Rapat',
-        points: part2.length > 0 ? part2 : ['Penyampaian masukan teknis dan inventarisasi kendala operasional lapangan.']
-      }
-    ];
-
-    actionItems = [
-      `Melaksanakan tindak lanjut dan rekomendasi terkait ${title.toLowerCase()}.`,
-      'Menyusun dokumen eviden pendukung dan memperbarui data pelaporan kepegawaian.',
-      'Melakukan koordinasi berkala dengan unit kerja dan pembina kepegawaian.'
-    ];
-
-    conclusions = [
-      `Pelaksanaan kegiatan ${title.toLowerCase()} berjalan dengan baik dan menghasilkan kesepahaman bersama.`,
-      'Seluruh penugasan dan hasil kerja wajib didukung data yang akurat dan tepat waktu.'
-    ];
-
-    closingText = `Kegiatan pertemuan dinas ditutup secara resmi dengan harapan seluruh rekomendasi dapat diimplementasikan secara optimal demi mendukung akuntabilitas kinerja instansi.`;
+    attendees = Array.from(foundSpeakers).slice(0, 8);
   }
+
+  if (attendees.length === 0) {
+    attendees = [
+      `${user.full_name || 'Notulis BKN'} – Notulis`,
+      'Pimpinan Rapat',
+      'Para Pejabat dan Peserta Rapat'
+    ];
+  }
+
+  // 5. Agenda Dinamis
+  const agenda = [
+    `Pelaksanaan kegiatan ${title.toLowerCase()} bersama unit kerja terkait.`,
+    'Review pemenuhan kertas kerja, dokumen eviden, dan instrumen pendukung.',
+    'Pembahasan kendala operasional serta strategi percepatan tindak lanjut.'
+  ];
+
+  // 6. Uraian Pembahasan Dinamis dari Dialog Nyata
+  const dialogueLines = text.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 35 && !/^(meeting|transcript|view original|\d{1,2}:\d{2}\s*$)/i.test(l));
+
+  const mid = Math.ceil(dialogueLines.length / 2);
+  const part1 = dialogueLines.slice(0, Math.min(mid, 4)).map(l => l.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/, ''));
+  const part2 = dialogueLines.slice(mid, Math.min(mid + 4, dialogueLines.length)).map(l => l.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s*/, ''));
+
+  const activities = [
+    {
+      sectionTitle: '1. Pengantar dan Pembahasan Awal',
+      speaker: attendees[0] || 'Pimpinan Rapat',
+      points: part1.length > 0 ? part1 : [`Penyampaian arahan dan tujuan pelaksanaan ${title.toLowerCase()}.`]
+    },
+    {
+      sectionTitle: '2. Review Kertas Kerja dan Diskusi Teknis',
+      speaker: attendees[1] || 'Tim Teknis / Narasumber',
+      points: part2.length > 0 ? part2 : ['Pendalaman materi teknis serta inventarisasi eviden pendukung.']
+    }
+  ];
+
+  // 7. Tindak Lanjut Dinamis
+  const actionItems = [];
+  const actionKeywords = text.match(/([^.!?\n\r]*(?:sk |tindak lanjut|harus|akan|segera|koordinasi|lengkapi|upload|percepatan|retensi|idp)[^.!?\n\r]*[.!?])/gi);
+  if (actionKeywords && actionKeywords.length > 0) {
+    const cleanedActions = actionKeywords
+      .map(a => a.replace(/^\d{1,2}:\d{2}(?::\d{2})?\s+[A-Za-z0-9_.\s]+:\s*/, '').trim())
+      .filter(a => a.length > 25 && a.length < 200);
+    const uniqueActions = Array.from(new Set(cleanedActions)).slice(0, 4);
+    if (uniqueActions.length > 0) actionItems.push(...uniqueActions);
+  }
+  if (actionItems.length === 0) {
+    actionItems.push(`Menindaklanjuti rekomendasi hasil kegiatan ${title.toLowerCase()}.`);
+    actionItems.push('Melengkapi dokumen eviden dan berkas administrasi kepegawaian yang diperlukan.');
+    actionItems.push('Melakukan koordinasi berkala dengan tim pendamping.');
+  }
+
+  // 9. Deteksi Topik Khusus Manajemen Talenta (MT)
+  const isMT = /(?:manajemen talenta|\bmt\b|kertas kerja|simata|si-mata|9 box|sembilan kotak|kotak talenta|bangtarier|akuisisi talenta|retensi talenta)/i.test(text);
+  let kertasKerjaMT = null;
+  if (isMT) {
+    kertasKerjaMT = STANDARD_KERTAS_KERJA_MT.map(item => {
+      let st = "-";
+      let ket = "";
+      if (item.no === "1.1" && /(?:komitmen|surat pernyataan)/i.test(text)) {
+        st = "✓";
+        ket = "Sesuai";
+      } else if (item.no === "1.2" && /(?:sk tim|tim kerja)/i.test(text)) {
+        st = "✓";
+        ket = "Sesuai";
+      } else if (item.no === "1.3" && /(?:komite talenta)/i.test(text)) {
+        st = "✓";
+        ket = "Sesuai";
+      } else if (item.no === "1.4" && /(?:regulasi|perbup|perwal)/i.test(text)) {
+        st = "✓";
+        ket = "Sesuai";
+      } else if (item.no === "2.1") {
+        st = "✓";
+        ket = /(?:update ss|dashboard)/i.test(text) ? "Sesuai, namun memerlukan update SS dashboard" : "Sesuai";
+      } else if (item.no === "2.2") {
+        st = "✓";
+        ket = /(?:pemadanan|integrasi)/i.test(text) ? "Sesuai, namun memerlukan update SS pemadanan data" : "Sesuai";
+      } else if (item.no === "3.2") {
+        ket = /(?:idp manual|ttd atasan)/i.test(text) ? "Perlu SS Simata dengan dokumen ttd atasan" : "Perlu verifikasi";
+      } else if (item.no === "3.3") {
+        st = "✓";
+        ket = "Sesuai";
+      }
+      return {
+        ...item,
+        status: st,
+        keterangan: ket
+      };
+    });
+  }
+
+  // 10. Kesimpulan Dinamis
+  const conclusions = [
+    `Kegiatan ${title.toLowerCase()} telah dilaksanakan dengan baik dan menghasilkan rekomendasi perbaikan yang konkret.`,
+    'Seluruh pihak yang terlibat berkomitmen untuk mempercepat pemenuhan data dan dokumen pendukung sesuai arahan.'
+  ];
+
+  const closingText = `Kegiatan ${title.toLowerCase()} ditutup secara resmi dengan komitmen bersama untuk segera menindaklanjuti seluruh catatan review demi mendukung akuntabilitas kinerja instansi.`;
 
   return {
-    title: title,
-    meetingTime: meetingTime,
-    meetingPlace: meetingPlace,
-    agenda: agenda,
-    attendees: attendees,
-    activities: activities,
-    actionItems: actionItems,
-    conclusions: conclusions,
-    closingText: closingText,
-    notulisName: notulisName,
-    notulisRole: notulisRole
+    title,
+    meetingTime,
+    meetingPlace,
+    agenda,
+    attendees,
+    activities,
+    actionItems,
+    conclusions,
+    closingText,
+    isMT,
+    kertasKerjaMT,
+    notulisName: user.full_name || 'Luthfi Arviandi',
+    notulisRole: user.division || 'Asisten Pengembang Sistem dan Aplikasi Digital'
   };
+}
+
+/**
+ * 15 Butir Baku Standar Kertas Kerja Manajemen Talenta BKN (Dit. Bangtarier)
+ */
+export const STANDARD_KERTAS_KERJA_MT = [
+  // I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.1",
+    komponen: "Komitmen Pimpinan Instansi",
+    indikator: "Tersedianya dukungan pimpinan instansi dalam penyelenggaraan manajemen talenta yang dinyatakan melalui surat pernyataan yang telah ditandatangani",
+    buktiOutput: "Surat Pernyataan Pimpinan tentang Komitmen Penerapan Manajemen Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.2",
+    komponen: "Tim Kerja Pengelola Manajemen Talenta",
+    indikator: "Tersedianya Tim Kerja yang mengelola manajemen talenta secara sistematis dan berkelanjutan yang ditetapkan secara formal dan operasional",
+    buktiOutput: "Surat Keputusan Pembentukan Tim Kerja Manajemen Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.3",
+    komponen: "Komite Talenta",
+    indikator: "Adanya tim penilai akhir yang memberikan rekomendasi dalam pengambilan keputusan dalam penyelenggaraan manajemen talenta",
+    buktiOutput: "Surat keputusan pembentukan Komite Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.4",
+    komponen: "Regulasi Penyelenggaraan Manajemen Talenta",
+    indikator: "Tersedianya regulasi yang ditetapkan pimpinan instansi sebagai dasar penyelenggaraan manajemen talenta",
+    buktiOutput: "Regulasi",
+    status: "-",
+    keterangan: ""
+  },
+
+  // II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI",
+    no: "2.1",
+    komponen: "Aplikasi Manajemen Talenta",
+    indikator: "Tersedianya aplikasi manajemen talenta yang menyediakan fitur-fitur penting (pemetaan dan penempatan) dalam penyelenggaraan manajemen talenta",
+    buktiOutput: "Aplikasi Manajemen Talenta Berbasis Web",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI",
+    no: "2.2",
+    komponen: "Sistem Informasi Manajemen Talenta",
+    indikator: "Terintegrasinya aplikasi dengan sistem informasi ASN (SI ASN) BKN dan sistem informasi SDM lain (misal ekinerja)",
+    buktiOutput: "Integrasi Data pada Aplikasi Manajemen Talenta",
+    status: "-",
+    keterangan: ""
+  },
+
+  // III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya identifikasi jabatan target",
+    buktiOutput: "Daftar Jabatan Target",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya analisis kebutuhan talenta yang memenuhi persyaratan untuk menduduki jabatan target",
+    buktiOutput: "Daftar kandidat yang memenuhi kriteria jabatan target",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya pengelompokan berbagai jenis jabatan berdasarkan kedekatan fungsi, kompetensi, dan/atau karakteristik jabatan.",
+    buktiOutput: "Daftar Rumpun Jabatan",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya parameter, komponen, dan bobot penilaian sebagai dasar pengembangan Karier dalam pemetaan talenta",
+    buktiOutput: "Demo aplikasi yang memuat parameter, komponen, dan bobot penilaian",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya profil talenta dari hasil penilaian kinerja dan potensial pegawai",
+    buktiOutput: "Dokumen Profil Talenta",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya hasil pemetaan pegawai ke dalam 9 kotak talenta",
+    buktiOutput: "Tangkapan layar aplikasi yang memuat matriks 9 kotak talenta ASN",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya kelompok rencana suksesi yang telah diperingkatkan untuk mengisi jabatan target",
+    buktiOutput: "Bagan rencana suksesi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.2",
+    komponen: "Pengembangan Talenta",
+    indikator: "Tersedianya rencana pengembangan individu berdasarkan klasifikasi 9 kotak talenta",
+    buktiOutput: "Dokumen Rencana Pengembangan Individu (Individual Development Plan) talenta ASN",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.3",
+    komponen: "Retensi Talenta",
+    indikator: "Tersedianya strategi retensi talenta (reward, pengakuan, jenjang karier, dsb.)",
+    buktiOutput: "Dokumen strategi retensi talenta untuk setiap kelompok talenta telah disusun",
+    status: "-",
+    keterangan: ""
+  }
+];
+
+/**
+ * Menormalisasi hasil array Kertas Kerja MT dari AI agar selalu selaras dengan 15 butir standar baku
+ * dan memastikan status hanya berupa '✓' atau '-'
+ */
+export function normalizeKertasKerjaMT(list) {
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  return STANDARD_KERTAS_KERJA_MT.map((std, idx) => {
+    const found = list.find(item => 
+      item && (
+        String(item.no || '').trim() === String(std.no).trim() &&
+        (
+          (item.indikator && item.indikator.slice(0, 20).toLowerCase() === std.indikator.slice(0, 20).toLowerCase()) ||
+          (item.buktiOutput && item.buktiOutput.slice(0, 20).toLowerCase() === std.buktiOutput.slice(0, 20).toLowerCase())
+        )
+      )
+    ) || list[idx] || {};
+
+    let rawStatus = String(found.status || '').trim();
+    let status = "-";
+    if (/^[vV✓]$/i.test(rawStatus) || /^(ceklis|ada|lengkap|sesuai|sudah|ya|true)$/i.test(rawStatus)) {
+      status = "✓";
+    } else {
+      status = "-";
+    }
+
+    let keterangan = typeof found.keterangan === 'string' ? found.keterangan.trim() : '';
+    if (!keterangan && status === "✓") {
+      keterangan = "Sesuai";
+    }
+
+    return {
+      pilar: std.pilar,
+      no: std.no,
+      komponen: std.komponen,
+      indikator: std.indikator,
+      buktiOutput: std.buktiOutput,
+      status: status,
+      keterangan: keterangan
+    };
+  });
+}
+
+/**
+ * Membersihkan daftar peserta agar diformat berdasarkan Tim Kerja / Unit Kerja / Jabatan Struktural
+ * dan menghilangkan nama orang pribadi secara konsisten untuk seluruh pembuatan notula.
+ */
+function sanitizeAttendees(list) {
+  if (!Array.isArray(list)) return [];
+  const results = [];
+  const seen = new Set();
+
+  list.forEach(item => {
+    if (!item || typeof item !== 'string') return;
+    let val = item.trim();
+
+    // 1. Jika format: "Nama Orang (Tim/Unit/Jabatan)" -> ambil isi kurung jika berupa jabatan/tim/unit
+    const bracketMatch = val.match(/^([A-Za-z\s'.,]+)\s*\(([^)]+)\)$/);
+    if (bracketMatch) {
+      const inside = bracketMatch[2].trim();
+      if (/(?:tim|bagian|unit|dinas|bkd|bkpsdm|bkn|kanreg|dit|perwakilan|admin|kepala|bidang|seksi|biro|inspektorat|setda|pejabat|pegawai|pic)/i.test(inside)) {
+        val = inside;
+      }
+    } else {
+      // 2. Jika format: "Nama Orang – Tim/Unit/Jabatan" atau "Nama Orang - Tim/Unit/Jabatan"
+      const dashMatch = val.match(/^([A-Za-z\s'.,]{2,35})\s*(?:–|—|\s-\s|:\s)\s*(.*)$/);
+      if (dashMatch) {
+        const right = dashMatch[2].trim();
+        if (/(?:tim|bagian|unit|dinas|bkd|bkpsdm|bkn|kanreg|dit|perwakilan|admin|kepala|bidang|seksi|biro|inspektorat|setda|pejabat|pegawai|pic)/i.test(right)) {
+          val = right;
+        }
+      }
+    }
+
+    // Hilangkan awalan sebutan jika masih ada
+    val = val.replace(/^(?:ibu|bapak|pak|bu|sdr|sdri)\s+[A-Za-z\s'.,]{2,25}\s*(?:–|-)\s*/i, '');
+    val = val.replace(/\s+/g, ' ').trim();
+
+    if (val.length > 2 && !seen.has(val.toLowerCase())) {
+      seen.add(val.toLowerCase());
+      results.push(val);
+    }
+  });
+
+  return results.length > 0 ? results : [
+    'Tim Kerja Terkait Kantor Regional V BKN Jakarta',
+    'Perwakilan Instansi / Badan Kepegawaian Daerah',
+    'Para Pejabat Administrator, Pengawas, dan Pejabat Fungsional Terkait'
+  ];
 }
 
 export default aiService;

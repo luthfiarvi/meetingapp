@@ -161,6 +161,9 @@ export async function initInfografisSchema() {
           IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='meeting_id') THEN
               ALTER TABLE notulen ADD COLUMN meeting_id INT;
           END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='kertas_kerja_mt') THEN
+              ALTER TABLE notulen ADD COLUMN kertas_kerja_mt JSONB DEFAULT NULL;
+          END IF;
           BEGIN
               ALTER TABLE notulen ALTER COLUMN user_id TYPE VARCHAR(100);
           EXCEPTION WHEN OTHERS THEN NULL;

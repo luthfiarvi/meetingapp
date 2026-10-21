@@ -2,11 +2,11 @@
  * NOTULEN.JS - LOGIKA REAKTIF & GENERATOR NOTULA BKN
  */
 
-// State dokumen notulen
-let notulenState = window.initialNotulenData || {
+// Default initial structure
+const defaultNotulenState = {
   id: null,
   meetingId: null,
-  title: 'BKN MENYAPA ASN : Penguatan Implementasi Manajemen Talenta melalui SIMATA dan MyASN',
+  title: '',
   meetingDate: new Date().toISOString().split('T')[0],
   formattedDate: '',
   meetingTime: '09.00 – 11.30 WIB',
@@ -19,15 +19,184 @@ let notulenState = window.initialNotulenData || {
   closingText: '',
   notulisName: '',
   notulisRole: '',
-  documentationPhotos: []
+  documentationPhotos: [],
+  isMT: false,
+  kertasKerjaMT: null
 };
 
-if (window.selectedMeetingId && !notulenState.meetingId) {
-  notulenState.meetingId = window.selectedMeetingId;
-}
+// 15 Butir Baku Standar Kertas Kerja Manajemen Talenta BKN (Dit. Bangtarier)
+const STANDARD_KERTAS_KERJA_MT = [
+  // I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.1",
+    komponen: "Komitmen Pimpinan Instansi",
+    indikator: "Tersedianya dukungan pimpinan instansi dalam penyelenggaraan manajemen talenta yang dinyatakan melalui surat pernyataan yang telah ditandatangani",
+    buktiOutput: "Surat Pernyataan Pimpinan tentang Komitmen Penerapan Manajemen Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.2",
+    komponen: "Tim Kerja Pengelola Manajemen Talenta",
+    indikator: "Tersedianya Tim Kerja yang mengelola manajemen talenta secara sistematis dan berkelanjutan yang ditetapkan secara formal dan operasional",
+    buktiOutput: "Surat Keputusan Pembentukan Tim Kerja Manajemen Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.3",
+    komponen: "Komite Talenta",
+    indikator: "Adanya tim penilai akhir yang memberikan rekomendasi dalam pengambilan keputusan dalam penyelenggaraan manajemen talenta",
+    buktiOutput: "Surat keputusan pembentukan Komite Talenta Instansi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "I. KELEMBAGAAN MANAJEMEN TALENTA INSTANSI",
+    no: "1.4",
+    komponen: "Regulasi Penyelenggaraan Manajemen Talenta",
+    indikator: "Tersedianya regulasi yang ditetapkan pimpinan instansi sebagai dasar penyelenggaraan manajemen talenta",
+    buktiOutput: "Regulasi",
+    status: "-",
+    keterangan: ""
+  },
 
-if (!Array.isArray(notulenState.documentationPhotos)) {
-  notulenState.documentationPhotos = [];
+  // II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI",
+    no: "2.1",
+    komponen: "Aplikasi Manajemen Talenta",
+    indikator: "Tersedianya aplikasi manajemen talenta yang menyediakan fitur-fitur penting (pemetaan dan penempatan) dalam penyelenggaraan manajemen talenta",
+    buktiOutput: "Aplikasi Manajemen Talenta Berbasis Web",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "II. INFRASTRUKTUR TEKNOLOGI MANAJEMEN TALENTA INSTANSI",
+    no: "2.2",
+    komponen: "Sistem Informasi Manajemen Talenta",
+    indikator: "Terintegrasinya aplikasi dengan sistem informasi ASN (SI ASN) BKN dan sistem informasi SDM lain (misal ekinerja)",
+    buktiOutput: "Integrasi Data pada Aplikasi Manajemen Talenta",
+    status: "-",
+    keterangan: ""
+  },
+
+  // III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya identifikasi jabatan target",
+    buktiOutput: "Daftar Jabatan Target",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya analisis kebutuhan talenta yang memenuhi persyaratan untuk menduduki jabatan target",
+    buktiOutput: "Daftar kandidat yang memenuhi kriteria jabatan target",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya pengelompokan berbagai jenis jabatan berdasarkan kedekatan fungsi, kompetensi, dan/atau karakteristik jabatan.",
+    buktiOutput: "Daftar Rumpun Jabatan",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya parameter, komponen, dan bobot penilaian sebagai dasar pengembangan Karier dalam pemetaan talenta",
+    buktiOutput: "Demo aplikasi yang memuat parameter, komponen, dan bobot penilaian",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya profil talenta dari hasil penilaian kinerja dan potensial pegawai",
+    buktiOutput: "Dokumen Profil Talenta",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya hasil pemetaan pegawai ke dalam 9 kotak talenta",
+    buktiOutput: "Tangkapan layar aplikasi yang memuat matriks 9 kotak talenta ASN",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.1",
+    komponen: "Akuisisi Talenta",
+    indikator: "Tersedianya kelompok rencana suksesi yang telah diperingkatkan untuk mengisi jabatan target",
+    buktiOutput: "Bagan rencana suksesi",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.2",
+    komponen: "Pengembangan Talenta",
+    indikator: "Tersedianya rencana pengembangan individu berdasarkan klasifikasi 9 kotak talenta",
+    buktiOutput: "Dokumen Rencana Pengembangan Individu (Individual Development Plan) talenta ASN",
+    status: "-",
+    keterangan: ""
+  },
+  {
+    pilar: "III. PEMBANGUNAN MANAJEMEN TALENTA INSTANSI",
+    no: "3.3",
+    komponen: "Retensi Talenta",
+    indikator: "Tersedianya strategi retensi talenta (reward, pengakuan, jenjang karier, dsb.)",
+    buktiOutput: "Dokumen strategi retensi talenta untuk setiap kelompok talenta telah disusun",
+    status: "-",
+    keterangan: ""
+  }
+];
+
+const rawInit = window.initialNotulenData || {};
+const initIsMt = Boolean(rawInit.isMt || (rawInit.kertasKerjaMt && rawInit.kertasKerjaMt.length > 0));
+
+let notulenState = {
+  ...defaultNotulenState,
+  ...rawInit,
+  agenda: Array.isArray(rawInit.agenda) ? [...rawInit.agenda] : [],
+  attendees: Array.isArray(rawInit.attendees) ? [...rawInit.attendees] : [],
+  activities: Array.isArray(rawInit.activities) ? JSON.parse(JSON.stringify(rawInit.activities)) : [],
+  actionItems: Array.isArray(rawInit.actionItems) ? [...rawInit.actionItems] : [],
+  conclusions: Array.isArray(rawInit.conclusions) ? [...rawInit.conclusions] : [],
+  documentationPhotos: Array.isArray(rawInit.documentationPhotos) ? [...rawInit.documentationPhotos] : [],
+  isMT: initIsMt,
+  kertasKerjaMT: Array.isArray(rawInit.kertasKerjaMt) && rawInit.kertasKerjaMt.length > 0
+    ? JSON.parse(JSON.stringify(rawInit.kertasKerjaMt))
+    : (initIsMt ? JSON.parse(JSON.stringify(STANDARD_KERTAS_KERJA_MT)) : null)
+};
+
+if (rawInit.title) notulenState.title = rawInit.title;
+if (rawInit.meetingDate) notulenState.meetingDate = rawInit.meetingDate;
+if (rawInit.formattedDate) notulenState.formattedDate = rawInit.formattedDate;
+if (rawInit.meetingTime) notulenState.meetingTime = rawInit.meetingTime;
+if (rawInit.meetingPlace) notulenState.meetingPlace = rawInit.meetingPlace;
+if (rawInit.closingText) notulenState.closingText = rawInit.closingText;
+if (rawInit.notulisName) notulenState.notulisName = rawInit.notulisName;
+if (rawInit.notulisRole) notulenState.notulisRole = rawInit.notulisRole;
+
+if (window.selectedMeetingId) {
+  notulenState.meetingId = window.selectedMeetingId;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -77,9 +246,36 @@ function initFormValues() {
       }
     }
   }
+
+  // Setup Toggle Kertas Kerja MT
+  const toggleMt = document.getElementById('toggleKertasKerjaMt');
+  const bodyMt = document.getElementById('kertasKerjaMtBody');
+  if (toggleMt) {
+    toggleMt.checked = Boolean(notulenState.isMT);
+    if (bodyMt) bodyMt.style.display = notulenState.isMT ? 'block' : 'none';
+  }
 }
 
 function setupEventListeners() {
+  // Listener Toggle Kertas Kerja MT
+  const toggleMt = document.getElementById('toggleKertasKerjaMt');
+  const bodyMt = document.getElementById('kertasKerjaMtBody');
+  if (toggleMt) {
+    toggleMt.addEventListener('change', (e) => {
+      notulenState.isMT = e.target.checked;
+      if (e.target.checked) {
+        if (!notulenState.kertasKerjaMT || notulenState.kertasKerjaMT.length === 0) {
+          notulenState.kertasKerjaMT = JSON.parse(JSON.stringify(STANDARD_KERTAS_KERJA_MT));
+        }
+        if (bodyMt) bodyMt.style.display = 'block';
+        renderKertasKerjaMtEditor();
+      } else {
+        if (bodyMt) bodyMt.style.display = 'none';
+      }
+      updateLivePreview();
+    });
+  }
+
   // Pilihan Link ke Manajemen Meeting
   const fMeeting = document.getElementById('selectMeetingId');
   if (fMeeting) {
@@ -91,7 +287,7 @@ function setupEventListeners() {
         const found = window.availableMeetings.find(m => String(m.meeting_id) === String(chosenId));
         if (found) {
           const fTitle = document.getElementById('notulaTitle');
-          if (fTitle) {
+          if (fTitle && (!notulenState.title || !window.isEditingNotulen)) {
             fTitle.value = found.meeting_nama;
             notulenState.title = found.meeting_nama;
           }
@@ -196,7 +392,7 @@ function setupEventListeners() {
     });
   }
 
-  // File transkrip upload (.docx, .txt, .md)
+  // File transkrip upload (.docx, .pdf, .txt, .md)
   const fileTranscriptInput = document.getElementById('transcriptFileInput');
   if (fileTranscriptInput) {
     fileTranscriptInput.addEventListener('change', handleTranscriptFileUpload);
@@ -247,9 +443,85 @@ function renderDynamicLists() {
   renderListEditor('agendaContainer', notulenState.agenda, 'agenda');
   renderListEditor('attendeesContainer', notulenState.attendees, 'attendees');
   renderActivitiesEditor();
+  renderKertasKerjaMtEditor();
   renderListEditor('actionItemsContainer', notulenState.actionItems, 'actionItems');
   renderListEditor('conclusionsContainer', notulenState.conclusions, 'conclusions');
 }
+
+// Editor Kertas Kerja Manajemen Talenta
+function renderKertasKerjaMtEditor() {
+  const container = document.getElementById('kertasKerjaMtContainer');
+  if (!container) return;
+  if (!notulenState.isMT || !Array.isArray(notulenState.kertasKerjaMT)) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = `
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.775rem; background: #ffffff; border: 1px solid #CBD5E1; border-radius: 4px;">
+      <thead>
+        <tr style="background: #0A2540; color: #ffffff; text-align: left;">
+          <th style="padding: 6px; width: 35px; text-align: center;">No</th>
+          <th style="padding: 6px; width: 130px;">Komponen</th>
+          <th style="padding: 6px;">Indikator Penilaian & Bukti Output</th>
+          <th style="padding: 6px; width: 85px; text-align: center;">Status</th>
+          <th style="padding: 6px; width: 180px;">Keterangan Rapat</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  let currPilar = '';
+  notulenState.kertasKerjaMT.forEach((row, idx) => {
+    if (row.pilar && row.pilar !== currPilar) {
+      currPilar = row.pilar;
+      html += `
+        <tr style="background: #FEF3C7; color: #92400E; font-weight: bold; border-top: 1px solid #FCD34D;">
+          <td colspan="5" style="padding: 6px 8px; font-size: 0.75rem;">${escapeHtml(row.pilar)}</td>
+        </tr>
+      `;
+    }
+
+    const isCeklis = row.status === '✓';
+    html += `
+      <tr style="border-bottom: 1px solid #E2E8F0; vertical-align: top;">
+        <td style="padding: 6px 4px; text-align: center; font-weight: 600; color: #64748B;">${escapeHtml(row.no || '-')}</td>
+        <td style="padding: 6px; font-weight: 600; color: #0A2540;">${escapeHtml(row.komponen || '-')}</td>
+        <td style="padding: 6px; color: #334155;">
+          <div style="font-size: 0.75rem;">${escapeHtml(row.indikator || '-')}</div>
+          <div style="font-size: 0.7rem; color: #64748B; margin-top: 2px;">📁 <em>${escapeHtml(row.buktiOutput || '-')}</em></div>
+        </td>
+        <td style="padding: 6px 4px; text-align: center;">
+          <select class="form-input" style="padding: 3px 6px; font-size: 0.825rem; font-weight: bold; width: 72px; text-align: center; cursor: pointer; color: ${isCeklis ? '#059669' : '#DC2626'};" onchange="updateKertasKerjaStatus(${idx}, this.value)">
+            <option value="✓" ${isCeklis ? 'selected' : ''}>✓ (Ada)</option>
+            <option value="-" ${!isCeklis ? 'selected' : ''}>- (Belum)</option>
+          </select>
+        </td>
+        <td style="padding: 6px;">
+          <textarea class="form-input" style="min-height: 44px; font-size: 0.75rem; padding: 4px;" placeholder="Keterangan hasil rapat..." oninput="updateKertasKerjaKet(${idx}, this.value)">${escapeHtml(row.keterangan || '')}</textarea>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+window.updateKertasKerjaStatus = function(idx, val) {
+  if (notulenState.kertasKerjaMT && notulenState.kertasKerjaMT[idx]) {
+    notulenState.kertasKerjaMT[idx].status = (val === '✓') ? '✓' : '-';
+    renderKertasKerjaMtEditor();
+    updateLivePreview();
+  }
+};
+
+window.updateKertasKerjaKet = function(idx, val) {
+  if (notulenState.kertasKerjaMT && notulenState.kertasKerjaMT[idx]) {
+    notulenState.kertasKerjaMT[idx].keterangan = val;
+    updateLivePreview();
+  }
+};
 
 function renderListEditor(containerId, listArray, stateKey) {
   const container = document.getElementById(containerId);
@@ -387,7 +659,7 @@ function renderDocumentationPhotos() {
     item.style.cssText = 'display: flex; gap: 0.75rem; align-items: center; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 0.5rem; padding: 0.5rem;';
 
     item.innerHTML = `
-      <img src="${photo.url}" alt="Foto" style="width: 56px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #CBD5E1;">
+      <img src="${photo.url || photo.dataUrl || photo.previewUrl || ''}" alt="Foto" style="width: 56px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #CBD5E1;">
       <div style="flex: 1;">
         <input type="text" class="form-input" style="font-size: 0.775rem; padding: 0.35rem 0.5rem;" value="${escapeHtml(photo.caption || '')}" placeholder="Keterangan / Kepsen Foto" oninput="updatePhotoCaption(${idx}, this.value)">
       </div>
@@ -448,7 +720,7 @@ async function handleDocumentationPhotoUpload(e) {
   }
 }
 
-// Upload File Transkrip Handler (.docx, .txt, .md)
+// Upload File Transkrip Handler (.docx, .pdf, .txt, .md)
 async function handleTranscriptFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -472,7 +744,9 @@ async function handleTranscriptFileUpload(e) {
       if (input) {
         input.value = data.text;
       }
-      showNotificationToast(`📄 File "${file.name}" berhasil dibaca! Klik tombol AI di bawah untuk menyusun notulen.`);
+      showNotificationToast(`📄 File "${file.name}" berhasil diunggah! Sedang mengekstrak notulen dengan AI...`);
+      // Otomatis jalankan pemrosesan AI agar data langsung terisi di formulir & pratinjau
+      await handleAiGenerate();
     } else {
       alert('Gagal membaca file: ' + (data.message || 'Format tidak didukung'));
     }
@@ -533,6 +807,41 @@ function updateLivePreview() {
     pActivities.innerHTML = actHtml;
   }
 
+  // Khusus Rapat MT: Render Live Preview Tabel Kertas Kerja
+  const pMtSection = document.getElementById('previewKertasKerjaMtSection');
+  const pMtBody = document.getElementById('previewKertasKerjaMtBody');
+  if (pMtSection && pMtBody) {
+    if (notulenState.isMT && Array.isArray(notulenState.kertasKerjaMT) && notulenState.kertasKerjaMT.length > 0) {
+      pMtSection.style.display = 'block';
+      let previewRows = '';
+      let currP = '';
+      notulenState.kertasKerjaMT.forEach(row => {
+        if (row.pilar && row.pilar !== currP) {
+          currP = row.pilar;
+          previewRows += `
+            <tr style="background-color: #FDE8D7; font-weight: bold; border: 1px solid #000;">
+              <td colspan="6" style="padding: 6px 8px; border: 1px solid #000; font-weight: bold; font-size: 9.5pt;">${escapeHtml(row.pilar)}</td>
+            </tr>
+          `;
+        }
+        previewRows += `
+          <tr style="border: 1px solid #000;">
+            <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 9.5pt;">${escapeHtml(row.no || '-')}</td>
+            <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt; font-weight: 500;">${escapeHtml(row.komponen || '-')}</td>
+            <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${escapeHtml(row.indikator || '-')}</td>
+            <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${escapeHtml(row.buktiOutput || '-')}</td>
+            <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 11pt; font-weight: bold;">${row.status === '✓' ? '✓' : '-'}</td>
+            <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;">${escapeHtml(row.keterangan || '-')}</td>
+          </tr>
+        `;
+      });
+      pMtBody.innerHTML = previewRows;
+    } else {
+      pMtSection.style.display = 'none';
+      pMtBody.innerHTML = '';
+    }
+  }
+
   // Pokok Tindak Lanjut
   const pAction = document.getElementById('previewActionList');
   if (pAction) {
@@ -561,7 +870,7 @@ function updateLivePreview() {
       notulenState.documentationPhotos.forEach(photo => {
         gridHtml += `
           <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
-            <img src="${photo.url}" alt="${escapeHtml(photo.caption || 'Bukti Kegiatan')}" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
+            <img src="${photo.url || photo.dataUrl || photo.previewUrl || ''}" alt="${escapeHtml(photo.caption || 'Bukti Kegiatan')}" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
             ${photo.caption ? `<div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;">${escapeHtml(photo.caption)}</div>` : ''}
           </div>
         `;
@@ -650,6 +959,14 @@ async function handleAiGenerate() {
     if (d.notulisName) notulenState.notulisName = d.notulisName;
     if (d.notulisRole) notulenState.notulisRole = d.notulisRole;
 
+    if (d.isMT && Array.isArray(d.kertasKerjaMT) && d.kertasKerjaMT.length > 0) {
+      notulenState.isMT = true;
+      notulenState.kertasKerjaMT = d.kertasKerjaMT;
+    } else {
+      notulenState.isMT = false;
+      notulenState.kertasKerjaMT = null;
+    }
+
     // Render ulang form dan live preview
     initFormValues();
     renderDynamicLists();
@@ -668,12 +985,70 @@ async function handleAiGenerate() {
 // Save Notulen Handler
 async function handleSaveNotulen() {
   const btn = document.getElementById('btnSaveNotulen');
-  const orig = btn.innerHTML;
+  const orig = btn ? btn.innerHTML : 'Simpan';
+
+  // Sinkronkan nilai input form terbaru ke state
+  const fTitle = document.getElementById('notulaTitle');
+  if (fTitle) notulenState.title = fTitle.value;
+  const fDate = document.getElementById('notulaDate');
+  if (fDate) notulenState.meetingDate = fDate.value;
+  const fTime = document.getElementById('notulaTime');
+  if (fTime) notulenState.meetingTime = fTime.value;
+  const fClosing = document.getElementById('notulaClosing');
+  if (fClosing) notulenState.closingText = fClosing.value;
+  const fNotulisName = document.getElementById('notulisName');
+  if (fNotulisName) notulenState.notulisName = fNotulisName.value;
+  const fNotulisRole = document.getElementById('notulisRole');
+  if (fNotulisRole) notulenState.notulisRole = fNotulisRole.value;
+
+  // Sinkronkan status Kertas Kerja MT ke notulenState sebelum disimpan
+  notulenState.kertasKerjaMt = notulenState.isMT ? notulenState.kertasKerjaMT : null;
+
+  const fPlace = document.getElementById('notulaPlace');
+  const fCustomPlace = document.getElementById('notulaCustomPlace');
+  if (fPlace) {
+    if (fPlace.value === 'custom') {
+      notulenState.meetingPlace = fCustomPlace ? fCustomPlace.value : 'Di Tempat';
+    } else {
+      notulenState.meetingPlace = fPlace.value;
+    }
+  }
+
+  // Sinkronkan seluruh daftar dinamis langsung dari input DOM agar tidak ada editan yang terlewat
+  const domAgendas = Array.from(document.querySelectorAll('#agendaContainer textarea')).map(t => t.value.trim()).filter(Boolean);
+  if (domAgendas.length > 0) notulenState.agenda = domAgendas;
+
+  const domAttendees = Array.from(document.querySelectorAll('#attendeesContainer textarea')).map(t => t.value.trim()).filter(Boolean);
+  if (domAttendees.length > 0) notulenState.attendees = domAttendees;
+
+  const domActions = Array.from(document.querySelectorAll('#actionItemsContainer textarea')).map(t => t.value.trim()).filter(Boolean);
+  if (domActions.length > 0) notulenState.actionItems = domActions;
+
+  const domConclusions = Array.from(document.querySelectorAll('#conclusionsContainer textarea')).map(t => t.value.trim()).filter(Boolean);
+  if (domConclusions.length > 0) notulenState.conclusions = domConclusions;
+
+  // Sinkronkan sesi paparan kegiatan dari DOM
+  const actCards = document.querySelectorAll('#activitiesContainer > div');
+  if (actCards.length > 0) {
+    const parsedActs = [];
+    actCards.forEach((card, idx) => {
+      const titleInput = card.querySelector('input[type="text"]');
+      const pointTextareas = card.querySelectorAll('textarea');
+      const pts = Array.from(pointTextareas).map(t => t.value.trim()).filter(Boolean);
+      parsedActs.push({
+        sectionTitle: titleInput ? titleInput.value.trim() : `${idx + 1}. Paparan`,
+        points: pts.length > 0 ? pts : ['-']
+      });
+    });
+    if (parsedActs.length > 0) notulenState.activities = parsedActs;
+  }
 
   // Baca pilihan rapat tujuan dari dropdown
   const fMeeting = document.getElementById('selectMeetingId');
   if (fMeeting && fMeeting.value) {
     notulenState.meetingId = parseInt(fMeeting.value, 10);
+  } else if (window.selectedMeetingId) {
+    notulenState.meetingId = window.selectedMeetingId;
   }
 
   // Jika rapat tujuan belum terpilih, konfirmasikan ke pengguna
@@ -698,8 +1073,10 @@ async function handleSaveNotulen() {
     }
   }
 
-  btn.disabled = true;
-  btn.innerHTML = 'Menyimpan...';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Menyimpan...';
+  }
 
   try {
     const res = await fetch('/api/notulen', {
@@ -714,15 +1091,28 @@ async function handleSaveNotulen() {
     }
 
     if (data.id) notulenState.id = data.id;
-    showNotificationToast(data.message || '✅ Dokumen notulen berhasil disimpan ke database!');
+    const targetMid = data.meetingId || notulenState.meetingId;
+    if (targetMid) notulenState.meetingId = targetMid;
+
+    showNotificationToast(data.message || '✅ Hasil edit notulen berhasil disimpan!');
+
+    // Masuk sesuai ID rapat yang dituju di Manajemen Meeting
+    if (targetMid) {
+      setTimeout(() => {
+        window.location.href = `/manajemenmeeting?meetingId=${targetMid}`;
+      }, 1000);
+    }
+
     return data.id;
   } catch (err) {
     console.error('Save error:', err);
     alert('Gagal menyimpan notulen: ' + err.message);
     return null;
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = orig;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
   }
 }
 

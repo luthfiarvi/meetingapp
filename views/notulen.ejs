@@ -13,10 +13,20 @@
           Editor Notula Rapat BKN
         </h2>
       </div>
-      <div style="display: flex; gap: 0.5rem;">
-        <button type="button" id="btnSaveNotulen" class="btn btn-primary btn-sm" style="font-size: 0.8rem; padding: 0.45rem 0.85rem;">
-          💾 Simpan
-        </button>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <% if (typeof isEditing !== 'undefined' && isEditing) { %>
+          <button type="button" id="btnSaveNotulen" class="btn btn-primary btn-sm" style="font-size: 0.825rem; font-weight: 700; padding: 0.45rem 1rem; box-shadow: 0 4px 10px rgba(37,99,235,0.3); background: #2563EB; border: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; color: #fff; cursor: pointer;">
+            💾 Simpan Hasil Edit
+          </button>
+        <% } else if (typeof fromMeetingManagement !== 'undefined' && fromMeetingManagement) { %>
+          <button type="button" id="btnSaveNotulen" class="btn btn-primary btn-sm" style="font-size: 0.825rem; font-weight: 700; padding: 0.45rem 1rem; box-shadow: 0 4px 10px rgba(37,99,235,0.3); background: #2563EB; border: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; color: #fff; cursor: pointer;">
+            💾 Simpan Notulen
+          </button>
+        <% } else { %>
+          <button type="button" id="btnSaveNotulen" class="btn btn-primary btn-sm" style="font-size: 0.825rem; font-weight: 700; padding: 0.45rem 1rem; box-shadow: 0 4px 10px rgba(37,99,235,0.3); background: #2563EB; border: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; color: #fff; cursor: pointer;">
+            💾 Simpan Notulen
+          </button>
+        <% } %>
       </div>
     </div>
 
@@ -25,7 +35,7 @@
       <div style="background: linear-gradient(135deg, #071C33 0%, #0A2540 100%); border-radius: 0.65rem; padding: 1.15rem; color: #fff; margin-bottom: 1.5rem; border-left: 4px solid #D97706;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
           <div style="display: flex; align-items: center; gap: 0.4rem;">
-            <span style="font-size: 1rem;">✨</span>
+            <span style="font-size: 1rem;">⚡</span>
             <span style="font-size: 0.85rem; font-weight: 700; color: #FBBF24;">AI Smart Notulis BKN</span>
           </div>
           <span style="font-size: 0.7rem; background: rgba(217, 119, 6, 0.3); border: 1px solid rgba(217, 119, 6, 0.5); padding: 0.15rem 0.5rem; border-radius: 9999px; color: #FDE68A;">
@@ -41,12 +51,12 @@
           <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #CBD5E1;">
             <span>📎</span>
             <span>Unggah Dokumen Transkrip (</span>
-            <span style="color: #FBBF24; font-family: monospace;">.docx, .txt, .md</span>
+            <span style="color: #FBBF24; font-family: monospace;">.docx, .pdf, .txt, .md</span>
             <span>)</span>
           </div>
           <label class="btn btn-secondary btn-sm" style="margin: 0; font-size: 0.725rem; padding: 0.25rem 0.65rem; cursor: pointer; background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">
             <span id="transcriptFileStatusText">Pilih File</span>
-            <input type="file" id="transcriptFileInput" accept=".docx,.txt,.md" style="display: none;">
+            <input type="file" id="transcriptFileInput" accept=".docx,.pdf,.txt,.md" style="display: none;">
           </label>
         </div>
 
@@ -62,14 +72,14 @@
           1. Identitas & Pelaksanaan Kegiatan
         </div>
 
-        <!-- Pilihan Hubungkan ke Manajemen Meeting -->
+        <% if ((typeof meetings !== 'undefined' && Array.isArray(meetings) && meetings.length > 0) || (typeof isEditing !== 'undefined' && isEditing)) { %>
+        <!-- Pilihan Hubungkan ke Manajemen Meeting (Integrasi Otomatis Rapat) -->
         <div class="form-group" style="margin-bottom: 0.85rem; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px;">
           <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-weight: 700; color: #166534;">🔗 Hubungkan ke Rapat di Manajemen Meeting:</span>
+            <span style="font-weight: 700; color: #166534;">🔗 Terhubung ke Rapat Manajemen Meeting:</span>
             <span style="font-size: 0.7rem; color: #15803D; font-weight: 700;">*Otomatis Terintegrasi</span>
           </label>
           <select id="selectMeetingId" class="form-input" style="font-size: 0.825rem; font-weight: 600; background: #ffffff; border-color: #86EFAC; color: #14532D;">
-            <option value="">-- Buat Notula Mandiri (Tanpa Tautan Rapat) --</option>
             <% if (typeof meetings !== 'undefined' && Array.isArray(meetings) && meetings.length > 0) { %>
               <% meetings.forEach(function(m) { %>
                 <option value="<%= m.meeting_id %>" <%= (typeof selectedMeetingId !== 'undefined' && selectedMeetingId && String(selectedMeetingId) === String(m.meeting_id)) ? 'selected' : '' %>>
@@ -81,9 +91,10 @@
             <% } %>
           </select>
           <div style="font-size: 0.72rem; color: #166534; margin-top: 4px; line-height: 1.3;">
-            💡 Saat Anda klik <strong>Simpan</strong>, berkas notula resmi akan otomatis tersimpan dan langsung terhubung ke tombol <strong>Unduh Notulen</strong> di Manajemen Meeting.
+            💡 Saat Anda klik <strong><%= (typeof isEditing !== 'undefined' && isEditing) ? 'Simpan Hasil Edit' : 'Simpan Notulen' %></strong> di atas, dokumen ini akan otomatis terhubung ke rapat yang dipilih di Manajemen Meeting.
           </div>
         </div>
+        <% } %>
 
         <!-- Judul Notula (Tandai Merah) -->
         <div class="form-group" style="margin-bottom: 0.85rem;">
@@ -149,6 +160,23 @@
           <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;" onclick="addActivitySection()">+ Tambah Sesi Paparan</button>
         </div>
         <div id="activitiesContainer"></div>
+      </div>
+
+      <!-- Formulir Khusus MT: Tabel Kertas Kerja Evaluasi MT -->
+      <div id="kertasKerjaMtCard" style="margin-bottom: 1.5rem; background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 0.5rem; padding: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0;">
+            <input type="checkbox" id="toggleKertasKerjaMt" style="width: 17px; height: 17px; accent-color: #D97706; cursor: pointer;">
+            <span style="font-size: 0.825rem; font-weight: 700; color: #92400E;">Sertakan Tabel Kertas Kerja Manajemen Talenta (MT)</span>
+          </label>
+          <span style="font-size: 0.7rem; background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; padding: 2px 7px; border-radius: 4px; font-weight: 600;">Khusus MT</span>
+        </div>
+        <div id="kertasKerjaMtBody" style="display: none; margin-top: 0.85rem;">
+          <div style="font-size: 0.725rem; color: #78350F; margin-bottom: 0.6rem; line-height: 1.4; background: #FEF3C7; padding: 0.5rem; border-radius: 4px;">
+            💡 <strong>Panduan:</strong> Komponen, Indikator, dan Bukti Output telah disesuaikan dengan 15 butir standar BKN Dit. Bangtarier. Ubah status menjadi <strong>✓</strong> (jika ada eviden) atau <strong>-</strong> (jika belum ada eviden), serta sesuaikan teks keterangan berdasarkan hasil rapat.
+          </div>
+          <div id="kertasKerjaMtContainer" style="overflow-x: auto;"></div>
+        </div>
       </div>
 
       <!-- Formulir Manual Section 5: Pokok Tindak Lanjut -->
@@ -291,6 +319,26 @@
         <% }); %>
       </div>
 
+      <!-- Khusus Rapat MT: Live Preview Tabel Kertas Kerja -->
+      <div id="previewKertasKerjaMtSection" style="margin-top: 1.5rem; margin-bottom: 2rem; display: none;">
+        <div class="notula-subsection-title" style="font-weight: bold; margin-bottom: 0.6rem; font-size: 11pt;">
+          Penyampaian Kertas Kerja Evaluasi Manajemen Talenta
+        </div>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-family: 'Times New Roman', serif;">
+          <thead>
+            <tr style="background-color: #D9E2EC; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 9.5pt;">
+              <th style="border: 1px solid #000; padding: 6px 4px; width: 35px;">No</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Komponen Penilaian</th>
+              <th style="border: 1px solid #000; padding: 6px 6px;">Indikator Penilaian</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Bukti Output</th>
+              <th style="border: 1px solid #000; padding: 6px 4px; width: 45px; text-align: center;">Status</th>
+              <th style="border: 1px solid #000; padding: 6px 6px; width: 130px;">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody id="previewKertasKerjaMtBody"></tbody>
+        </table>
+      </div>
+
       <!-- 4. Pokok Tindak Lanjut -->
       <div class="notula-section-heading" style="margin-top: 2rem;">
         POKOK TINDAK LANJUT
@@ -327,7 +375,7 @@
         <div id="previewEvidenceGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
           <% (initialData.documentationPhotos || []).forEach(function(photo) { %>
             <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
-              <img src="<%= photo.url %>" alt="<%= photo.caption || 'Bukti Kegiatan' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
+              <img src="<%= photo.url || photo.dataUrl || photo.previewUrl || '' %>" alt="<%= photo.caption || 'Bukti Kegiatan' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
               <% if (photo.caption) { %>
                 <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;"><%= photo.caption %></div>
               <% } %>
@@ -362,6 +410,7 @@
   window.todayFormattedString = "<%= typeof todayFormatted !== 'undefined' ? todayFormatted : '' %>";
   window.availableMeetings = <%- typeof meetings !== 'undefined' ? JSON.stringify(meetings || []) : '[]' %>;
   window.selectedMeetingId = <%= typeof selectedMeetingId !== 'undefined' && selectedMeetingId ? JSON.stringify(selectedMeetingId) : 'null' %>;
+  window.isEditingNotulen = <%= typeof isEditing !== 'undefined' && isEditing ? 'true' : 'false' %>;
 </script>
 <script src="/js/notulen.js"></script>
 
