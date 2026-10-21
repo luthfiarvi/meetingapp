@@ -18,6 +18,7 @@ const defaultNotulenState = {
   conclusions: [],
   closingText: '',
   notulisName: '',
+  notulisNip: '',
   notulisRole: '',
   documentationPhotos: [],
   isMT: false,
@@ -193,6 +194,8 @@ if (rawInit.meetingTime) notulenState.meetingTime = rawInit.meetingTime;
 if (rawInit.meetingPlace) notulenState.meetingPlace = rawInit.meetingPlace;
 if (rawInit.closingText) notulenState.closingText = rawInit.closingText;
 if (rawInit.notulisName) notulenState.notulisName = rawInit.notulisName;
+if (rawInit.notulisNip || rawInit.notulis_nip) notulenState.notulisNip = rawInit.notulisNip || rawInit.notulis_nip;
+else if (window.currentUserNip) notulenState.notulisNip = window.currentUserNip;
 if (rawInit.notulisRole) notulenState.notulisRole = rawInit.notulisRole;
 
 if (window.selectedMeetingId) {
@@ -215,6 +218,7 @@ function initFormValues() {
   const fCustomPlace = document.getElementById('notulaCustomPlace');
   const fClosing = document.getElementById('notulaClosing');
   const fNotulisName = document.getElementById('notulisName');
+  const fNotulisNip = document.getElementById('notulisNip');
   const fNotulisRole = document.getElementById('notulisRole');
   const fMeeting = document.getElementById('selectMeetingId');
 
@@ -230,6 +234,7 @@ function initFormValues() {
   if (fTime) fTime.value = notulenState.meetingTime || '';
   if (fClosing) fClosing.value = notulenState.closingText || '';
   if (fNotulisName) fNotulisName.value = notulenState.notulisName || '';
+  if (fNotulisNip) fNotulisNip.value = notulenState.notulisNip || '';
   if (fNotulisRole) fNotulisRole.value = notulenState.notulisRole || '';
 
   // Setup Tempat Dropdown
@@ -380,6 +385,14 @@ function setupEventListeners() {
   if (fNotulisName) {
     fNotulisName.addEventListener('input', (e) => {
       notulenState.notulisName = e.target.value;
+      updateLivePreview();
+    });
+  }
+
+  const fNotulisNip = document.getElementById('notulisNip');
+  if (fNotulisNip) {
+    fNotulisNip.addEventListener('input', (e) => {
+      notulenState.notulisNip = e.target.value;
       updateLivePreview();
     });
   }
@@ -891,6 +904,18 @@ function updateLivePreview() {
   const pSigName = document.getElementById('previewSigName');
   if (pSigName) pSigName.textContent = notulenState.notulisName || 'Rizky Chandra Satria';
 
+  const pSigNip = document.getElementById('previewSigNip');
+  if (pSigNip) {
+    const nipVal = (notulenState.notulisNip || '').trim();
+    if (nipVal) {
+      pSigNip.textContent = nipVal.startsWith('NIP') ? nipVal : `NIP. ${nipVal}`;
+      pSigNip.style.display = 'block';
+    } else {
+      pSigNip.textContent = '';
+      pSigNip.style.display = 'none';
+    }
+  }
+
   const pSigRole = document.getElementById('previewSigRole');
   if (pSigRole) pSigRole.textContent = notulenState.notulisRole || 'Asisten Analis Sumber Daya Manusia';
 }
@@ -957,6 +982,7 @@ async function handleAiGenerate() {
     if (Array.isArray(d.conclusions)) notulenState.conclusions = d.conclusions;
     if (d.closingText) notulenState.closingText = d.closingText;
     if (d.notulisName) notulenState.notulisName = d.notulisName;
+    if (d.notulisNip) notulenState.notulisNip = d.notulisNip;
     if (d.notulisRole) notulenState.notulisRole = d.notulisRole;
 
     if (d.isMT && Array.isArray(d.kertasKerjaMT) && d.kertasKerjaMT.length > 0) {
@@ -998,6 +1024,8 @@ async function handleSaveNotulen() {
   if (fClosing) notulenState.closingText = fClosing.value;
   const fNotulisName = document.getElementById('notulisName');
   if (fNotulisName) notulenState.notulisName = fNotulisName.value;
+  const fNotulisNip = document.getElementById('notulisNip');
+  if (fNotulisNip) notulenState.notulisNip = fNotulisNip.value;
   const fNotulisRole = document.getElementById('notulisRole');
   if (fNotulisRole) notulenState.notulisRole = fNotulisRole.value;
 

@@ -228,7 +228,12 @@
 .notula-sig-name {
   font-weight: bold;
   text-decoration: underline;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
+}
+
+.notula-sig-nip {
+  font-size: 10pt;
+  margin-bottom: 0.15rem;
 }
 
 .notula-sig-division {

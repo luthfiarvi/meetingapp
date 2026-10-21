@@ -791,6 +791,7 @@ function smartLocalNotulenParser(rawText, user = {}) {
     isMT,
     kertasKerjaMT,
     notulisName: user.full_name || 'Luthfi Arviandi',
+    notulisNip: user.nip || 'MagangHub',
     notulisRole: user.division || 'Asisten Pengembang Sistem dan Aplikasi Digital'
   };
 }

@@ -206,14 +206,18 @@
           <label class="form-label">Teks Narasi Penutup:</label>
           <textarea id="notulaClosing" class="form-input" style="min-height: 60px; font-size: 0.825rem;"></textarea>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem;">
           <div class="form-group">
             <label class="form-label">Nama Notulis:</label>
-            <input type="text" id="notulisName" class="form-input" style="font-size: 0.825rem;">
+            <input type="text" id="notulisName" class="form-input" style="font-size: 0.825rem;" placeholder="Nama lengkap">
+          </div>
+          <div class="form-group">
+            <label class="form-label">NIP Notulis:</label>
+            <input type="text" id="notulisNip" class="form-input" style="font-size: 0.825rem;" placeholder="Contoh: MagangHub / 19850101...">
           </div>
           <div class="form-group">
             <label class="form-label">Jabatan Notulis:</label>
-            <input type="text" id="notulisRole" class="form-input" style="font-size: 0.825rem;">
+            <input type="text" id="notulisRole" class="form-input" style="font-size: 0.825rem;" placeholder="Jabatan / unit kerja">
           </div>
         </div>
       </div>
@@ -390,6 +394,7 @@
           <div class="notula-sig-date" id="previewSigDate"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= initialData.formattedDate.includes(',') ? initialData.formattedDate.split(',')[1].trim() : initialData.formattedDate %></div>
           <div class="notula-sig-role">Notulis,</div>
           <div class="notula-sig-name" id="previewSigName"><%= initialData.notulisName || (typeof user !== 'undefined' ? user.full_name : '') %></div>
+          <div class="notula-sig-nip" id="previewSigNip" style="<%= (initialData.notulisNip || (typeof user !== 'undefined' && user.nip)) ? '' : 'display: none;' %>"><%= (initialData.notulisNip || (typeof user !== 'undefined' && user.nip)) ? (String(initialData.notulisNip || user.nip).startsWith('NIP') ? String(initialData.notulisNip || user.nip) : 'NIP. ' + (initialData.notulisNip || user.nip)) : '' %></div>
           <div class="notula-sig-division" id="previewSigRole"><%= initialData.notulisRole || (typeof user !== 'undefined' ? user.division : '') %></div>
         </div>
         <div style="clear: both;"></div>
@@ -411,6 +416,7 @@
   window.availableMeetings = <%- typeof meetings !== 'undefined' ? JSON.stringify(meetings || []) : '[]' %>;
   window.selectedMeetingId = <%= typeof selectedMeetingId !== 'undefined' && selectedMeetingId ? JSON.stringify(selectedMeetingId) : 'null' %>;
   window.isEditingNotulen = <%= typeof isEditing !== 'undefined' && isEditing ? 'true' : 'false' %>;
+  window.currentUserNip = "<%= (typeof user !== 'undefined' && user.nip) ? user.nip : '' %>";
 </script>
 <script src="/js/notulen.js"></script>
 

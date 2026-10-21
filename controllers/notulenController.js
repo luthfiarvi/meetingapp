@@ -439,7 +439,7 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
       <div style="margin-top: 4px; font-weight: bold;">Notulis,</div>
       <div style="height: 60px;"></div>
       <div style="font-weight: bold; text-decoration: underline;">${docData.notulisName || user.full_name}</div>
-      <div>NIP. ${user.nip || '-'}</div>
+      ${(docData.notulisNip || user.nip) ? `<div>${String(docData.notulisNip || user.nip).startsWith('NIP') ? (docData.notulisNip || user.nip) : 'NIP. ' + (docData.notulisNip || user.nip)}</div>` : ''}
       <div style="font-size: 9.5pt; color: #333;">${docData.notulisRole || user.division}</div>
     </div>
 
@@ -765,6 +765,7 @@ export const notulenController = {
         isMt: Boolean(parsedLatestMt && parsedLatestMt.length > 0),
         kertasKerjaMt: parsedLatestMt,
         notulisName: latestDoc.notulis_name || latestDoc.notulisName || user.full_name,
+        notulisNip: latestDoc.notulis_nip || latestDoc.notulisNip || user.nip || "",
         notulisRole: latestDoc.notulis_role || latestDoc.notulisRole || user.division
       } : {
         id: null,
@@ -784,6 +785,7 @@ export const notulenController = {
         isMt: false,
         kertasKerjaMt: null,
         notulisName: user.full_name,
+        notulisNip: user.nip || "",
         notulisRole: user.division
       };
 
@@ -841,6 +843,8 @@ export const notulenController = {
         closingText,
         documentationPhotos,
         notulisName,
+        notulisNip,
+        notulis_nip,
         notulisRole,
         kertasKerjaMt,
         kertas_kerja_mt
@@ -879,6 +883,7 @@ export const notulenController = {
       const rawMt = kertasKerjaMt || kertas_kerja_mt;
       const mtArray = (Array.isArray(rawMt) && rawMt.length > 0) ? rawMt : null;
       const mtJson = mtArray ? JSON.stringify(mtArray) : null;
+      const finalNotulisNip = (notulisNip !== undefined && notulisNip !== null) ? notulisNip : (notulis_nip || user.nip || null);
 
       let savedId;
       if (id) {
@@ -898,14 +903,16 @@ export const notulenController = {
             notulis_name = $12,
             notulis_role = $13,
             meeting_id = COALESCE($14, meeting_id),
-            kertas_kerja_mt = $15
-          WHERE id = $16
+            kertas_kerja_mt = $15,
+            notulis_nip = $16
+          WHERE id = $17
         `, [
           title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
           targetMeetingId,
           mtJson,
+          finalNotulisNip,
           id
         ]);
         savedId = id;
@@ -915,15 +922,16 @@ export const notulenController = {
             user_id, title, meeting_date, meeting_time, meeting_place,
             agenda_data, attendees_data, activities_data, action_items, conclusions,
             closing_text, documentation_photos, notulis_name, notulis_role, meeting_id,
-            kertas_kerja_mt
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+            kertas_kerja_mt, notulis_nip
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
           RETURNING id
         `, [
           String(user?.id || "user"), title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
           targetMeetingId,
-          mtJson
+          mtJson,
+          finalNotulisNip
         ]);
         savedId = insertRes.rows[0]?.id;
       }
@@ -951,7 +959,7 @@ export const notulenController = {
             conclusions: Array.isArray(conclusions) ? conclusions : [],
             closingText, documentationPhotos: Array.isArray(documentationPhotos) ? documentationPhotos : [],
             kertasKerjaMt: mtArray,
-            notulisName, notulisRole
+            notulisName, notulisNip: finalNotulisNip, notulisRole
           },
           user,
           notulenId: savedId,
@@ -1050,6 +1058,9 @@ export const notulenController = {
         user: user,
         doc: {
           ...doc,
+          notulisName: doc.notulis_name,
+          notulisNip: doc.notulis_nip || user.nip || "",
+          notulisRole: doc.notulis_role,
           formattedDate,
           agenda,
           attendees,
@@ -1565,13 +1576,27 @@ export const notulenController = {
         new Paragraph({
           alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: docData.notulis_name || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })
+            new TextRun({ text: docData.notulis_name || docData.notulisName || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })
           ]
         }),
+        ...((docData.notulis_nip || docData.notulisNip || user.nip) ? [
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            children: [
+              new TextRun({
+                text: String(docData.notulis_nip || docData.notulisNip || user.nip).startsWith('NIP')
+                  ? String(docData.notulis_nip || docData.notulisNip || user.nip)
+                  : `NIP. ${docData.notulis_nip || docData.notulisNip || user.nip}`,
+                size: 20,
+                font: "Times New Roman"
+              })
+            ]
+          })
+        ] : []),
         new Paragraph({
           alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: docData.notulis_role || user.division, size: 20, font: "Times New Roman" })
+            new TextRun({ text: docData.notulis_role || docData.notulisRole || user.division, size: 20, font: "Times New Roman" })
           ]
         })
       );

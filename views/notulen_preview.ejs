@@ -218,6 +218,10 @@
         <div class="notula-sig-date"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= doc.formattedDate.includes(',') ? doc.formattedDate.split(',')[1].trim() : doc.formattedDate %></div>
         <div class="notula-sig-role">Notulis,</div>
         <div class="notula-sig-name"><%= doc.notulisName %></div>
+        <% const previewNip = doc.notulisNip || (typeof user !== 'undefined' && user.nip ? user.nip : ''); %>
+        <% if (previewNip) { %>
+          <div class="notula-sig-nip"><%= String(previewNip).startsWith('NIP') ? previewNip : 'NIP. ' + previewNip %></div>
+        <% } %>
         <div class="notula-sig-division"><%= doc.notulisRole %></div>
       </div>
     </div>
