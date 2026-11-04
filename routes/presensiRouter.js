@@ -6,7 +6,10 @@ import {
     daftarPresensiPdf,
     inputPresensi,
     showPresensi,
-    listSertifikatApi
+    listSertifikatApi,
+    previewSertifikat,
+    downloadAllSertifikatZip,
+    downloadAllSertifikatPdf
 } from "../controllers/presensiController.js";
 
 const routerPresensi = express.Router();
@@ -21,5 +24,9 @@ routerPresensi.get("/daftar-presensi/:meeting_id", ensureAuthenticated, daftarPr
 routerPresensi.get("/daftar-presensi/:meeting_id/pdf", ensureAuthenticated, daftarPresensiPdf);
 routerPresensi.get("/api/presensi/:meeting_id", ensureAuthenticated, showPresensi);
 routerPresensi.get("/api/sertifikat/:meeting_id", ensureAuthenticated, listSertifikatApi);
+routerPresensi.get("/api/sertifikat/:meeting_id/download-zip", ensureAuthenticated, downloadAllSertifikatZip);
+routerPresensi.get("/api/sertifikat/:meeting_id/download-pdf", ensureAuthenticated, downloadAllSertifikatPdf);
+routerPresensi.get("/meeting/sertifikat/preview/:meeting_id", previewSertifikat);
+routerPresensi.get("/sertifikat/preview/:meeting_id", previewSertifikat);
 
 export default routerPresensi;

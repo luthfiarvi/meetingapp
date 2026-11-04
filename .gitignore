@@ -9,3 +9,10 @@ deploy_bundle.tar.gz
 *.tar.gz
 *.sql
 $null
+scratch/
+public/uploads/sertif/*/
+!public/uploads/sertif/template.html
+public/uploads/ttd/
+public/uploads/evidence/
+public/uploads/avatars/
+

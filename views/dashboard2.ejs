@@ -77,16 +77,6 @@
 
 
             <div class="sidebar-bottom">
-
-                <div class="help-box">
-                    <span class="help-icon">?</span>
-
-                    <div>
-                        <strong>Butuh bantuan?</strong>
-                        <p>Hubungi administrator sistem.</p>
-                    </div>
-                </div>
-
                 <a href="/" class="logout" onclick="showLogoutModal(event)">
                     <span>↪</span>
                     Keluar
@@ -104,11 +94,6 @@
             <header class="topbar-right-only">
 
                 <div class="profile">
-
-                    <div class="notification">
-                        🔔
-                        <span></span>
-                    </div>
 
                     <div class="profile-info">
                         <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>

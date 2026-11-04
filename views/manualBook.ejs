@@ -470,21 +470,12 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .manual-hero-card {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 1.5rem;
-            }
-            .manual-container {
-                padding: 1rem;
-            }
-            .step-grid {
-                grid-template-columns: 1fr;
-            }
-            .flow-arrow {
-                display: none;
-            }
+        /* Base step-grid defaults */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         /* ==============================================================
@@ -751,6 +742,378 @@
             color: #ffffff;
             border-color: #2563eb;
         }
+
+        /* ==============================================================
+           RESPONSIVE MOBILE OPTIMIZATIONS (< 768px)
+           ============================================================== */
+        @media (max-width: 768px) {
+            /* 1. Container & Main Content */
+            .manual-container {
+                padding: 10px 10px 88px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow-x: hidden !important;
+            }
+
+            /* 2. Hero Card */
+            .manual-hero-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 1.25rem 1rem !important;
+                border-radius: 16px !important;
+                gap: 1.2rem !important;
+                margin-bottom: 1.25rem !important;
+            }
+
+            .hero-left h1 {
+                font-size: 1.25rem !important;
+                gap: 0.5rem !important;
+                line-height: 1.3 !important;
+            }
+
+            .hero-left p {
+                font-size: 0.82rem !important;
+                line-height: 1.45 !important;
+            }
+
+            .hero-actions {
+                width: 100% !important;
+                gap: 0.5rem !important;
+            }
+
+            .hero-doc-buttons {
+                display: flex !important;
+                flex-direction: column !important;
+                width: 100% !important;
+                gap: 0.5rem !important;
+            }
+
+            .btn-print-doc {
+                width: 100% !important;
+                padding: 0.65rem 1rem !important;
+                font-size: 0.8rem !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 3. Navigation Bar & Pills */
+            .manual-nav-bar {
+                position: static !important;
+                padding: 0.65rem 0.75rem !important;
+                border-radius: 12px !important;
+                margin-bottom: 1.25rem !important;
+                gap: 0.6rem !important;
+            }
+
+            .search-manual-wrap {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+
+            .nav-pills {
+                width: 100% !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding-bottom: 4px !important;
+                flex-wrap: nowrap !important;
+            }
+
+            .nav-pill-btn {
+                padding: 0.4rem 0.75rem !important;
+                font-size: 0.74rem !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* 4. Section Card & Section Header */
+            .manual-section,
+            .video-hub-card {
+                padding: 1.1rem 1rem !important;
+                border-radius: 16px !important;
+                margin-bottom: 1.25rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+
+            .section-header,
+            .video-hub-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.75rem !important;
+                padding-bottom: 0.85rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .section-title-wrap {
+                gap: 0.7rem !important;
+                align-items: flex-start !important;
+            }
+
+            .section-icon-badge {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 1.15rem !important;
+                border-radius: 10px !important;
+            }
+
+            .section-title-wrap h2,
+            .video-hub-header h2 {
+                font-size: 1.15rem !important;
+                line-height: 1.3 !important;
+            }
+
+            .section-title-wrap span,
+            .video-hub-header span {
+                font-size: 0.76rem !important;
+                line-height: 1.35 !important;
+            }
+
+            .role-badge {
+                align-self: flex-start !important;
+            }
+
+            /* 5. Video Hub Grid & Player Frame */
+            .video-hub-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1.25rem !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .video-hub-grid > * {
+                min-width: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .video-player-frame {
+                border-radius: 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+
+            .video-topbar {
+                padding: 0.45rem 0.75rem !important;
+                gap: 0.5rem !important;
+            }
+
+            .window-dots {
+                display: none !important;
+            }
+
+            #videoTopTitle {
+                font-size: 0.72rem !important;
+                max-width: none !important;
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+
+            #videoModeBadge {
+                font-size: 0.65rem !important;
+                padding: 0.1rem 0.4rem !important;
+                flex-shrink: 0 !important;
+            }
+
+            .video-stage {
+                height: 270px !important;
+                min-height: 270px !important;
+            }
+
+            .video-cover-overlay {
+                padding: 1rem !important;
+            }
+
+            .play-btn-circle {
+                width: 56px !important;
+                height: 56px !important;
+                font-size: 1.4rem !important;
+                margin-bottom: 0.6rem !important;
+            }
+
+            #coverTitle {
+                font-size: 1rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+
+            #coverDesc {
+                font-size: 0.76rem !important;
+                margin-bottom: 0.75rem !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+            }
+
+            .video-control-bar {
+                padding: 0.5rem 0.75rem !important;
+                gap: 0.6rem !important;
+            }
+
+            .btn-ctrl {
+                font-size: 0.95rem !important;
+                padding: 0.2rem 0.4rem !important;
+            }
+
+            #videoTimeText {
+                font-size: 0.68rem !important;
+            }
+
+            /* Quick Steps Under Video */
+            .video-quick-steps-card {
+                padding: 0.85rem 1rem !important;
+                margin-top: 0.75rem !important;
+                border-radius: 10px !important;
+            }
+
+            .quick-steps-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.5rem !important;
+                margin-bottom: 0.6rem !important;
+            }
+
+            .quick-steps-header button {
+                width: 100% !important;
+                text-align: center !important;
+                padding: 0.35rem 0.6rem !important;
+            }
+
+            #quickStepsList {
+                grid-template-columns: 1fr !important;
+                gap: 0.4rem !important;
+            }
+
+            /* 6. Video Playlist Column (Fix Cut-off and Overflow) */
+            .playlist-header {
+                margin-bottom: 0.6rem !important;
+            }
+
+            .video-playlist-container {
+                max-height: 380px !important;
+                gap: 0.5rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                padding-right: 0 !important;
+            }
+
+            .playlist-card {
+                padding: 0.7rem 0.85rem !important;
+                gap: 0.75rem !important;
+                border-radius: 12px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .playlist-card:hover {
+                transform: none !important;
+            }
+
+            .playlist-thumb {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 1.1rem !important;
+                border-radius: 8px !important;
+                flex-shrink: 0 !important;
+            }
+
+            /* 7. Workflow Section Grid */
+            .workflow-box {
+                padding: 1rem 0.85rem !important;
+                border-radius: 12px !important;
+            }
+
+            .workflow-steps {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.65rem !important;
+                justify-content: stretch !important;
+            }
+
+            .flow-step-item {
+                min-width: 0 !important;
+                width: 100% !important;
+                padding: 0.75rem 0.6rem !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                box-sizing: border-box !important;
+            }
+
+            .flow-step-item:last-child {
+                grid-column: span 2 !important;
+            }
+
+            .flow-step-icon {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 0.95rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            .flow-step-title {
+                font-size: 0.78rem !important;
+            }
+
+            .flow-step-desc {
+                font-size: 0.68rem !important;
+            }
+
+            .flow-arrow {
+                display: none !important;
+            }
+
+            /* 8. Step Grid Cards */
+            .step-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .step-card {
+                padding: 1rem !important;
+                border-radius: 12px !important;
+                gap: 0.45rem !important;
+            }
+
+            .step-card h3 {
+                font-size: 0.92rem !important;
+            }
+
+            .step-card p {
+                font-size: 0.78rem !important;
+                line-height: 1.45 !important;
+            }
+
+            /* 9. Feature Callout & FAQ */
+            .feature-callout {
+                padding: 0.85rem 1rem !important;
+                border-radius: 10px !important;
+                font-size: 0.78rem !important;
+                gap: 0.6rem !important;
+            }
+
+            .faq-item {
+                border-radius: 10px !important;
+                margin-bottom: 0.6rem !important;
+            }
+
+            .faq-question {
+                padding: 0.75rem 0.9rem !important;
+                font-size: 0.82rem !important;
+            }
+
+            .faq-answer {
+                padding: 0 0.9rem 0.85rem !important;
+                font-size: 0.78rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -818,14 +1181,6 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="help-box">
-                    <span class="help-icon">?</span>
-                    <div>
-                        <strong>Butuh bantuan?</strong>
-                        <p>Hubungi administrator sistem.</p>
-                    </div>
-                </div>
-
                 <a href="/" class="logout" onclick="showLogoutModal(event)">
                     <span>↪</span>
                     Keluar
@@ -840,11 +1195,6 @@
             <!-- TOPBAR / PROFILE -->
             <header class="topbar-right-only">
                 <div class="profile">
-                    <div class="notification">
-                        🔔
-                        <span></span>
-                    </div>
-
                     <div class="profile-info">
                         <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
                         <small><%= (typeof user !== 'undefined' && user && user.role) ? user.role.toUpperCase() : "PENGGUNA SISTEM" %></small>
@@ -890,7 +1240,7 @@
                         <a href="#section-video" class="btn-print-doc" style="background: #eff6ff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe;">
                             <span>🎬</span> Tonton Video Panduan
                         </a>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <div class="hero-doc-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <a href="/docs/manual-book-user.pdf" target="_blank" class="btn-print-doc" style="background: #ffffff; color: #1d4ed8; text-decoration: none; border: 1.5px solid #bfdbfe; font-size: 0.8rem; padding: 0.65rem 0.9rem;" title="Buka Dokumen Panduan Khusus Pegawai (Format PDF)">
                                 <span>📘</span> Cetak PDF / Word User
                             </a>
@@ -1048,8 +1398,8 @@
                             </div>
 
                             <!-- RINGKASAN LANGKAH CEPAT DI BAWAH PLAYER -->
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem;">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+                            <div class="video-quick-steps-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem;">
+                                <div class="quick-steps-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
                                     <strong style="font-size: 0.85rem; color: #0f172a; display: flex; align-items: center; gap: 0.4rem;">
                                         <span>📝</span> Rangkuman Langkah Cepat Topik Ini:
                                     </strong>
@@ -1066,7 +1416,7 @@
 
                         <!-- KOLOM KANAN: PLAYLIST VIDEO -->
                         <div>
-                            <div style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                            <div class="playlist-header" style="font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
                                 <span>Daftar Video Panduan (6 Topik)</span>
                                 <span style="font-size: 0.75rem; font-weight: 600; color: #64748b;">Klik untuk memilih</span>
                             </div>

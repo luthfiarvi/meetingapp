@@ -6,9 +6,11 @@ set USER=magangit
 set DEST=/home/magangit/meetingapp
 
 echo ============================================================
-echo   CLEAN SYNC: CLONE LOKAL KE SERVER (84.247.160.55:3000)
+echo   UPDATE KODE KE SERVER (84.247.160.55:3000)
 echo ============================================================
-echo.
+set CLEAN_FLAG=
+if "%1"=="--clean" set CLEAN_FLAG=--clean
+
 
 :: 1. Export database lokal
 echo [1/4] Mengekspor database lokal (PostgreSQL appmeeting)...
@@ -30,7 +32,7 @@ if %ERRORLEVEL% EQU 0 (
 echo.
 echo [2/4] Menyiapkan izin berkas dan mengompres paket proyek...
 attrib -r * /s /d >nul 2>&1
-tar --format ustar -czf deploy_bundle.tar.gz config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js check_db.js backup_local.sql package.json package-lock.json
+tar --format ustar -czf deploy_bundle.tar.gz --exclude="public/uploads/meeting_metadata.json" --exclude="public/uploads/thumbnails/*" --exclude="public/uploads/notulen/*" --exclude="public/uploads/videos/*" --exclude="public/uploads/presensi/*" --exclude="public/uploads/ttd/*" --exclude="public/uploads/avatars/*" --exclude="public/uploads/evidence/*" --exclude="public/uploads/sertif/bg/*" --exclude="public/uploads/sertif/1/*" --exclude="public/uploads/sertif/2/*" --exclude="public/uploads/sertif/3/*" --exclude="public/uploads/sertif/4/*" --exclude="public/uploads/sertif/5/*" --exclude="public/uploads/sertif/6/*" --exclude="public/uploads/sertif/26/*" config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh check_db.js clean_meetings.js seed_users.js batch_generate_aksara.js peserta_aksara.json package.json package-lock.json
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Gagal membuat arsip kompresi.
     pause
@@ -55,9 +57,9 @@ echo   [OK] Arsip proyek berhasil diunggah!
 
 :: 4. Ekstrak bersih, reset total di server (tanpa butuh sudo)
 echo.
-echo [4/4] Mengekstrak bersih, merestore database, dan merestart aplikasi di server...
+echo [4/4] Mengekstrak berkas, sinkronisasi database, dan merestart aplikasi di server...
 echo       (Masukkan password user %USER% jika diminta)
-ssh -t %USER%@%SERVER% "bash -c 'tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/ 2>/dev/null || (mkdir -p /home/magangit/meetingapp && tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/); rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp 2>/dev/null || true; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash /home/magangit/meetingapp/deploy_server.sh'"
+ssh -t %USER%@%SERVER% "bash -l -c 'tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/ 2>/dev/null || (mkdir -p /home/magangit/meetingapp && tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/); rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp 2>/dev/null || true; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash -l /home/magangit/meetingapp/deploy_server.sh %CLEAN_FLAG%'"
 
 echo.
 echo ============================================================

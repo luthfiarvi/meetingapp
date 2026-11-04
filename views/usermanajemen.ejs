@@ -635,6 +635,272 @@
             display: block;
             border-radius: 10px;
         }
+
+        /* =========================================
+           MOBILE RESPONSIVE STYLES (<= 768px)
+           ========================================= */
+        @media (max-width: 768px) {
+            .topbar {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 8px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .topbar .profile {
+                display: none !important; /* Hide duplicate avatar already present in mobile topbar */
+            }
+
+            .topbar h1 {
+                font-size: 20px !important;
+            }
+
+            .topbar .subtitle {
+                font-size: 11.5px !important;
+                line-height: 1.4 !important;
+            }
+
+            .user-page-container {
+                gap: 16px !important;
+                padding-bottom: 24px !important;
+            }
+
+            /* Toolbar & Stats on Mobile */
+            .toolbar-card {
+                padding: 14px 16px !important;
+                gap: 14px !important;
+                border-radius: 16px !important;
+            }
+
+            .stats-summary {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .stats-summary .stat-pill:first-child {
+                grid-column: 1 / -1 !important;
+            }
+
+            .stat-pill {
+                justify-content: center !important;
+                padding: 7px 10px !important;
+                font-size: 11px !important;
+                border-radius: 10px !important;
+            }
+
+            .stat-pill strong {
+                font-size: 13px !important;
+            }
+
+            .toolbar-actions {
+                width: 100% !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .search-box {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .search-box input {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                height: 40px !important;
+                font-size: 12.5px !important;
+            }
+
+            .role-filter {
+                width: 100% !important;
+            }
+
+            .role-filter select {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                height: 40px !important;
+                font-size: 12.5px !important;
+            }
+
+            .btn-add-user {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                height: 40px !important;
+                font-size: 13px !important;
+            }
+
+            /* Responsive User Cards instead of cut-off Table */
+            .table-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
+            }
+
+            .user-table {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+            }
+
+            .user-table thead {
+                display: none !important; /* Hide table headers on mobile */
+            }
+
+            .user-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 14px !important;
+                width: 100% !important;
+            }
+
+            .user-table tr.user-row {
+                display: flex !important;
+                flex-direction: column !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 16px !important;
+                padding: 16px !important;
+                box-shadow: 0 4px 16px rgba(13, 43, 92, 0.06) !important;
+                box-sizing: border-box !important;
+                gap: 12px !important;
+                position: relative !important;
+            }
+
+            .user-table tr.user-row[style*="display: none"] {
+                display: none !important;
+            }
+
+            /* Number indicator (No) */
+            .user-table td:nth-child(1) {
+                position: absolute !important;
+                top: 14px !important;
+                right: 14px !important;
+                background: #f1f5f9 !important;
+                color: #64748b !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                padding: 2px 8px !important;
+                border-radius: 20px !important;
+                border: 1px solid #e2e8f0 !important;
+                display: inline-block !important;
+                width: auto !important;
+            }
+
+            /* User Cell */
+            .user-table td:nth-child(2) {
+                padding: 0 !important;
+                border: none !important;
+                padding-right: 40px !important; /* Prevent overlap with #no badge */
+            }
+
+            .user-cell {
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
+            }
+
+            .user-avatar-badge {
+                width: 46px !important;
+                height: 46px !important;
+                border-radius: 14px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .user-details strong {
+                font-size: 14.5px !important;
+                line-height: 1.3 !important;
+                margin-bottom: 4px !important;
+                color: #0d2b5c !important;
+            }
+
+            .user-details span {
+                font-size: 11px !important;
+            }
+
+            /* NIP & Unit Kerja */
+            .user-table td:nth-child(3) {
+                padding: 10px 12px !important;
+                border: none !important;
+                background: #f8fafc !important;
+                border: 1px solid #edf2f7 !important;
+                border-radius: 10px !important;
+            }
+
+            /* Role Badge */
+            .user-table td:nth-child(4) {
+                padding: 0 !important;
+                border: none !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+
+            .role-badge {
+                font-size: 11px !important;
+                padding: 5px 12px !important;
+            }
+
+            /* Action Buttons */
+            .user-table td:nth-child(5) {
+                padding: 6px 0 0 0 !important;
+                border: none !important;
+                border-top: 1px solid #f1f5f9 !important;
+                width: 100% !important;
+            }
+
+            .action-buttons {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .action-buttons .btn-action-password {
+                grid-column: 1 / -1 !important; /* Password full width */
+            }
+
+            .btn-action {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                padding: 9px 8px !important;
+                font-size: 12px !important;
+                border-radius: 8px !important;
+                white-space: nowrap !important;
+            }
+
+            /* Modals Mobile Friendly */
+            .custom-modal-dialog {
+                max-width: 100% !important;
+                width: 95% !important;
+                border-radius: 18px !important;
+            }
+
+            .form-row-2 {
+                grid-template-columns: 1fr !important;
+                gap: 0 !important;
+            }
+
+            .modal-footer-styled {
+                flex-direction: column-reverse !important;
+                gap: 8px !important;
+                padding: 14px 20px 20px !important;
+            }
+
+            .modal-footer-styled button {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+            }
+        }
     </style>
 </head>
 
@@ -701,14 +967,6 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <div class="help-box">
-                    <span class="help-icon">?</span>
-                    <div>
-                        <strong>Butuh bantuan?</strong>
-                        <p>Hubungi administrator sistem.</p>
-                    </div>
-                </div>
-
                 <a href="/" class="logout" onclick="showLogoutModal(event)">
                     <span>↪</span>
                     Keluar
@@ -731,11 +989,6 @@
                 </div>
 
                 <div class="profile">
-                    <div class="notification">
-                        🔔
-                        <span></span>
-                    </div>
-
                     <div class="profile-info">
                         <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
                         <small><%= (typeof user !== 'undefined' && user && user.role) ? user.role.toUpperCase() : "ADMINISTRATOR" %></small>

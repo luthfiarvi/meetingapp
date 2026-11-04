@@ -28,7 +28,7 @@ fi
 echo ""
 echo "[2/4] Menyiapkan izin berkas dan mengompres paket proyek..."
 attrib -r * /s /d 2>/dev/null || true
-tar --format ustar -czf deploy_bundle.tar.gz config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js backup_local.sql package.json package-lock.json
+tar --format ustar -czf deploy_bundle.tar.gz config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh check_db.js clean_meetings.js seed_users.js backup_local.sql package.json package-lock.json
 echo "  [OK] Berkas proyek berhasil dikompres!"
 
 echo ""

@@ -88,10 +88,7 @@
       overflow: hidden;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
       background-color: #f7f5ef;
-      background-image:
-        url('/images/bg-sertifikat.png'),
-        url('../../images/bg-sertifikat.png'),
-        url('../../../images/bg-sertifikat.png');
+      background-image: url('{{BG_SERTIFIKAT_URL}}');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
@@ -103,6 +100,66 @@
     img[src=""] {
       opacity: 0 !important;
       visibility: hidden !important;
+    }
+
+    /* ============================================================
+       MODE NAMA & KODE UNIK SAJA (Template Resmi Siap Pakai)
+       Semua teks, logo, tema, ttd pejabat & QR code sudah ada di latar.
+       Sistem HANYA mencetak: Nomor/Kode Unik & Nama Peserta.
+    ============================================================ */
+    .mode-name-only .cert-title-container,
+    .mode-name-only .cert-kepada,
+    .mode-name-only .cert-line-below-name,
+    .mode-name-only .cert-sebagai,
+    .mode-name-only .cert-desc-container,
+    .mode-name-only .cert-tanggal-container,
+    .mode-name-only .cert-ttd-info,
+    .mode-name-only .cert-qr-ttd-box,
+    .mode-name-only .cert-qr-download-box {
+      display: none !important;
+    }
+
+    /* 1. KODE UNIK / NOMOR SERTIFIKAT */
+    .mode-name-only .cert-nomor {
+      display: block !important;
+      position: absolute !important;
+      top: 31.4% !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      font-family: 'Montserrat', Arial, sans-serif !important;
+      font-size: 4.2mm !important;
+      font-weight: 700 !important;
+      color: #1a1a1a !important;
+      letter-spacing: 0.03em !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      z-index: 10 !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      text-rendering: optimizeLegibility !important;
+    }
+
+    /* 2. NAMA PESERTA */
+    .mode-name-only .cert-nama {
+      display: block !important;
+      position: absolute !important;
+      top: 41.6% !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      font-family: 'Montserrat', Arial, sans-serif !important;
+      font-size: 8.8mm !important;
+      font-weight: 700 !important;
+      color: #111111 !important;
+      letter-spacing: 0.015em !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      max-width: 85% !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      z-index: 10 !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      text-rendering: optimizeLegibility !important;
     }
 
     /* ========================
@@ -207,7 +264,7 @@
     /* 4. NAMA PESERTA */
     .cert-nama {
       position: absolute;
-      top: 39.8%;
+      top: 41.6%;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Montserrat', Arial, sans-serif;
@@ -450,7 +507,7 @@
   </div>
 
   <!-- CERTIFICATE CONTAINER -->
-  <div class="cert-page">
+  <div class="cert-page {{CERT_PAGE_CLASSES}}">
 
     <!-- ALL TEXT & OVERLAY -->
     <div class="cert-content">
@@ -485,7 +542,7 @@
         <span class="cert-desc-intro">Akselerasi Kompetensi dan Sinergi ASN (AKSARA) Vol. 5 dengan tema</span>
         <span class="cert-desc-tema">{{TEMA_WEBINAR}}</span>
         <span class="cert-desc-sub">yang diselenggarakan secara daring, selama 2 Jam Pelajaran ( JP )</span>
-        <span class="cert-desc-penyelenggara">oleh <strong>Kantor Regional V BKN</strong></span>
+        <span class="cert-desc-penyelenggara">oleh <strong>{{PENYELENGGARA}}</strong></span>
         <div class="diamond-divider bottom-divider">
           <span class="diamond">◆</span>
         </div>
@@ -494,8 +551,8 @@
       <!-- 8. TANGGAL & INSTANSI -->
       <div class="cert-tanggal-container">
         <p>Jakarta, {{TANGGAL}}</p>
-        <p>Kantor Regional V</p>
-        <p>Badan Kepegawaian Negara</p>
+        <p>{{SIGNER_ROLE}}</p>
+        <p>{{PENYELENGGARA}}</p>
       </div>
 
       <!-- 9. QR DOWNLOAD (Bottom Left) -->
@@ -513,7 +570,7 @@
         </svg>
         <div class="cert-ttd-texts">
           <span class="cert-ttd-lbl">Ditandatangani secara elektronik oleh:</span>
-          <span class="cert-ttd-name">Myrna Amir, S.E., M.M</span>
+          <span class="cert-ttd-name">{{SIGNER_NAME}}</span>
         </div>
       </div>
       <div class="cert-qr-ttd-box">

@@ -1,0 +1,47 @@
+{
+  "1": {
+    "sertifikat_bg": "/images/bg-aksara-vol7.png",
+    "sertifikat_signer": "Myrna Amir, S.E., M.M.",
+    "sertifikat_signer_role": "Kepala Kantor Regional V",
+    "sertifikat_penyelenggara": "Kantor Regional V BKN Jakarta",
+    "sertifikat_enable_ttd": true,
+    "sertifikat_layout_mode": "name_only",
+    "sertifikat_format_nomor": "[NOMOR]/AKSARA.07/KR5/[BULAN]/[TAHUN]"
+  },
+  "2": {
+    "sertifikat_bg": "/images/bg-aksara-vol7.png",
+    "sertifikat_signer": "Myrna Amir, S.E., M.M.",
+    "sertifikat_signer_role": "Kepala Kantor Regional V",
+    "sertifikat_penyelenggara": "Kantor Regional V BKN Jakarta",
+    "sertifikat_enable_ttd": true,
+    "sertifikat_layout_mode": "name_only",
+    "sertifikat_format_nomor": "[NOMOR]/AKSARA.07/KR5/[BULAN]/[TAHUN]"
+  },
+  "3": {
+    "sertifikat_bg": "/images/bg-aksara-vol7.png",
+    "sertifikat_signer": "Myrna Amir, S.E., M.M.",
+    "sertifikat_signer_role": "Kepala Kantor Regional V",
+    "sertifikat_penyelenggara": "Kantor Regional V BKN Jakarta",
+    "sertifikat_enable_ttd": true,
+    "sertifikat_layout_mode": "name_only",
+    "sertifikat_format_nomor": "[NOMOR]/AKSARA.07/KR5/[BULAN]/[TAHUN]"
+  },
+  "5": {
+    "sertifikat_bg": "/images/bg-aksara-vol7.png",
+    "sertifikat_signer": "Myrna Amir, S.E., M.M.",
+    "sertifikat_signer_role": "Kepala Kantor Regional V",
+    "sertifikat_penyelenggara": "Kantor Regional V BKN",
+    "sertifikat_enable_ttd": true,
+    "sertifikat_layout_mode": "name_only",
+    "sertifikat_format_nomor": "[NOMOR]/AKSARA.07/KR5/[BULAN]/[TAHUN]"
+  },
+  "6": {
+    "sertifikat_bg": "/images/bg-aksara-vol7.png",
+    "sertifikat_signer": "Myrna Amir, S.E., M.M.",
+    "sertifikat_signer_role": "Kepala Kantor Regional V",
+    "sertifikat_penyelenggara": "Kantor Regional V BKN Jakarta",
+    "sertifikat_enable_ttd": true,
+    "sertifikat_layout_mode": "name_only",
+    "sertifikat_format_nomor": "[NOMOR]/AKSARA.07/KR5/[BULAN]/[TAHUN]"
+  }
+}

@@ -13,11 +13,83 @@ import presensiRouter from "./routes/presensiRouter.js";
 import infographicRouter from "./routes/infographicRouter.js";
 import zoomRouter from "./routes/zoomRouter.js";
 
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import pool from "./config/database.js";
+import notulenController from "./controllers/notulenController.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.set("view engine", "ejs");
 
+// Interceptor: Perbaiki otomatis berkas notulen HTML jika mengandung gambar rusak (src="undefined")
+app.get("/uploads/notulen/:filename", async (req, res, next) => {
+    try {
+        const filename = req.params.filename;
+        const filePath = path.join(process.cwd(), "public", "uploads", "notulen", filename);
+        if (!fs.existsSync(filePath)) return next();
+
+        let content = fs.readFileSync(filePath, "utf-8");
+        if (content.includes('src="undefined"') || content.includes("src='undefined'")) {
+            const m = filename.match(/notulen_rapat_([0-9]+)_/);
+            const targetId = m ? m[1] : null;
+            if (targetId) {
+                const notulenRes = await pool.query(
+                    "SELECT * FROM notulen WHERE meeting_id = $1 OR id = $1 ORDER BY id DESC LIMIT 1",
+                    [targetId]
+                );
+                if (notulenRes.rows.length > 0) {
+                    const doc = notulenRes.rows[0];
+                    let userObj = {
+                        full_name: doc.notulis_name || "Pegawai BKN",
+                        institution: "Kantor Regional V BKN Jakarta",
+                        division: doc.notulis_role || "Pengembang Sistem",
+                        sig_city: "Jakarta"
+                    };
+                    try {
+                        const uRes = await pool.query("SELECT * FROM users WHERE id = $1", [doc.user_id]);
+                        if (uRes.rows.length > 0) userObj = { ...userObj, ...uRes.rows[0] };
+                    } catch (e) {}
+
+                    const fixedHtml = notulenController.generateHtmlDoc({
+                        docData: {
+                            title: doc.title,
+                            meetingDate: doc.meeting_date,
+                            meetingTime: doc.meeting_time,
+                            meetingPlace: doc.meeting_place,
+                            agenda: typeof doc.agenda_data === "string" ? JSON.parse(doc.agenda_data) : doc.agenda_data,
+                            attendees: typeof doc.attendees_data === "string" ? JSON.parse(doc.attendees_data) : doc.attendees_data,
+                            activities: typeof doc.activities_data === "string" ? JSON.parse(doc.activities_data) : doc.activities_data,
+                            actionItems: typeof doc.action_items === "string" ? JSON.parse(doc.action_items) : doc.action_items,
+                            conclusions: typeof doc.conclusions === "string" ? JSON.parse(doc.conclusions) : doc.conclusions,
+                            closingText: doc.closing_text,
+                            documentationPhotos: doc.documentation_photos ? (typeof doc.documentation_photos === "string" ? JSON.parse(doc.documentation_photos) : doc.documentation_photos) : [],
+                            notulisName: doc.notulis_name,
+                            notulisRole: doc.notulis_role
+                        },
+                        user: userObj,
+                        notulenId: doc.id,
+                        meetingId: doc.meeting_id
+                    });
+
+                    fs.writeFileSync(filePath, fixedHtml, "utf-8");
+                    res.setHeader("Content-Type", "text/html; charset=utf-8");
+                    return res.send(fixedHtml);
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("⚠️ Notulen HTML on-the-fly repair notice:", err.message);
+    }
+    next();
+});
+
 // 1. TAMBAHKAN BARIS INI AGAR BROWSER BISA MENGAKSES FOLDER PUBLIC (/bkn.png)
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static("public"));
 
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -34,7 +106,6 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-import pool from "./config/database.js";
 import { initWebinarQuizSchema } from "./config/webinar_quiz_schema.js";
 import webinarQuizRouter from "./routes/webinarQuizRouter.js";
 
@@ -101,6 +172,8 @@ app.use((req, res, next) => {
     if (
         req.path.startsWith("/webinar-quiz") ||
         req.path.startsWith("/presensi") ||
+        req.path.startsWith("/meeting/sertifikat/preview") ||
+        req.path.startsWith("/sertifikat/preview") ||
         req.path.startsWith("/manual-book/pdf")
     ) {
         return next();

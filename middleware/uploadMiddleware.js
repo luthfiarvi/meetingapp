@@ -81,12 +81,12 @@ const transcriptStorage = multer.diskStorage({
 
 const transcriptFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
-  const allowed = /^(txt|md|docx|doc|csv)$/i;
+  const allowed = /^(txt|md|docx|doc|pdf|csv)$/i;
 
   if (allowed.test(ext)) {
     cb(null, true);
   } else {
-    cb(new Error("Format file tidak didukung. Harap unggah berkas dokumen transkrip (.txt, .docx, .md)."));
+    cb(new Error("Format file tidak didukung. Harap unggah berkas dokumen transkrip (.docx, .pdf, .txt, .md)."));
   }
 };
 

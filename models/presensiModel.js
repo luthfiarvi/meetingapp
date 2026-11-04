@@ -1,4 +1,5 @@
 import pool from "../config/database.js";
+import { getMeetingById as getMeetingFromModel } from "./meetingModel.js";
 
 // ============================================================
 // Helper: Pastikan tabel sertifikat sudah ada di database
@@ -71,11 +72,11 @@ export const createPresensi = async ({
             [
                 meeting_id,
                 nama,
-                nip,
-                instansi,
-                jabatan,
-                email,
-                keterangan,
+                nip || "-",
+                instansi || "-",
+                jabatan || "-",
+                email || "-",
+                keterangan || "-",
                 tanda_tangan
             ]
         );
@@ -140,11 +141,11 @@ export const getPresensiByMeeting = async (meeting_id) => {
 // ============================================================
 export const getMeetingById = async (meeting_id) => {
     try {
+        const fullMeeting = await getMeetingFromModel(meeting_id);
+        if (fullMeeting) return fullMeeting;
+
         const result = await pool.query(
-            `SELECT meeting_id, meeting_nama, deskripsi, tipe_meeting, tanggal, tgl_buat
-             FROM meetings
-             WHERE meeting_id = $1
-             LIMIT 1`,
+            `SELECT * FROM meetings WHERE meeting_id = $1 LIMIT 1`,
             [meeting_id]
         );
         return result.rows[0] || null;
@@ -174,16 +175,46 @@ export const saveSertifikat = async ({ nama, nip, meeting_id, file_path }) => {
 };
 
 // ============================================================
-// Ambil nomor urut berikutnya untuk penomoran sertifikat
+// Ambil nomor urut berikutnya untuk penomoran sertifikat (Atomic & Concurrency-Safe per Meeting)
 // ============================================================
-export const getNextSertifikatNumber = async () => {
+export const ensureCounterTable = async () => {
     try {
-        await ensureSertifikatTable();
-        const result = await pool.query(`SELECT COUNT(*) as cnt FROM sertifikat`);
-        return parseInt(result.rows[0]?.cnt || 0) + 1;
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS meeting_sertifikat_counter (
+                meeting_id INT PRIMARY KEY,
+                last_number INT DEFAULT 0,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+    } catch (_) {}
+};
+
+export const getNextSertifikatNumber = async (meeting_id) => {
+    try {
+        await ensureCounterTable();
+        const mId = parseInt(meeting_id) || 0;
+
+        const res = await pool.query(`
+            INSERT INTO meeting_sertifikat_counter (meeting_id, last_number, updated_at)
+            VALUES ($1, 1, CURRENT_TIMESTAMP)
+            ON CONFLICT (meeting_id) DO UPDATE
+            SET last_number = meeting_sertifikat_counter.last_number + 1,
+                updated_at = CURRENT_TIMESTAMP
+            RETURNING last_number;
+        `, [mId]);
+
+        const num = res.rows[0]?.last_number || 1;
+        return String(num).padStart(3, '0');
     } catch (err) {
-        console.warn("⚠️ [DEV MODE] PostgreSQL error in getNextSertifikatNumber:", err.message);
-        return Math.floor(Math.random() * 9000) + 1000; // fallback random
+        console.warn("⚠️ Warning getNextSertifikatNumber:", err.message);
+        try {
+            await ensureSertifikatTable();
+            const cntRes = await pool.query(`SELECT COUNT(*) as cnt FROM sertifikat WHERE meeting_id = $1`, [String(meeting_id || 0)]);
+            const cnt = parseInt(cntRes.rows[0]?.cnt || 0) + 1;
+            return String(cnt).padStart(3, '0');
+        } catch (_) {
+            return "001";
+        }
     }
 };
 

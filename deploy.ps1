@@ -1,6 +1,10 @@
+param (
+    [switch]$Clean
+)
+
 # ============================================================
 #  DEPLOY SCRIPT - MeetingApp ke Server 84.247.160.55
-#  Jalankan: .\deploy.ps1
+#  Jalankan: .\deploy.ps1 (atau .\deploy.ps1 -Clean untuk reset data rapat)
 # ============================================================
 
 $SERVER   = "84.247.160.55"
@@ -41,7 +45,7 @@ Write-Host "`n[2/4] Menyiapkan izin berkas dan mengompres paket proyek..." -Fore
 
 attrib -r "$LOCAL\*" /s /d 2>$null
 
-tar --format ustar -czf "$LOCAL\deploy_bundle.tar.gz" config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh seed_users.js backup_local.sql package.json package-lock.json
+tar --format ustar -czf "$LOCAL\deploy_bundle.tar.gz" --exclude="public/uploads/meeting_metadata.json" --exclude="public/uploads/thumbnails/*" --exclude="public/uploads/notulen/*" --exclude="public/uploads/videos/*" --exclude="public/uploads/presensi/*" --exclude="public/uploads/ttd/*" --exclude="public/uploads/avatars/*" --exclude="public/uploads/evidence/*" --exclude="public/uploads/sertif/bg/*" --exclude="public/uploads/sertif/1/*" --exclude="public/uploads/sertif/2/*" --exclude="public/uploads/sertif/3/*" --exclude="public/uploads/sertif/4/*" --exclude="public/uploads/sertif/5/*" --exclude="public/uploads/sertif/6/*" config controllers middleware models routes services views public meeting.js meetingserver.js deploy_server.sh check_db.js clean_meetings.js seed_users.js package.json package-lock.json
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Gagal membuat file arsip kompresi." -ForegroundColor Red
@@ -69,7 +73,8 @@ Write-Host "  [OK] Berkas arsip berhasil diunggah!" -ForegroundColor Green
 Write-Host "`n[4/4] Melakukan sinkronisasi total di server..." -ForegroundColor Yellow
 Write-Host "      (Masukkan password user $USER jika diminta)" -ForegroundColor Gray
 
-ssh -t "${USER}@${SERVER}" "bash -c 'set -e; rm -rf /home/magangit/meetingapp_new 2>/dev/null || true; mv /home/magangit/meetingapp /home/magangit/trash_app_\$(date +%s) 2>/dev/null || true; mkdir -p /home/magangit/meetingapp; tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/; rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash /home/magangit/meetingapp/deploy_server.sh; rm -rf /home/magangit/trash_app_* 2>/dev/null || true'"
+$cleanArg = if ($Clean) { "--clean" } else { "" }
+ssh -t "${USER}@${SERVER}" "bash -l -c 'tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/ 2>/dev/null || (mkdir -p /home/magangit/meetingapp && tar --no-same-owner --overwrite -xzf /home/magangit/deploy_bundle.tar.gz -C /home/magangit/meetingapp/); rm -f /home/magangit/deploy_bundle.tar.gz; chmod -R 775 /home/magangit/meetingapp 2>/dev/null || true; chmod +x /home/magangit/meetingapp/deploy_server.sh; bash -l /home/magangit/meetingapp/deploy_server.sh $cleanArg'"
 
 Write-Host "`n============================================================" -ForegroundColor Cyan
 Write-Host "  SINKRONISASI SELESAI!" -ForegroundColor Green

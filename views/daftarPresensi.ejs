@@ -6,6 +6,309 @@
     <title>Daftar Presensi Meeting | BKN</title>
     <link rel="stylesheet" href="/presensi.css">
     <script src="/js/html2pdf.bundle.min.js"></script>
+    <style>
+        .presensi-nav-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            background: #f1f5f9;
+            color: #334155;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-nav-back:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .presensi-nav-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .presensi-nav-secondary {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-nav-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: #ffffff;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-nav-primary:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-nav-pdf {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 16px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .btn-nav-pdf:hover {
+            background: linear-gradient(135deg, #047857, #059669);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-nav-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: #ffffff;
+            color: #1e293b;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-nav-print:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .signature-display-box {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .signature-display-box .detail-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .signature-img-wrapper {
+            width: 100%;
+            background: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .signature-img-wrapper:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .signature-img-wrapper img {
+            max-width: 100%;
+            height: 75px;
+            object-fit: contain;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .presensi-page {
+                padding: 12px 10px 40px !important;
+            }
+
+            .presensi-card {
+                padding: 20px 14px 18px !important;
+                border-radius: 18px !important;
+                box-shadow: 0 10px 30px rgba(13, 43, 92, 0.08) !important;
+            }
+
+            /* Clean Summary Box */
+            .daftar-header-box {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 12px !important;
+                padding: 14px !important;
+            }
+
+            .total-badge {
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                padding: 10px 14px !important;
+                border-radius: 10px !important;
+                box-sizing: border-box !important;
+            }
+
+            .total-badge span {
+                font-size: 11px !important;
+            }
+
+            .total-badge strong {
+                font-size: 15px !important;
+            }
+
+            /* Unified Full-Width Button Stack */
+            .presensi-nav-toolbar {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .btn-nav-back {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                padding: 10px 14px !important;
+            }
+
+            .presensi-nav-actions {
+                width: 100% !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+            }
+
+            .btn-nav-primary {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                padding: 11px 14px !important;
+                font-size: 13px !important;
+            }
+
+            .presensi-nav-secondary {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+
+            .btn-nav-pdf,
+            .btn-nav-print {
+                width: 100% !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+                padding: 10px 8px !important;
+                font-size: 12px !important;
+            }
+
+            /* Participant Card Optimization */
+            .peserta-card {
+                padding: 14px !important;
+                border-radius: 14px !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 4px 14px rgba(13, 43, 92, 0.05) !important;
+            }
+
+            .peserta-header {
+                padding-bottom: 8px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .peserta-nama {
+                font-size: 16px !important;
+                font-weight: 800 !important;
+            }
+
+            .peserta-details-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px 12px !important;
+            }
+
+            .time-badge {
+                display: inline-flex !important;
+                align-self: flex-start !important;
+                width: fit-content !important;
+                font-size: 11px !important;
+                padding: 3px 8px !important;
+            }
+
+            /* Clean, centered signature box */
+            .signature-display-box {
+                margin-top: 12px !important;
+                padding-top: 10px !important;
+                border-top: 1px dashed #e2e8f0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+            }
+
+            .signature-display-box .detail-label {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                font-size: 11px !important;
+            }
+
+            .signature-img-wrapper {
+                width: 100% !important;
+                background: #f8fafc !important;
+                border: 1.5px dashed #cbd5e1 !important;
+                border-radius: 12px !important;
+                padding: 10px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-sizing: border-box !important;
+            }
+
+            .signature-img-wrapper img {
+                max-width: 100% !important;
+                height: 70px !important;
+                object-fit: contain !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -48,26 +351,28 @@
         </div>
 
         <!-- NAVIGATION ACTION BAR -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap:wrap; gap:10px;">
-            <a href="/manajemenmeeting" style="display:inline-flex; align-items:center; gap:6px; padding:9px 16px; background:#f1f5f9; color:#334155; border-radius:10px; font-size:12.5px; font-weight:600; text-decoration:none; border:1px solid #cbd5e1; transition: 0.2s;">
-                ← Kembali ke Manajemen Meeting
+        <div class="presensi-nav-toolbar">
+            <a href="/manajemenmeeting" class="btn-nav-back">
+                <span>←</span> Kembali ke Manajemen Meeting
             </a>
             
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <!-- TOMBOL UNDUH PRESENSI PDF -->
-                <button type="button" id="btnDownloadPresensiPdf" onclick="downloadPresensiPdf()" style="display:inline-flex; align-items:center; gap:6px; padding:9px 16px; background:linear-gradient(135deg, #059669, #10b981); color:#ffffff; border:none; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.25); transition: 0.2s;">
-                    📥 Unduh Presensi (PDF)
-                </button>
-
-                <!-- TOMBOL PRATINJAU CETAK -->
-                <a href="/daftar-presensi/<%= meeting_id %>/pdf" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:9px 14px; background:#ffffff; color:#1e293b; border-radius:10px; font-size:12.5px; font-weight:600; text-decoration:none; border:1px solid #cbd5e1; transition: 0.2s;" title="Lihat Lembar Format Cetak A4">
-                    🖨️ Cetak / Print
-                </a>
-
-                <!-- BUKA FORM PRESENSI -->
-                <a href="/presensi/<%= meeting_id %>" target="_blank" style="display:inline-flex; align-items:center; gap:6px; padding:9px 16px; background:#2563eb; color:#ffffff; border-radius:10px; font-size:12.5px; font-weight:600; text-decoration:none; box-shadow:0 4px 12px rgba(37,99,235,0.25); transition: 0.2s;">
+            <div class="presensi-nav-actions">
+                <!-- BUKA FORM PRESENSI (PRIMARY ACTION) -->
+                <a href="/presensi/<%= meeting_id %>" target="_blank" class="btn-nav-primary">
                     ✍️ Buka Form Presensi Peserta ↗
                 </a>
+
+                <div class="presensi-nav-secondary">
+                    <!-- TOMBOL UNDUH PRESENSI PDF -->
+                    <button type="button" id="btnDownloadPresensiPdf" onclick="downloadPresensiPdf()" class="btn-nav-pdf">
+                        📥 Unduh Presensi (PDF)
+                    </button>
+
+                    <!-- TOMBOL PRATINJAU CETAK -->
+                    <a href="/daftar-presensi/<%= meeting_id %>/pdf" target="_blank" class="btn-nav-print" title="Lihat Lembar Format Cetak A4">
+                        🖨️ Cetak / Print
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -99,29 +404,30 @@
                             </div>
 
                             <div class="detail-item">
-                                <span class="detail-label">🏢 Instansi</span>
-                                <span class="detail-value"><%= peserta.instansi || "-" %></span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">💼 Jabatan</span>
-                                <span class="detail-value"><%= peserta.jabatan || "-" %></span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">✉️ Email</span>
-                                <span class="detail-value"><%= peserta.email || "-" %></span>
-                            </div>
-
-                            <div class="detail-item full-width">
-                                <span class="detail-label">📝 Keterangan</span>
-                                <span class="detail-value"><%= peserta.keterangan || "-" %></span>
-                            </div>
-
-                            <div class="detail-item full-width">
                                 <span class="detail-label">⏰ Waktu Presensi</span>
                                 <span class="detail-value time-badge"><%= peserta.waktu_presensi ? (peserta.waktu_presensi instanceof Date ? peserta.waktu_presensi.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : peserta.waktu_presensi) : '-' %></span>
                             </div>
+
+                            <% if (peserta.instansi && peserta.instansi !== '-') { %>
+                            <div class="detail-item">
+                                <span class="detail-label">🏢 Instansi</span>
+                                <span class="detail-value"><%= peserta.instansi %></span>
+                            </div>
+                            <% } %>
+
+                            <% if (peserta.jabatan && peserta.jabatan !== '-') { %>
+                            <div class="detail-item">
+                                <span class="detail-label">💼 Jabatan</span>
+                                <span class="detail-value"><%= peserta.jabatan %></span>
+                            </div>
+                            <% } %>
+
+                            <% if (peserta.keterangan && peserta.keterangan !== '-') { %>
+                            <div class="detail-item full-width">
+                                <span class="detail-label">📝 Keterangan</span>
+                                <span class="detail-value"><%= peserta.keterangan %></span>
+                            </div>
+                            <% } %>
                         </div>
 
                         <% if (peserta.tanda_tangan) { %>
