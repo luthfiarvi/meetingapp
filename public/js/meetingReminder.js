@@ -391,34 +391,22 @@
                 ${itemsHtml}
             </div>
 
-            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                <span style="font-size: 11.5px; color: #64748b;">Notifikasi Desktop Windows:</span>
-                ${notifGranted ? `
-                    <span style="font-size: 11.5px; font-weight: 700; color: #15803d;">✓ Aktif</span>
-                ` : `
-                    <button type="button" onclick="window.requestBknNotificationPermission(this)"
-                        style="font-size: 11.5px; font-weight: 700; background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer;">
-                        Aktifkan
-                    </button>
-                `}
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 13px; color: #16a34a; line-height: 1;">✓</span>
+                        <span style="font-size: 12px; font-weight: 700; color: #166534;">Pengingat Rapat Aktif</span>
+                    </div>
+                    <span style="font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 6px;">
+                        Otomatis
+                    </span>
+                </div>
+                <p style="font-size: 11px; color: #64748b; margin: 4px 0 0 0; line-height: 1.35;">
+                    Banner pengingat & suara lonceng otomatis muncul di layar web 15 menit sebelum rapat dimulai.
+                </p>
             </div>
         `;
     }
-
-    // Request Izin Desktop Notification
-    window.requestBknNotificationPermission = async function (btn) {
-        if (!("Notification" in window)) {
-            alert("Browser Anda tidak mendukung Web Notification.");
-            return;
-        }
-        const perm = await Notification.requestPermission();
-        if (perm === "granted") {
-            if (btn) btn.outerHTML = '<span style="font-size: 11.5px; font-weight: 700; color: #15803d;">✓ Aktif</span>';
-            sendDesktopNotification("🔔 Notifikasi Pengingat Aktif!", "Anda akan menerima pengingat 15 menit sebelum rapat dimulai.", null);
-        } else {
-            alert("Izin notifikasi ditolak. Anda dapat mengizinkannya melalui setelan izin browser di samping bilah URL.");
-        }
-    };
 
     // Fungsi Test Notifikasi Interaktif
     window.testBknReminder = function () {
@@ -477,3 +465,4 @@
         init();
     }
 })();
+
