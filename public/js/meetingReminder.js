@@ -313,9 +313,10 @@
         dropdown.style.cssText = `
             display: none;
             position: ${isMobile ? 'fixed' : 'absolute'};
-            top: ${isMobile ? '58px' : '52px'};
+            top: ${isMobile ? '58px' : '48px'};
             right: ${isMobile ? '12px' : '0'};
-            ${isMobile ? 'left: 12px; width: auto;' : 'width: 340px;'}
+            left: ${isMobile ? '12px' : 'auto'};
+            width: ${isMobile ? 'auto' : '340px'};
             max-width: calc(100vw - 24px);
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
@@ -449,7 +450,8 @@
         `;
 
         if (targetContainer.classList.contains('management-actions')) {
-            targetContainer.insertBefore(wrapper, targetContainer.firstChild);
+            // Tempatkan di paling kanan (setelah tombol Tambah Meeting) agar dropdown tidak terpotong sidebar
+            targetContainer.appendChild(wrapper);
         } else {
             targetContainer.insertBefore(wrapper, targetContainer.firstChild);
         }
