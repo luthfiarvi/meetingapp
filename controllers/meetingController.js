@@ -593,3 +593,87 @@ export const unenrollMeetingPegawaiController = async (req, res) => {
         return res.status(500).json({ success: false, message: "Gagal membatalkan keikutsertaan rapat" });
     }
 };
+
+// CONTROLLER PENGINGAT NOTIFIKASI RAPAT HARI INI
+export const getMyAgendaRemindersController = async (req, res) => {
+    try {
+        const currentUser = req.user || res.locals.user;
+        if (!currentUser) {
+            return res.status(401).json({ success: false, message: "Sesi login telah berakhir" });
+        }
+        const uid = currentUser.id || currentUser.username || currentUser.nip;
+        let meetings = [];
+        if (currentUser.role === 'pegawai') {
+            meetings = await meetingModel.getPegawaiMeetings(uid);
+        } else {
+            meetings = await meetingModel.getAllMeeting();
+        }
+
+        // Waktu WIB saat ini (UTC+7)
+        const nowUtc = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
+        const nowWIB = new Date(nowUtc + (7 * 3600000));
+        const y = nowWIB.getFullYear();
+        const mo = String(nowWIB.getMonth() + 1).padStart(2, '0');
+        const dt = String(nowWIB.getDate()).padStart(2, '0');
+        const todayStr = `${y}-${mo}-${dt}`;
+        const curHM = `${String(nowWIB.getHours()).padStart(2, '0')}:${String(nowWIB.getMinutes()).padStart(2, '0')}`;
+
+        // Filter untuk rapat hari ini yang belum selesai
+        const reminders = meetings.filter(m => {
+            let rawIsoDate = '';
+            if (m.tanggal) {
+                if (typeof m.tanggal === 'string' && m.tanggal.match(/^\d{4}-\d{2}-\d{2}/)) {
+                    rawIsoDate = m.tanggal.substring(0, 10);
+                } else {
+                    const d = new Date(m.tanggal);
+                    if (!isNaN(d.getTime())) {
+                        const yr = d.getFullYear();
+                        const mon = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        rawIsoDate = `${yr}-${mon}-${day}`;
+                    }
+                }
+            }
+            if (rawIsoDate !== todayStr) return false;
+
+            let wSelesai = m.waktu_selesai || '';
+            if (!wSelesai && m.deskripsi) {
+                const matchSelesai = m.deskripsi.match(/-\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchSelesai) wSelesai = matchSelesai[1];
+            }
+            if (wSelesai) wSelesai = wSelesai.replace(':', '.');
+            const endHM = wSelesai ? wSelesai.replace('.', ':') : '23:59';
+            if (endHM && curHM > endHM) return false;
+
+            return true;
+        }).map(m => {
+            let wMulai = m.waktu_mulai || '';
+            let wSelesai = m.waktu_selesai || '';
+            if (!wMulai && m.deskripsi) {
+                const matchMulai = m.deskripsi.match(/Waktu:\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchMulai) wMulai = matchMulai[1];
+            }
+            if (!wSelesai && m.deskripsi) {
+                const matchSelesai = m.deskripsi.match(/-\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchSelesai) wSelesai = matchSelesai[1];
+            }
+            if (wMulai) wMulai = wMulai.replace(':', '.');
+            if (wSelesai) wSelesai = wSelesai.replace(':', '.');
+
+            return {
+                meeting_id: m.meeting_id,
+                meeting_nama: m.meeting_nama || m.m_nama || 'Agenda Rapat BKN',
+                tanggal: todayStr,
+                waktu_mulai: wMulai,
+                waktu_selesai: wSelesai,
+                zoom_link: m.zoom_link || '',
+                tipe_meeting: m.tipe_meeting || m.m_tipe || 'Rapat'
+            };
+        });
+
+        return res.json({ success: true, server_time: curHM, today: todayStr, data: reminders });
+    } catch (err) {
+        console.error("Error getMyAgendaRemindersController:", err);
+        return res.status(500).json({ success: false, message: "Gagal memuat pengingat rapat" });
+    }
+};

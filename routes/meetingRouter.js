@@ -9,7 +9,8 @@ import {
     saveMeetingPhotosController,
     getAvailableMeetingsPegawaiController,
     enrollMeetingPegawaiController,
-    unenrollMeetingPegawaiController
+    unenrollMeetingPegawaiController,
+    getMyAgendaRemindersController
 } from "../controllers/meetingController.js";
 import { previewSertifikat } from "../controllers/presensiController.js";
 
@@ -28,5 +29,8 @@ routerMeeting.get("/sertifikat/preview/:meeting_id", previewSertifikat);
 routerMeeting.get("/api/pegawai/available-meetings", ensureAuthenticated, getAvailableMeetingsPegawaiController);
 routerMeeting.post("/api/pegawai/enroll-meeting", ensureAuthenticated, enrollMeetingPegawaiController);
 routerMeeting.post("/api/pegawai/unenroll-meeting", ensureAuthenticated, unenrollMeetingPegawaiController);
+
+// API PENGINGAT NOTIFIKASI RAPAT HARI INI (SEMUA USER / PEGAWAI)
+routerMeeting.get("/api/user/my-agenda-reminders", ensureAuthenticated, getMyAgendaRemindersController);
 
 export default routerMeeting;
