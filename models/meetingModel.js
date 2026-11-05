@@ -525,16 +525,109 @@ export const getAvailableMeetingsForPegawai = async (userId) => {
         );
         const enrolledIds = new Set(enrolledRes.rows.map(r => String(r.meeting_id)));
         const all = await getAllMeeting();
-        return all.map(m => ({
-            meeting_id: m.meeting_id,
-            meeting_nama: m.meeting_nama || m.m_nama || 'Agenda Rapat BKN',
-            tanggal: m.tanggal,
-            tipe_meeting: m.tipe_meeting || m.m_tipe || 'Rapat',
-            deskripsi: m.deskripsi,
-            zoom_link: m.zoom_link,
-            thumbnail: m.thumbnail,
-            is_enrolled: enrolledIds.has(String(m.meeting_id))
-        }));
+
+        // Waktu WIB saat ini (UTC+7)
+        const nowUtc = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
+        const nowWIB = new Date(nowUtc + (7 * 3600000));
+        const y = nowWIB.getFullYear();
+        const mo = String(nowWIB.getMonth() + 1).padStart(2, '0');
+        const dt = String(nowWIB.getDate()).padStart(2, '0');
+        const todayStr = `${y}-${mo}-${dt}`;
+        const curHM = `${String(nowWIB.getHours()).padStart(2, '0')}:${String(nowWIB.getMinutes()).padStart(2, '0')}`;
+
+        // Filter: HANYA tampilkan rapat yang belum berakhir (rapat yang sudah berakhir jangan ditampilkan di pilihan)
+        const activeMeetings = all.filter(m => {
+            let rawIsoDate = '';
+            if (m.tanggal) {
+                if (typeof m.tanggal === 'string' && m.tanggal.match(/^\d{4}-\d{2}-\d{2}/)) {
+                    rawIsoDate = m.tanggal.substring(0, 10);
+                } else {
+                    const d = new Date(m.tanggal);
+                    if (!isNaN(d.getTime())) {
+                        const yr = d.getFullYear();
+                        const mon = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        rawIsoDate = `${yr}-${mon}-${day}`;
+                    }
+                }
+            }
+
+            // Jika tanggal tidak ada atau tidak valid, jangan tampilkan di pilihan rapat
+            if (!rawIsoDate) return false;
+
+            // Ekstrak waktu selesai jika ada
+            let wSelesai = m.waktu_selesai || '';
+            if (!wSelesai && m.deskripsi) {
+                const matchSelesai = m.deskripsi.match(/-\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchSelesai) wSelesai = matchSelesai[1];
+            }
+            if (wSelesai) wSelesai = wSelesai.replace(':', '.');
+            const endHM = wSelesai ? wSelesai.replace('.', ':') : '23:59';
+
+            // 1. Rapat dengan tanggal di masa lalu (sebelum hari ini) -> SUDAH BERAKHIR (JANGAN TAMPILKAN)
+            if (rawIsoDate < todayStr) {
+                return false;
+            }
+
+            // 2. Rapat hari ini dengan jam selesai sudah lewat -> SUDAH BERAKHIR (JANGAN TAMPILKAN)
+            if (rawIsoDate === todayStr && endHM && curHM > endHM) {
+                return false;
+            }
+
+            return true;
+        });
+
+        return activeMeetings.map(m => {
+            let rawIsoDate = '';
+            if (m.tanggal) {
+                if (typeof m.tanggal === 'string' && m.tanggal.match(/^\d{4}-\d{2}-\d{2}/)) {
+                    rawIsoDate = m.tanggal.substring(0, 10);
+                } else {
+                    const d = new Date(m.tanggal);
+                    if (!isNaN(d.getTime())) {
+                        const yr = d.getFullYear();
+                        const mon = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        rawIsoDate = `${yr}-${mon}-${day}`;
+                    }
+                }
+            }
+
+            let wMulai = m.waktu_mulai || '';
+            let wSelesai = m.waktu_selesai || '';
+            if (!wMulai && m.deskripsi) {
+                const matchMulai = m.deskripsi.match(/Waktu:\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchMulai) wMulai = matchMulai[1];
+            }
+            if (!wSelesai && m.deskripsi) {
+                const matchSelesai = m.deskripsi.match(/-\s*(\d{1,2}[:.]\d{2})/i);
+                if (matchSelesai) wSelesai = matchSelesai[1];
+            }
+            if (wMulai) wMulai = wMulai.replace(':', '.');
+            if (wSelesai) wSelesai = wSelesai.replace(':', '.');
+            const startHM = wMulai ? wMulai.replace('.', ':') : '';
+
+            let statusWaktu = 'upcoming'; // Belum Mulai
+            if (rawIsoDate === todayStr) {
+                if (startHM && curHM >= startHM) {
+                    statusWaktu = 'active'; // Sedang Berlangsung
+                }
+            }
+
+            return {
+                meeting_id: m.meeting_id,
+                meeting_nama: m.meeting_nama || m.m_nama || 'Agenda Rapat BKN',
+                tanggal: m.tanggal,
+                waktu_mulai: wMulai,
+                waktu_selesai: wSelesai,
+                status_waktu: statusWaktu,
+                tipe_meeting: m.tipe_meeting || m.m_tipe || 'Rapat',
+                deskripsi: m.deskripsi,
+                zoom_link: m.zoom_link,
+                thumbnail: m.thumbnail,
+                is_enrolled: enrolledIds.has(String(m.meeting_id))
+            };
+        });
     } catch (e) {
         console.error("Error getAvailableMeetingsForPegawai:", e.message);
         return [];

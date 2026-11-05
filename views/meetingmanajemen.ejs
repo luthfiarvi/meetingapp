@@ -1103,7 +1103,7 @@
                 <div class="modal-icon" style="background:#eef2ff; color:#4f46e5;">📅</div>
                 <div>
                     <h2>Pilih & Tambah Rapat ke Agenda</h2>
-                    <p>Pilih ruang rapat yang ingin Anda ikuti untuk dimasukkan ke agenda pribadi</p>
+                    <p>Daftar ruang rapat yang belum mulai untuk dimasukkan ke agenda pribadi Anda</p>
                 </div>
             </div>
 
@@ -2187,15 +2187,15 @@
             listEl.innerHTML = '';
 
             if (infoEl) {
-                infoEl.textContent = `Menampilkan ${meetingsToRender.length} ruang rapat`;
+                infoEl.textContent = `Menampilkan ${meetingsToRender.length} ruang rapat (belum mulai / aktif)`;
             }
 
             if (!meetingsToRender || meetingsToRender.length === 0) {
                 listEl.innerHTML = `
-                    <div style="text-align: center; padding: 32px 16px; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
-                        <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
-                        <strong style="color: #1e293b; font-size: 14px;">Tidak Ada Rapat yang Cocok</strong>
-                        <p style="font-size: 12.5px; margin: 4px 0 0;">Coba cari dengan kata kunci lain atau periksa ID rapat.</p>
+                    <div style="text-align: center; padding: 36px 16px; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+                        <span style="font-size: 36px; display: block; margin-bottom: 8px;">📅</span>
+                        <strong style="color: #1e293b; font-size: 14px;">Belum Ada Rapat Mendatang yang Tersedia</strong>
+                        <p style="font-size: 12.5px; margin: 4px 0 0; color: #64748b;">Seluruh rapat sebelumnya telah berakhir. Rapat baru yang belum mulai akan muncul di sini secara otomatis.</p>
                     </div>
                 `;
                 return;
@@ -2221,6 +2221,18 @@
                 let tglFormatted = m.tanggal ? new Date(m.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
                 const safeName = (m.meeting_nama || '').replace(/'/g, "\\'");
 
+                let statusBadgeHtml = '';
+                if (m.status_waktu === 'active') {
+                    statusBadgeHtml = `<span style="font-size: 10px; font-weight: 700; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 6px;">🔴 Berlangsung</span>`;
+                } else {
+                    statusBadgeHtml = `<span style="font-size: 10px; font-weight: 700; color: #4338ca; background: #e0e7ff; padding: 2px 7px; border-radius: 6px;">⏰ Belum Mulai</span>`;
+                }
+
+                let waktuText = '';
+                if (m.waktu_mulai) {
+                    waktuText = ` • 🕒 ${m.waktu_mulai}${m.waktu_selesai ? ' - ' + m.waktu_selesai : ''}`;
+                }
+
                 item.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
                         <div style="width: 44px; height: 44px; border-radius: 10px; background: ${tipeBadgeBg}; color: ${tipeBadgeColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
@@ -2231,11 +2243,12 @@
                                 <span style="font-size: 10.5px; font-weight: 700; color: ${tipeBadgeColor}; background: ${tipeBadgeBg}; padding: 2px 7px; border-radius: 6px;">
                                     ${tipe}
                                 </span>
+                                ${statusBadgeHtml}
                                 <span style="font-size: 11px; font-weight: 600; color: #64748b;">
                                     #${m.meeting_id}
                                 </span>
                                 <span style="font-size: 11px; color: #64748b;">
-                                    • 📅 ${tglFormatted}
+                                    • 📅 ${tglFormatted}${waktuText}
                                 </span>
                             </div>
                             <h4 style="font-size: 13.5px; font-weight: 700; color: #1e293b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.meeting_nama}">
