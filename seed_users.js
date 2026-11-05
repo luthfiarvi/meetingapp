@@ -17,6 +17,7 @@ async function run() {
         // 2. Hash password
         const adminHash = await bcrypt.hash("admin123", 10);
         const userHash = await bcrypt.hash("user123", 10);
+        const pegawaiHash = await bcrypt.hash("198205122008122001", 10);
 
         // 3. Masukkan data sesuai dengan kolom yang memang tersedia di tabel
         if (existingCols.includes("username") && existingCols.includes("full_name")) {
@@ -25,34 +26,38 @@ async function run() {
                 VALUES 
                 ('admin', 'admin', $1, 'admin', 'Divisi Sidigi', '199505122020121005', 'Divisi Sidigi'),
                 ('user', 'user', $2, 'user', 'Pegawai BKN', '1231236567', 'Divisi Pembinaan'),
-                ('user2', 'user2', $2, 'user', 'user 2', '', 'Divisi Pemecatan')
-                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
-            `, [adminHash, userHash]);
+                ('user2', 'user2', $2, 'user', 'user 2', '', 'Divisi Pemecatan'),
+                ('198205122008122001', '198205122008122001', $3, 'pegawai', 'Pegawai BKN', '198205122008122001', 'Kantor Regional V BKN')
+                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password, role = EXCLUDED.role, full_name = EXCLUDED.full_name, nip = EXCLUDED.nip, division = EXCLUDED.division;
+            `, [adminHash, userHash, pegawaiHash]);
         } else if (existingCols.includes("username")) {
             await pool.query(`
                 INSERT INTO users (id, username, password, role)
                 VALUES 
                 ('admin', 'admin', $1, 'admin'),
                 ('user', 'user', $2, 'user'),
-                ('user2', 'user2', $2, 'user')
-                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
-            `, [adminHash, userHash]);
+                ('user2', 'user2', $2, 'user'),
+                ('198205122008122001', '198205122008122001', $3, 'pegawai')
+                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password, role = EXCLUDED.role;
+            `, [adminHash, userHash, pegawaiHash]);
         } else if (existingCols.includes("password")) {
             await pool.query(`
                 INSERT INTO users (id, password, role)
                 VALUES 
                 ('admin', $1, 'admin'),
                 ('user', $2, 'user'),
-                ('user2', $2, 'user')
-                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password;
-            `, [adminHash, userHash]);
+                ('user2', $2, 'user'),
+                ('198205122008122001', $3, 'pegawai')
+                ON CONFLICT (id) DO UPDATE SET password = EXCLUDED.password, role = EXCLUDED.role;
+            `, [adminHash, userHash, pegawaiHash]);
         }
 
         console.log("==================================================");
-        console.log("✅ BERHASIL! Akun admin dan user siap digunakan:");
-        console.log("1. Admin -> ID: admin | Password: admin123");
-        console.log("2. User  -> ID: user  | Password: user123");
-        console.log("3. User2 -> ID: user2 | Password: user123");
+        console.log("✅ BERHASIL! Akun admin, user, dan pegawai siap digunakan:");
+        console.log("1. Admin   -> ID: admin | Password: admin123");
+        console.log("2. User    -> ID: user  | Password: user123");
+        console.log("3. User2   -> ID: user2 | Password: user123");
+        console.log("4. Pegawai -> ID: 198205122008122001 | Password: 198205122008122001");
         console.log("==================================================");
 
         const checkUsers = await pool.query("SELECT * FROM users");

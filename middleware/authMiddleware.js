@@ -28,3 +28,17 @@ export const ensureAdmin = (req, res, next) => {
     return res.redirect("/dashboard?error=" + encodeURIComponent("Akses ditolak. Fitur Manajemen User hanya dapat diakses oleh Administrator."));
 };
 
+export const ensureNotPegawai = (req, res, next) => {
+    const currentUser = req.user || res.locals.user;
+    if (currentUser && currentUser.role === "pegawai") {
+        if (req.xhr || req.headers.accept?.includes("json") || req.path?.startsWith("/api/")) {
+            return res.status(403).json({
+                success: false,
+                message: "Akses dibatasi. Fitur ini hanya dapat diakses oleh User Tim Kerja & Administrator."
+            });
+        }
+        return res.redirect("/manajemenmeeting?error=" + encodeURIComponent("Akses dibatasi. Fitur ini hanya dapat diakses oleh User Tim Kerja & Administrator."));
+    }
+    return next();
+};
+

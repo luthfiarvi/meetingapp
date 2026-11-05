@@ -950,6 +950,7 @@
                     <span>Manajemen Meeting</span>
                 </a>
 
+                <% if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
                 <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
                     <span>📹</span>
                     <span>Request Zoom</span>
@@ -964,6 +965,7 @@
                     <span>📖</span>
                     <span>Manual Book</span>
                 </a>
+                <% } %>
             </nav>
 
             <div class="sidebar-bottom">
@@ -1029,8 +1031,12 @@
                             <strong><%= users ? users.filter(u => u.role === 'admin').length : 0 %></strong>
                         </div>
                         <div class="stat-pill pill-purple">
-                            <span>Pegawai / Divisi Lain:</span>
-                            <strong><%= users ? users.filter(u => u.role !== 'admin').length : 0 %></strong>
+                            <span>User Tim Kerja:</span>
+                            <strong><%= users ? users.filter(u => u.role === 'user').length : 0 %></strong>
+                        </div>
+                        <div class="stat-pill pill-purple" style="border-color: #ddd6fe; background: #f5f3ff;">
+                            <span style="color: #6d28d9;">User Pegawai:</span>
+                            <strong style="color: #6d28d9;"><%= users ? users.filter(u => u.role === 'pegawai').length : 0 %></strong>
                         </div>
                     </div>
 
@@ -1044,7 +1050,8 @@
                             <select id="roleFilterSelect" onchange="filterUserTable()">
                                 <option value="all">Semua Hak Akses</option>
                                 <option value="admin">Administrator (Tim Sidigi)</option>
-                                <option value="user">Pegawai / User (Divisi Lain)</option>
+                                <option value="user">User Tim (Divisi / Tim Kerja)</option>
+                                <option value="pegawai">User Pegawai (Perorangan)</option>
                             </select>
                         </div>
 
@@ -1099,8 +1106,10 @@
                                         <td>
                                             <% if (u.role === 'admin') { %>
                                                 <span class="role-badge badge-admin">👑 Admin (Tim Sidigi)</span>
+                                            <% } else if (u.role === 'pegawai') { %>
+                                                <span class="role-badge" style="background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; font-weight:700;">👤 User Pegawai</span>
                                             <% } else { %>
-                                                <span class="role-badge badge-user">👤 Pegawai / User</span>
+                                                <span class="role-badge badge-user">👥 User Tim</span>
                                             <% } %>
                                         </td>
                                         <td style="text-align: right;">
@@ -1109,7 +1118,7 @@
                                                     🔑 Ganti Password
                                                 </button>
 
-                                                <button type="button" class="btn-action btn-action-edit" onclick="openEditUserModal('<%= u.id %>', '<%= u.username || '' %>', '<%= u.full_name || '' %>', '<%= u.nip || '' %>', '<%= u.role === 'admin' ? 'admin' : 'user' %>', '<%= u.division || '' %>', '<%= u.institution || '' %>')">
+                                                <button type="button" class="btn-action btn-action-edit" onclick="openEditUserModal('<%= u.id %>', '<%= u.username || '' %>', '<%= u.full_name || '' %>', '<%= u.nip || '' %>', '<%= u.role %>', '<%= u.division || '' %>', '<%= u.institution || '' %>')">
                                                     ✏️ Edit
                                                 </button>
 
@@ -1179,7 +1188,8 @@
                         <div class="form-field">
                             <label for="newUserRole">Hak Akses (Role) <span style="color:red;">*</span></label>
                             <select id="newUserRole" name="role" required>
-                                <option value="user" selected>Pegawai / User (Divisi Lain)</option>
+                                <option value="pegawai">User Pegawai (Perorangan)</option>
+                                <option value="user" selected>User Tim (Divisi / Tim Kerja)</option>
                                 <option value="admin">Administrator (Tim Kerja Sidigi)</option>
                             </select>
                         </div>
@@ -1286,7 +1296,8 @@
                         <div class="form-field">
                             <label for="editUserRole">Hak Akses (Role)</label>
                             <select id="editUserRole" name="role" required>
-                                <option value="user">Pegawai / User (Divisi Lain)</option>
+                                <option value="pegawai">User Pegawai (Perorangan)</option>
+                                <option value="user">User Tim (Divisi / Tim Kerja)</option>
                                 <option value="admin">Administrator (Tim Kerja Sidigi)</option>
                             </select>
                         </div>

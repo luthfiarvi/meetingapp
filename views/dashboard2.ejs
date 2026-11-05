@@ -58,6 +58,7 @@
                     <span>Manajemen Meeting</span>
                 </a>
 
+                <% if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
                 <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
                     <span>📹</span>
                     <span>Request Zoom</span>
@@ -72,6 +73,7 @@
                     <span>📖</span>
                     <span>Manual Book</span>
                 </a>
+                <% } %>
 
             </nav>
 

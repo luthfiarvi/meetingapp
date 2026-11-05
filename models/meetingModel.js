@@ -54,6 +54,7 @@ export const updateMeeting = async ({
     m_tipe,
     thumbnail,
     notulen_pdf,
+    bahan_rapat,
     video_url,
     absensi,
     zoom_link,
@@ -75,6 +76,7 @@ export const updateMeeting = async ({
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS video_url TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen TEXT;
+            ALTER TABLE meetings ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_link TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_meeting_id VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS zoom_passcode VARCHAR(100);
@@ -88,6 +90,7 @@ export const updateMeeting = async ({
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS sertifikat_layout_mode VARCHAR(50) DEFAULT 'full';
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS sertifikat_format_nomor VARCHAR(255);
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS sertifikat_format_nomor VARCHAR(255);
+            ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_bg TEXT;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_enable_ttd BOOLEAN DEFAULT TRUE;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_layout_mode VARCHAR(50) DEFAULT 'full';
@@ -130,6 +133,10 @@ export const updateMeeting = async ({
             values.push(notulen_pdf);
             setClauses.push(`notulen = $${pIndex++}`);
             values.push(notulen_pdf);
+        }
+        if (bahan_rapat !== undefined && bahan_rapat !== null) {
+            setClauses.push(`bahan_rapat = $${pIndex++}`);
+            values.push(bahan_rapat);
         }
         if (video_url !== undefined && video_url !== null) {
             setClauses.push(`video_url = $${pIndex++}`);
@@ -203,11 +210,12 @@ export const updateMeeting = async ({
 
         try {
             await pool.query(`
-                INSERT INTO meeting_media (meeting_id, thumbnail, notulen_pdf, video_url, absensi, sertifikat_bg, sertifikat_enable_ttd, sertifikat_layout_mode, sertifikat_format_nomor, updated_at)
-                VALUES ($1::int, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
+                INSERT INTO meeting_media (meeting_id, thumbnail, notulen_pdf, bahan_rapat, video_url, absensi, sertifikat_bg, sertifikat_enable_ttd, sertifikat_layout_mode, sertifikat_format_nomor, updated_at)
+                VALUES ($1::int, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)
                 ON CONFLICT (meeting_id) DO UPDATE SET
                     thumbnail = COALESCE(NULLIF(EXCLUDED.thumbnail, ''), meeting_media.thumbnail),
                     notulen_pdf = COALESCE(NULLIF(EXCLUDED.notulen_pdf, ''), meeting_media.notulen_pdf),
+                    bahan_rapat = COALESCE(NULLIF(EXCLUDED.bahan_rapat, ''), meeting_media.bahan_rapat),
                     video_url = COALESCE(NULLIF(EXCLUDED.video_url, ''), meeting_media.video_url),
                     absensi = COALESCE(NULLIF(EXCLUDED.absensi, ''), meeting_media.absensi),
                     sertifikat_bg = COALESCE(NULLIF(EXCLUDED.sertifikat_bg, ''), meeting_media.sertifikat_bg),
@@ -215,7 +223,7 @@ export const updateMeeting = async ({
                     sertifikat_layout_mode = COALESCE(NULLIF(EXCLUDED.sertifikat_layout_mode, ''), meeting_media.sertifikat_layout_mode),
                     sertifikat_format_nomor = COALESCE(NULLIF(EXCLUDED.sertifikat_format_nomor, ''), meeting_media.sertifikat_format_nomor),
                     updated_at = CURRENT_TIMESTAMP
-            `, [mId, thumbnail || null, notulen_pdf || null, video_url || null, absensi || null, sertifikat_bg || null, isTtdBool, sertifikat_layout_mode || null, sertifikat_format_nomor || null]);
+            `, [mId, thumbnail || null, notulen_pdf || null, bahan_rapat || null, video_url || null, absensi || null, sertifikat_bg || null, isTtdBool, sertifikat_layout_mode || null, sertifikat_format_nomor || null]);
         } catch (mmErr) {
             console.warn("⚠️ Warning upsert meeting_media:", mmErr.message);
         }
@@ -249,6 +257,7 @@ export const updateMeeting = async ({
             if (sertifikat_format_nomor !== undefined && sertifikat_format_nomor !== null) metaStore[mIdStr].sertifikat_format_nomor = sertifikat_format_nomor;
             if (thumbnail) metaStore[mIdStr].thumbnail = thumbnail;
             if (notulen_pdf) metaStore[mIdStr].notulen_pdf = notulen_pdf;
+            if (bahan_rapat) metaStore[mIdStr].bahan_rapat = bahan_rapat;
             if (video_url) metaStore[mIdStr].video_url = video_url;
             if (absensi) metaStore[mIdStr].absensi = absensi;
             saveMetadataStore(metaStore);
@@ -311,6 +320,7 @@ export const getAllMeeting = async () => {
             if (mm) {
                 if (!row.thumbnail && mm.thumbnail) row.thumbnail = mm.thumbnail;
                 if (!row.notulen_pdf && mm.notulen_pdf) row.notulen_pdf = mm.notulen_pdf;
+                if (!row.bahan_rapat && mm.bahan_rapat) row.bahan_rapat = mm.bahan_rapat;
                 if (!row.video_url && mm.video_url) row.video_url = mm.video_url;
                 if (!row.absensi && mm.absensi) row.absensi = mm.absensi;
                 if (!row.sertifikat_bg && mm.sertifikat_bg) row.sertifikat_bg = mm.sertifikat_bg;
@@ -364,6 +374,7 @@ export const getAllMeeting = async () => {
                 if (!row.sertifikat_format_nomor && meta.sertifikat_format_nomor) row.sertifikat_format_nomor = meta.sertifikat_format_nomor;
                 if (!row.thumbnail && meta.thumbnail) row.thumbnail = meta.thumbnail;
                 if (!row.notulen_pdf && meta.notulen_pdf) row.notulen_pdf = meta.notulen_pdf;
+                if (!row.bahan_rapat && meta.bahan_rapat) row.bahan_rapat = meta.bahan_rapat;
                 if (!row.video_url && meta.video_url) row.video_url = meta.video_url;
                 if (!row.absensi && meta.absensi) row.absensi = meta.absensi;
             }
@@ -395,6 +406,7 @@ export const getMeetingById = async (id) => {
             const mm = mmRes.rows[0];
             if (!meeting.thumbnail && mm.thumbnail) meeting.thumbnail = mm.thumbnail;
             if (!meeting.notulen_pdf && mm.notulen_pdf) meeting.notulen_pdf = mm.notulen_pdf;
+            if (!meeting.bahan_rapat && mm.bahan_rapat) meeting.bahan_rapat = mm.bahan_rapat;
             if (!meeting.video_url && mm.video_url) meeting.video_url = mm.video_url;
             if (!meeting.absensi && mm.absensi) meeting.absensi = mm.absensi;
             if (!meeting.sertifikat_bg && mm.sertifikat_bg) meeting.sertifikat_bg = mm.sertifikat_bg;
@@ -441,6 +453,7 @@ export const getMeetingById = async (id) => {
             if (!meeting.sertifikat_format_nomor && meta.sertifikat_format_nomor) meeting.sertifikat_format_nomor = meta.sertifikat_format_nomor;
             if (!meeting.thumbnail && meta.thumbnail) meeting.thumbnail = meta.thumbnail;
             if (!meeting.notulen_pdf && meta.notulen_pdf) meeting.notulen_pdf = meta.notulen_pdf;
+            if (!meeting.bahan_rapat && meta.bahan_rapat) meeting.bahan_rapat = meta.bahan_rapat;
             if (!meeting.video_url && meta.video_url) meeting.video_url = meta.video_url;
             if (!meeting.absensi && meta.absensi) meeting.absensi = meta.absensi;
         }
@@ -449,9 +462,93 @@ export const getMeetingById = async (id) => {
     return meeting;
 };
 
+export const initPegawaiMeetingsTable = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS pegawai_meetings (
+                id SERIAL PRIMARY KEY,
+                user_id VARCHAR(100) NOT NULL,
+                meeting_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, meeting_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_pegawai_meetings_user ON pegawai_meetings(user_id);
+        `);
+    } catch (err) {
+        console.warn("⚠️ Warning initPegawaiMeetingsTable:", err.message);
+    }
+};
+
+export const getPegawaiMeetings = async (userId) => {
+    await initPegawaiMeetingsTable();
+    try {
+        const res = await pool.query(
+            "SELECT meeting_id FROM pegawai_meetings WHERE user_id = $1 ORDER BY created_at DESC",
+            [String(userId).trim()]
+        );
+        const meetingIds = new Set(res.rows.map(r => String(r.meeting_id)));
+        const all = await getAllMeeting();
+        return all.filter(m => meetingIds.has(String(m.meeting_id)));
+    } catch (e) {
+        console.error("Error getPegawaiMeetings:", e.message);
+        return [];
+    }
+};
+
+export const addPegawaiMeeting = async (userId, meetingId) => {
+    await initPegawaiMeetingsTable();
+    const res = await pool.query(
+        `INSERT INTO pegawai_meetings (user_id, meeting_id) 
+         VALUES ($1, $2::int) 
+         ON CONFLICT (user_id, meeting_id) DO NOTHING 
+         RETURNING *`,
+        [String(userId).trim(), parseInt(meetingId, 10)]
+    );
+    return res.rows[0] || null;
+};
+
+export const removePegawaiMeeting = async (userId, meetingId) => {
+    await initPegawaiMeetingsTable();
+    await pool.query(
+        "DELETE FROM pegawai_meetings WHERE user_id = $1 AND meeting_id = $2::int",
+        [String(userId).trim(), parseInt(meetingId, 10)]
+    );
+    return true;
+};
+
+export const getAvailableMeetingsForPegawai = async (userId) => {
+    await initPegawaiMeetingsTable();
+    try {
+        const enrolledRes = await pool.query(
+            "SELECT meeting_id FROM pegawai_meetings WHERE user_id = $1",
+            [String(userId).trim()]
+        );
+        const enrolledIds = new Set(enrolledRes.rows.map(r => String(r.meeting_id)));
+        const all = await getAllMeeting();
+        return all.map(m => ({
+            meeting_id: m.meeting_id,
+            meeting_nama: m.meeting_nama || m.m_nama || 'Agenda Rapat BKN',
+            tanggal: m.tanggal,
+            tipe_meeting: m.tipe_meeting || m.m_tipe || 'Rapat',
+            deskripsi: m.deskripsi,
+            zoom_link: m.zoom_link,
+            thumbnail: m.thumbnail,
+            is_enrolled: enrolledIds.has(String(m.meeting_id))
+        }));
+    } catch (e) {
+        console.error("Error getAvailableMeetingsForPegawai:", e.message);
+        return [];
+    }
+};
+
 export default {
     createMeeting,
     updateMeeting,
     getAllMeeting,
-    getMeetingById
+    getMeetingById,
+    initPegawaiMeetingsTable,
+    getPegawaiMeetings,
+    addPegawaiMeeting,
+    removePegawaiMeeting,
+    getAvailableMeetingsForPegawai
 };

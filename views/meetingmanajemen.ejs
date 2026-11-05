@@ -56,6 +56,7 @@
                             <span>Manajemen Meeting</span>
                         </a>
 
+                        <% if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
                         <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
                             <span>📹</span>
                             <span>Request Zoom</span>
@@ -70,6 +71,7 @@
                             <span>📖</span>
                             <span>Manual Book</span>
                         </a>
+                        <% } %>
             </nav>
 
             <div class="sidebar-bottom">
@@ -91,13 +93,24 @@
                         📑
                     </div>
                     <div class="management-title-text">
-                        <h1>Manajemen Meeting</h1>
-                        <p>Halaman untuk menambah, edit dan kelola daftar meeting BKN</p>
+                        <h1><%= (typeof user !== 'undefined' && user && user.role === 'pegawai') ? 'Agenda Rapat Saya' : 'Manajemen Meeting' %></h1>
+                        <p><%= (typeof user !== 'undefined' && user && user.role === 'pegawai') ? 'Daftar agenda ruang rapat yang Anda ikuti' : 'Halaman untuk menambah, edit dan kelola daftar meeting BKN' %></p>
                     </div>
                 </div>
 
                 <div class="management-actions"
                     style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+
+                    <% if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                        <!-- KHUSUS USER PEGAWAI: TOMBOL TAMBAH RAPAT KE AGENDA PRIBADI -->
+                        <button type="button" class="btn-add-primary" onclick="openPilihRapatPegawaiModal()"
+                            style="background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%); display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3); white-space: nowrap; cursor: pointer; border: none; padding: 0.65rem 1.15rem; font-weight: 700; font-size: 0.875rem; border-radius: 0.625rem; color: #fff;"
+                            title="Pilih & tambahkan ruang rapat ke agenda pribadi Anda">
+                            <span style="font-size: 1.1rem; line-height: 1;">＋</span>
+                            <span>Tambah Rapat</span>
+                        </button>
+                    <% } %>
+
                     <div class="search-box-wrapper">
                         <span class="search-icon">🔍</span>
                         <input type="text" id="searchMeeting" placeholder="Cari Meeting..." onkeyup="filterMeetings()">
@@ -120,15 +133,15 @@
                         <button type="button" class="btn-add-primary" onclick="openMeetingModal()">
                             ＋ Tambah Meeting
                         </button>
-                        <% } else { %>
-                            <!-- KHUSUS USER (DIVISI LAIN) -->
+                        <% } else if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
+                            <!-- KHUSUS USER TIM (DIVISI LAIN) -->
                             <a href="/request-zoom" class="btn-add-primary"
                                 style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); white-space: nowrap;"
                                 title="Ajukan permohonan lisensi/jadwal rapat Zoom ke Tim Kerja Sidigi">
                                 <span>📹</span>
                                 <span>Request Zoom Meeting</span>
                             </a>
-                            <% } %>
+                        <% } %>
                 </div>
             </section>
 
@@ -253,7 +266,7 @@
                                 creatorCandidates.some(c => userIdentifiers.some(u => u === c || c.includes(u) || u.includes(c)));
 
                             let meetingCreator = m.creator_user_id || m.pembuat || m.user_id || '';
-                            let canManageMeeting = (typeof user !== 'undefined' && user) ? true : false;
+                            let canManageMeeting = (typeof user !== 'undefined' && user && user.role !== 'pegawai') ? true : false;
                             let safeMeetingTitle = (m.meeting_nama || m.m_nama || 'Agenda Rapat BKN').replace(/"/g, '&quot;');
                             let safeMeetingDesc = (m.deskripsi || '').replace(/"/g, '&quot;');
                             let safeCreator = (meetingCreator || 'Admin BKN').replace(/"/g, '&quot;');
@@ -330,6 +343,7 @@
                              data-waktu-selesai="<%= wSelesai %>"
                              data-thumbnail="<%= m.thumbnail || '' %>"
                              data-pdf-url="<%= m.notulen_pdf || m.notulen || '' %>"
+                             data-bahan-rapat="<%= m.bahan_rapat || '' %>"
                              data-video-url="<%= m.video_url || '' %>"
                              data-absensi="<%= m.absensi || '' %>"
                              data-sertif-bg="<%= m.sertifikat_bg || '' %>"
@@ -413,6 +427,7 @@
                                                                 onclick="openSertifikatModal('<%= m.meeting_id %>', '<%= safeMeetingTitle %>', 'list')">
                                                                 📜 Sertifikat
                                                             </button>
+                                                            <% if (canManageMeeting) { %>
                                                             <button type="button" class="btn-card-action"
                                                                 style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; font-weight:700; border-radius:8px; font-size:11.5px; padding:6px 10px; cursor:pointer;"
                                                                 onclick="openSertifikatModal('<%= m.meeting_id %>', '<%= safeMeetingTitle %>', 'config')"
@@ -420,10 +435,42 @@
                                                                 🎨 Template
                                                             </button>
                                                             <% } %>
+                                                            <% } %>
+                                                            <button type="button" class="btn-card-bahan"
+                                                                onclick="openBahanRapatModal(this, '<%= m.meeting_id || m.m_id || m.id %>', '<%= safeMeetingTitle %>')"
+                                                                title="Lihat Bahan Rapat">
+                                                                📁 Bahan Rapat
+                                                            </button>
+
+                                                            <% if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                                                            <button type="button" class="btn-card-unenroll"
+                                                                onclick="handleUnenrollPegawaiMeeting('<%= m.meeting_id || m.m_id || m.id %>', '<%= safeMeetingTitle %>')"
+                                                                title="Hapus rapat ini dari agenda pribadi saya">
+                                                                ❌ Batal Ikuti
+                                                            </button>
+                                                            <% } %>
                                             </div>
                                 </div>
                             </div>
                             <% }); %>
+                                <% } else if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                                    <!-- EMPTY STATE KHUSUS PEGAWAI BELUM IKUT RAPAT -->
+                                    <div id="pegawaiEmptyAgenda" style="grid-column: 1 / -1; text-align: center; padding: 60px 24px; background: #ffffff; border-radius: 20px; border: 2px dashed #cbd5e1; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin: 12px 0 30px;">
+                                        <div style="width: 72px; height: 72px; line-height: 72px; margin: 0 auto 16px; background: #eef2ff; border-radius: 20px; font-size: 36px;">
+                                            📅
+                                        </div>
+                                        <h2 style="font-size: 19px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">
+                                            Agenda Rapat Anda Masih Kosong
+                                        </h2>
+                                        <p style="font-size: 14px; color: #64748b; max-width: 480px; margin: 0 auto 24px; line-height: 1.6;">
+                                            Anda belum menambahkan ruang rapat ke agenda pribadi. Silakan klik tombol di bawah untuk memilih rapat yang ingin Anda ikuti.
+                                        </p>
+                                        <button type="button" onclick="openPilihRapatPegawaiModal()"
+                                            style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%); color: #ffffff; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35); transition: all 0.2s;">
+                                            <span style="font-size: 18px; line-height: 1;">＋</span>
+                                            <span>Pilih & Tambah Rapat Sekarang</span>
+                                        </button>
+                                    </div>
                                 <% } %>
 
                                     <!-- EMPTY STATE NOT FOUND -->
@@ -762,9 +809,27 @@
                     </div>
                 </div>
 
-                <div class="modal-form-group">
-                    <label for="editVideoFile">Upload Video Dokumentasi Rapat (MP4 / WebM)</label>
-                    <input type="file" id="editVideoFile" accept="video/*">
+                <div class="modal-form-row">
+                    <div class="modal-form-group">
+                        <label for="editVideoFile">Upload Video Dokumentasi Rapat (MP4 / WebM)</label>
+                        <input type="file" id="editVideoFile" accept="video/*">
+                    </div>
+
+                    <div class="modal-form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label for="editBahanRapatFile" style="margin: 0; font-size: 13px; font-weight: 600; color: #1e293b;">
+                                Upload Bahan Rapat (PDF / PPT)
+                            </label>
+                            <span id="currentBahanRapatStatus" style="font-size: 11px; font-weight: 700; color: #4f46e5;"></span>
+                        </div>
+                        <input type="file" id="editBahanRapatFile" accept=".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation">
+                        <div id="previewBahanRapatLinkWrap" style="display: none; margin-top: 6px; font-size: 11.5px;">
+                            <a id="currentBahanRapatLink" href="#" target="_blank"
+                                style="color: #4f46e5; font-weight: 700; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                                📁 Buka Berkas Bahan Rapat Terunggah Saat Ini ↗
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- UPLOAD BERKAS ABSENSI / DAFTAR HADIR MANUAL RAPAT OFFLINE -->
@@ -993,6 +1058,74 @@
 
             <div class="modal-actions" style="margin-top: 18px; justify-content: flex-end;">
                 <button type="button" class="modal-cancel" onclick="closeSertifikatModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LIHAT BAHAN RAPAT -->
+    <div class="meeting-modal" id="bahanRapatModal" style="z-index: 10400;">
+        <div class="meeting-modal-content" style="max-width: 540px; width: 95%;">
+            <button type="button" class="modal-close" onclick="closeBahanRapatModal()">×</button>
+
+            <div class="modal-title">
+                <div class="modal-icon" style="background:#ede9fe; color:#4f46e5;">📁</div>
+                <div>
+                    <h2>Bahan Rapat</h2>
+                    <p id="bahanRapatModalSubtitle">Materi & berkas pendukung rapat</p>
+                </div>
+            </div>
+
+            <div id="bahanRapatContent" style="padding: 10px 0 6px;">
+                <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 36px 20px; text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: 12px;">📂</div>
+                    <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Belum Ada Bahan Rapat</h3>
+                    <p style="font-size: 13px; color: #64748b; max-width: 360px; margin: 0 auto 16px; line-height: 1.5;">
+                        Materi presentasi atau dokumen pendukung untuk rapat ini belum diunggah.
+                    </p>
+                    <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #4f46e5; background: #eef2ff; padding: 6px 14px; border-radius: 20px; border: 1px solid #c7d2fe;">
+                        ℹ️ Penempatan upload bahan rapat akan segera diaktifkan
+                    </span>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 18px; justify-content: flex-end;">
+                <button type="button" class="modal-cancel" onclick="closeBahanRapatModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PILIH & TAMBAH RAPAT KE AGENDA PEGAWAI -->
+    <div class="meeting-modal" id="modalPilihRapatPegawai" style="z-index: 10400;">
+        <div class="meeting-modal-content" style="max-width: 720px; width: 95%; max-height: 88vh; display: flex; flex-direction: column;">
+            <button type="button" class="modal-close" onclick="closePilihRapatPegawaiModal()">×</button>
+
+            <div class="modal-title" style="margin-bottom: 14px;">
+                <div class="modal-icon" style="background:#eef2ff; color:#4f46e5;">📅</div>
+                <div>
+                    <h2>Pilih & Tambah Rapat ke Agenda</h2>
+                    <p>Pilih ruang rapat yang ingin Anda ikuti untuk dimasukkan ke agenda pribadi</p>
+                </div>
+            </div>
+
+            <!-- SEARCH INPUT -->
+            <div style="margin-bottom: 12px; position: relative;">
+                <input type="text" id="searchKatalogRapatInput" placeholder="🔍 Cari judul rapat atau ketik ID rapat..." 
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; transition: all 0.2s;"
+                    oninput="handleSearchKatalogRapat(this.value)">
+            </div>
+
+            <!-- LIST RAPAT TERSEDIA (SCROLLABLE) -->
+            <div id="katalogRapatLoading" style="text-align: center; padding: 36px; color: #64748b; font-size: 13.5px;">
+                ⏳ Mengambil daftar ruang rapat yang tersedia...
+            </div>
+
+            <div id="katalogRapatList" style="display: none; flex: 1; overflow-y: auto; max-height: 50vh; padding-right: 4px; flex-direction: column; gap: 10px;">
+                <!-- Diisi via JavaScript -->
+            </div>
+
+            <div class="modal-actions" style="margin-top: 16px; justify-content: space-between; align-items: center;">
+                <span id="katalogRapatInfo" style="font-size: 12px; color: #64748b; font-weight: 600;"></span>
+                <button type="button" class="modal-cancel" onclick="closePilihRapatPegawaiModal()">Tutup</button>
             </div>
         </div>
     </div>
@@ -1861,6 +1994,366 @@
             if (e.target === this) closeSertifikatModal();
         });
 
+        function openBahanRapatModal(param1, param2, param3) {
+            let card = null;
+            let meetingId = null;
+            let meetingTitle = '';
+
+            if (param1 && param1.nodeType) {
+                card = param1.closest('.meeting-card');
+                meetingId = param2 || (card ? card.dataset.meetingId : '');
+                meetingTitle = param3 || (card ? card.dataset.title : '');
+            } else {
+                meetingId = param1;
+                meetingTitle = param2 || '';
+                if (meetingId) {
+                    card = document.querySelector(`.meeting-card[data-meeting-id="${meetingId}"]`);
+                }
+            }
+
+            if (!meetingTitle && card) {
+                meetingTitle = card.dataset.title || card.querySelector('.meeting-card-title')?.textContent?.trim() || '';
+            }
+
+            const modal = document.getElementById('bahanRapatModal');
+            const sub = document.getElementById('bahanRapatModalSubtitle');
+            const content = document.getElementById('bahanRapatContent');
+
+            if (sub) {
+                sub.textContent = meetingTitle ? `Agenda: ${meetingTitle}` : (meetingId ? `ID Rapat: #${meetingId}` : 'Materi & berkas pendukung rapat');
+            }
+
+            const bahanUrl = card ? (card.dataset.bahanRapat || '').trim() : '';
+            const canManage = card ? card.dataset.canManage === 'true' : true;
+
+            if (content) {
+                if (bahanUrl) {
+                    const isPdf = bahanUrl.toLowerCase().endsWith('.pdf');
+                    const isPpt = bahanUrl.toLowerCase().endsWith('.ppt') || bahanUrl.toLowerCase().endsWith('.pptx');
+                    const typeIcon = isPdf ? '📄' : (isPpt ? '📊' : '📁');
+                    const typeLabel = isPdf ? 'Dokumen PDF' : (isPpt ? 'Presentasi PowerPoint (PPT)' : 'Berkas Bahan Rapat');
+                    const fileName = bahanUrl.split('/').pop();
+
+                    content.innerHTML = `
+                        <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 22px 20px; text-align: center;">
+                            <div style="width: 58px; height: 58px; line-height: 58px; margin: 0 auto 12px; background: #eef2ff; border-radius: 14px; font-size: 30px;">
+                                ${typeIcon}
+                            </div>
+                            <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #4f46e5; background: #e0e7ff; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px;">
+                                ${typeLabel}
+                            </span>
+                            <h3 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 4px; word-break: break-all;">
+                                ${fileName}
+                            </h3>
+                            <p style="font-size: 12px; color: #64748b; margin: 0 auto 18px; max-width: 360px;">
+                                Berkas materi atau dokumen pendukung rapat telah tersedia dan dapat diunduh/dibuka.
+                            </p>
+                            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                                <a href="${bahanUrl}" target="_blank"
+                                    style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #4f46e5; color: #ffffff; border-radius: 9px; font-size: 12.5px; font-weight: 700; text-decoration: none; box-shadow: 0 2px 8px rgba(79,70,229,0.25);">
+                                    <span>👁️</span> Buka Dokumen ↗
+                                </a>
+                                <a href="${bahanUrl}" download
+                                    style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 12.5px; font-weight: 700; text-decoration: none;">
+                                    <span>⬇️</span> Unduh File
+                                </a>
+                                ${canManage && card ? `
+                                <button type="button" onclick="closeBahanRapatModal(); triggerEditBahanRapat('${meetingId}');"
+                                    style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+                                    <span>✏️</span> Ganti Dokumen
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `
+                        <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 32px 20px; text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 12px;">📂</div>
+                            <h3 style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Belum Ada Bahan Rapat</h3>
+                            <p style="font-size: 13px; color: #64748b; max-width: 360px; margin: 0 auto 16px; line-height: 1.5;">
+                                Materi presentasi (PPT) atau dokumen pendukung (PDF) untuk rapat ini belum diunggah.
+                            </p>
+                            ${canManage && card ? `
+                            <button type="button" onclick="closeBahanRapatModal(); triggerEditBahanRapat('${meetingId}');"
+                                style="display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: #ffffff; background: #4f46e5; padding: 9px 18px; border-radius: 9px; border: none; cursor: pointer; box-shadow: 0 2px 8px rgba(79,70,229,0.25);">
+                                📤 Upload Bahan Rapat Sekarang
+                            </button>` : `
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #64748b; background: #e2e8f0; padding: 6px 14px; border-radius: 20px;">
+                                ℹ️ Menunggu penyelenggara mengunggah berkas
+                            </span>`}
+                        </div>
+                    `;
+                }
+            }
+
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function triggerEditBahanRapat(meetingId) {
+            const card = document.querySelector(`.meeting-card[data-meeting-id="${meetingId}"]`);
+            if (card) {
+                const editBtn = card.querySelector('.btn-card-edit');
+                if (editBtn) {
+                    openEditModal(editBtn);
+                    setTimeout(() => {
+                        const fInput = document.getElementById('editBahanRapatFile');
+                        if (fInput) {
+                            fInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            fInput.focus();
+                        }
+                    }, 300);
+                }
+            }
+        }
+
+        function closeBahanRapatModal() {
+            const modal = document.getElementById('bahanRapatModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        const bahanModalEl = document.getElementById('bahanRapatModal');
+        if (bahanModalEl) {
+            bahanModalEl.addEventListener('click', function (e) {
+                if (e.target === this) closeBahanRapatModal();
+            });
+        }
+
+        // LOGIKA KATALOG RUANG RAPAT & AGENDA KHUSUS USER PEGAWAI
+        let allKatalogMeetings = [];
+        let hasPegawaiEnrolledChanges = false;
+
+        async function openPilihRapatPegawaiModal() {
+            const modal = document.getElementById('modalPilihRapatPegawai');
+            const listEl = document.getElementById('katalogRapatList');
+            const loadingEl = document.getElementById('katalogRapatLoading');
+            const searchInput = document.getElementById('searchKatalogRapatInput');
+            const infoEl = document.getElementById('katalogRapatInfo');
+
+            if (searchInput) searchInput.value = '';
+            if (modal) modal.classList.add('show');
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (listEl) {
+                listEl.style.display = 'none';
+                listEl.innerHTML = '';
+            }
+            if (infoEl) infoEl.textContent = '';
+            hasPegawaiEnrolledChanges = false;
+
+            try {
+                const res = await fetch('/api/pegawai/available-meetings');
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    allKatalogMeetings = json.data || [];
+                    renderKatalogRapat(allKatalogMeetings);
+                } else {
+                    if (loadingEl) {
+                        loadingEl.textContent = '❌ ' + (json.message || 'Gagal memuat daftar rapat.');
+                    }
+                }
+            } catch (err) {
+                if (loadingEl) {
+                    loadingEl.textContent = '❌ Gagal terhubung ke server.';
+                }
+            }
+        }
+
+        function closePilihRapatPegawaiModal() {
+            const modal = document.getElementById('modalPilihRapatPegawai');
+            if (modal) modal.classList.remove('show');
+            if (hasPegawaiEnrolledChanges) {
+                window.location.reload();
+            }
+        }
+
+        const modalPilihEl = document.getElementById('modalPilihRapatPegawai');
+        if (modalPilihEl) {
+            modalPilihEl.addEventListener('click', function (e) {
+                if (e.target === this) closePilihRapatPegawaiModal();
+            });
+        }
+
+        function renderKatalogRapat(meetingsToRender) {
+            const listEl = document.getElementById('katalogRapatList');
+            const loadingEl = document.getElementById('katalogRapatLoading');
+            const infoEl = document.getElementById('katalogRapatInfo');
+            if (loadingEl) loadingEl.style.display = 'none';
+
+            if (!listEl) return;
+            listEl.style.display = 'flex';
+            listEl.innerHTML = '';
+
+            if (infoEl) {
+                infoEl.textContent = `Menampilkan ${meetingsToRender.length} ruang rapat`;
+            }
+
+            if (!meetingsToRender || meetingsToRender.length === 0) {
+                listEl.innerHTML = `
+                    <div style="text-align: center; padding: 32px 16px; color: #64748b; background: #f8fafc; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+                        <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
+                        <strong style="color: #1e293b; font-size: 14px;">Tidak Ada Rapat yang Cocok</strong>
+                        <p style="font-size: 12.5px; margin: 4px 0 0;">Coba cari dengan kata kunci lain atau periksa ID rapat.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            meetingsToRender.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'katalog-item-card';
+                item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 16px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; transition: all 0.2s;';
+                
+                const isEnrolled = m.is_enrolled;
+                const tipe = m.tipe_meeting || 'Rapat';
+                let tipeBadgeColor = '#2563eb';
+                let tipeBadgeBg = '#eff6ff';
+                if (tipe.toLowerCase().includes('webinar')) {
+                    tipeBadgeColor = '#7c3aed';
+                    tipeBadgeBg = '#f5f3ff';
+                } else if (tipe.toLowerCase().includes('offline')) {
+                    tipeBadgeColor = '#059669';
+                    tipeBadgeBg = '#ecfdf5';
+                }
+
+                let tglFormatted = m.tanggal ? new Date(m.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                const safeName = (m.meeting_nama || '').replace(/'/g, "\\'");
+
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                        <div style="width: 44px; height: 44px; border-radius: 10px; background: ${tipeBadgeBg}; color: ${tipeBadgeColor}; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+                            ${tipe.toLowerCase().includes('webinar') ? '🎓' : (tipe.toLowerCase().includes('zoom') ? '📹' : '🏢')}
+                        </div>
+                        <div style="min-width: 0; flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px; flex-wrap: wrap;">
+                                <span style="font-size: 10.5px; font-weight: 700; color: ${tipeBadgeColor}; background: ${tipeBadgeBg}; padding: 2px 7px; border-radius: 6px;">
+                                    ${tipe}
+                                </span>
+                                <span style="font-size: 11px; font-weight: 600; color: #64748b;">
+                                    #${m.meeting_id}
+                                </span>
+                                <span style="font-size: 11px; color: #64748b;">
+                                    • 📅 ${tglFormatted}
+                                </span>
+                            </div>
+                            <h4 style="font-size: 13.5px; font-weight: 700; color: #1e293b; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${m.meeting_nama}">
+                                ${m.meeting_nama}
+                            </h4>
+                        </div>
+                    </div>
+                    <div style="flex-shrink: 0;">
+                        ${isEnrolled ? `
+                            <button type="button" disabled
+                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: 8px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; font-size: 12px; font-weight: 700; cursor: default;">
+                                <span>✓</span> Sudah Diikuti
+                            </button>
+                        ` : `
+                            <button type="button" onclick="enrollPegawaiMeeting(this, '${m.meeting_id}', '${safeName}')"
+                                style="display: inline-flex; align-items: center; gap: 5px; padding: 7px 15px; border-radius: 8px; background: #4f46e5; color: #ffffff; border: none; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(79,70,229,0.25); transition: all 0.2s;">
+                                <span>＋</span> Ikuti Rapat
+                            </button>
+                        `}
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function handleSearchKatalogRapat(query) {
+            const q = (query || '').trim().toLowerCase();
+            if (!q) {
+                renderKatalogRapat(allKatalogMeetings);
+                return;
+            }
+            const filtered = allKatalogMeetings.filter(m => {
+                const name = (m.meeting_nama || '').toLowerCase();
+                const id = String(m.meeting_id || '');
+                const tipe = (m.tipe_meeting || '').toLowerCase();
+                return name.includes(q) || id.includes(q) || tipe.includes(q);
+            });
+            renderKatalogRapat(filtered);
+        }
+
+        async function enrollPegawaiMeeting(button, meetingId, meetingName) {
+            const originalHtml = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<span>⏳</span> Menambahkan...';
+
+            try {
+                const res = await fetch('/api/pegawai/enroll-meeting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ meeting_id: meetingId })
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    hasPegawaiEnrolledChanges = true;
+                    button.style.background = '#ecfdf5';
+                    button.style.color = '#059669';
+                    button.style.border = '1px solid #a7f3d0';
+                    button.style.boxShadow = 'none';
+                    button.innerHTML = '<span>✓</span> Sudah Diikuti';
+                    
+                    const found = allKatalogMeetings.find(x => String(x.meeting_id) === String(meetingId));
+                    if (found) found.is_enrolled = true;
+
+                    if (typeof showToast === 'function') {
+                        showToast(`Rapat berhasil ditambahkan ke agenda pribadi Anda!`, 'success', 'Berhasil Menambahkan');
+                    }
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = originalHtml;
+                    alert('Gagal menambahkan rapat: ' + (json.message || 'Terjadi kesalahan'));
+                }
+            } catch (err) {
+                button.disabled = false;
+                button.innerHTML = originalHtml;
+                alert('Gagal menghubungi server.');
+            }
+        }
+
+        async function handleUnenrollPegawaiMeeting(meetingId, meetingTitle) {
+            if (!confirm(`Apakah Anda yakin ingin membatalkan keikutsertaan dan menghapus rapat "${meetingTitle}" dari agenda pribadi Anda?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/pegawai/unenroll-meeting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ meeting_id: meetingId })
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    if (typeof showToast === 'function') {
+                        showToast(`Rapat "${meetingTitle}" berhasil dihapus dari agenda Anda.`, 'info', 'Dihapus dari Agenda');
+                    }
+                    const card = document.querySelector(`.meeting-card[data-meeting-id="${meetingId}"]`);
+                    if (card) {
+                        card.style.transition = 'all 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            card.remove();
+                            const remaining = document.querySelectorAll('.meeting-card');
+                            if (remaining.length === 0) {
+                                window.location.reload();
+                            }
+                        }, 300);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert('Gagal menghapus rapat: ' + (json.message || 'Terjadi kesalahan'));
+                }
+            } catch (err) {
+                alert('Gagal menghubungi server.');
+            }
+        }
+
+
 
         function handleLihatPresensi(button, explicitMeetingId) {
             const card = button ? button.closest('.meeting-card') : null;
@@ -2361,8 +2854,30 @@
             document.getElementById('editThumbnail').value = '';
             document.getElementById('editNotulenPdf').value = '';
             document.getElementById('editVideoFile').value = '';
+            if (document.getElementById('editBahanRapatFile')) {
+                document.getElementById('editBahanRapatFile').value = '';
+            }
             if (document.getElementById('editAbsensiFile')) {
                 document.getElementById('editAbsensiFile').value = '';
+            }
+
+            // Status berkas bahan rapat (PDF / PPT)
+            const existingBahan = activeCardForEdit.dataset.bahanRapat;
+            const statusBahan = document.getElementById('currentBahanRapatStatus');
+            const linkBahanWrap = document.getElementById('previewBahanRapatLinkWrap');
+            const linkBahan = document.getElementById('currentBahanRapatLink');
+            if (statusBahan && linkBahanWrap && linkBahan) {
+                if (existingBahan && existingBahan.trim() !== '') {
+                    const isPpt = existingBahan.toLowerCase().endsWith('.ppt') || existingBahan.toLowerCase().endsWith('.pptx');
+                    statusBahan.textContent = isPpt ? '✓ Berkas PPT terunggah' : '✓ Berkas PDF terunggah';
+                    statusBahan.style.color = '#4f46e5';
+                    linkBahan.href = existingBahan;
+                    linkBahanWrap.style.display = 'block';
+                } else {
+                    statusBahan.textContent = '(Belum ada file)';
+                    statusBahan.style.color = '#64748b';
+                    linkBahanWrap.style.display = 'none';
+                }
             }
 
             // Status berkas absensi offline
@@ -2437,6 +2952,18 @@
             });
         }
 
+        const editBahanRapatInput = document.getElementById('editBahanRapatFile');
+        if (editBahanRapatInput) {
+            editBahanRapatInput.addEventListener('change', function () {
+                const statusBahan = document.getElementById('currentBahanRapatStatus');
+                if (statusBahan && this.files && this.files[0]) {
+                    const fname = this.files[0].name;
+                    statusBahan.textContent = `✓ File siap: ${fname.length > 20 ? fname.substring(0, 18) + '...' : fname}`;
+                    statusBahan.style.color = '#15803d';
+                }
+            });
+        }
+
         // Toggle input absensi offline secara dinamis jika pilihan tipe meeting diubah
         document.getElementById('editType').addEventListener('change', function () {
             const groupAbsensi = document.getElementById('groupEditAbsensiOffline');
@@ -2477,6 +3004,7 @@
             const fileInput = document.getElementById('editThumbnail');
             const pdfInput = document.getElementById('editNotulenPdf');
             const videoInput = document.getElementById('editVideoFile');
+            const bahanInput = document.getElementById('editBahanRapatFile');
 
             // Button loading state
             const saveBtn = this.querySelector('.modal-save');
@@ -2499,8 +3027,15 @@
                 }
 
                 let videoBase64 = null;
-                if (videoInput.files && videoInput.files[0]) {
+                if (videoInput && videoInput.files && videoInput.files[0]) {
                     videoBase64 = await readFileAsBase64(videoInput.files[0]);
+                }
+
+                let bahanBase64 = null;
+                let bahanFileName = null;
+                if (bahanInput && bahanInput.files && bahanInput.files[0]) {
+                    bahanBase64 = await readFileAsBase64(bahanInput.files[0]);
+                    bahanFileName = bahanInput.files[0].name;
                 }
 
                 const absensiInput = document.getElementById('editAbsensiFile');
@@ -2522,6 +3057,10 @@
                 };
                 if (thumbnailBase64) payload.thumbnail = thumbnailBase64;
                 if (pdfBase64) payload.notulen_pdf = pdfBase64;
+                if (bahanBase64) {
+                    payload.bahan_rapat = bahanBase64;
+                    payload.bahan_rapat_name = bahanFileName;
+                }
                 if (videoBase64) payload.video_url = videoBase64;
                 if (absensiBase64) payload.absensi = absensiBase64;
 
@@ -2612,6 +3151,9 @@
                     }
                     if (result.data?.absensi) {
                         targetCard.dataset.absensi = result.data.absensi;
+                    }
+                    if (result.data?.bahan_rapat) {
+                        targetCard.dataset.bahanRapat = result.data.bahan_rapat;
                     }
 
                     // Sinkronisasi tombol Lihat Sertifikat (khusus Webinar)

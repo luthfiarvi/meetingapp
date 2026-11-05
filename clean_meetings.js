@@ -86,7 +86,7 @@ async function cleanDatabase(dbName) {
 
 function cleanUploadFiles() {
     console.log("\n📁 Membersihkan berkas upload sementara ruang rapat (foto avatar user TETAP AMAN)...");
-    const uploadDirs = ["ttd", "thumbnails", "notulen", "sertif", "videos", "transcripts", "evidence"];
+    const uploadDirs = ["ttd", "thumbnails", "notulen", "bahan_rapat", "sertif", "videos", "transcripts", "evidence"];
     let deletedCount = 0;
 
     for (const dir of uploadDirs) {

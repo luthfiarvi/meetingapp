@@ -19,6 +19,7 @@ export async function syncApprovedZoomToMeetings() {
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS pembuat VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;
+            ALTER TABLE meetings ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS thumbnail TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS video_url TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS absensi TEXT;
@@ -43,6 +44,7 @@ export async function syncApprovedZoomToMeetings() {
                 documentation_photos JSONB DEFAULT '[]'::jsonb,
                 thumbnail TEXT,
                 notulen_pdf TEXT,
+                bahan_rapat TEXT,
                 video_url TEXT,
                 absensi TEXT,
                 sertifikat_bg TEXT,

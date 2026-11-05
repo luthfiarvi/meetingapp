@@ -31,6 +31,7 @@ async function main() {
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS pembuat VARCHAR(100);
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;
+            ALTER TABLE meetings ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS thumbnail TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS video_url TEXT;
             ALTER TABLE meetings ADD COLUMN IF NOT EXISTS absensi TEXT;
@@ -51,6 +52,7 @@ async function main() {
                 documentation_photos JSONB DEFAULT '[]'::jsonb,
                 thumbnail TEXT,
                 notulen_pdf TEXT,
+                bahan_rapat TEXT,
                 video_url TEXT,
                 absensi TEXT,
                 sertifikat_bg TEXT,
@@ -59,6 +61,7 @@ async function main() {
                 sertifikat_format_nomor VARCHAR(255),
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+            ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_bg TEXT;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_enable_ttd BOOLEAN DEFAULT TRUE;
             ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS sertifikat_layout_mode VARCHAR(50) DEFAULT 'full';
@@ -68,6 +71,14 @@ async function main() {
                 last_number INT DEFAULT 0,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+            CREATE TABLE IF NOT EXISTS pegawai_meetings (
+                id SERIAL PRIMARY KEY,
+                user_id VARCHAR(100) NOT NULL,
+                meeting_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, meeting_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_pegawai_meetings_user ON pegawai_meetings(user_id);
         `).catch(() => {});
         console.log("✅ [CHECK_DB] Skema kolom pendukung siap!");
 

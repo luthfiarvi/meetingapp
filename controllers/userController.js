@@ -67,7 +67,7 @@ export const createUser = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const safeRole = (role === "admin") ? "admin" : "user";
+        const safeRole = (role === "admin") ? "admin" : (role === "pegawai" ? "pegawai" : "user");
 
         await userModel.createUser({
             id: trimmedId,
@@ -131,7 +131,7 @@ export const updateUser = async (req, res) => {
             return res.redirect("/manajemenuser?error=User ID tidak valid!");
         }
 
-        const safeRole = (role === "admin") ? "admin" : "user";
+        const safeRole = (role === "admin") ? "admin" : (role === "pegawai" ? "pegawai" : "user");
 
         await userModel.updateUser(id, {
             username: (username || id).trim(),

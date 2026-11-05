@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { ensureAuthenticated, ensureAdmin } from "../middleware/authMiddleware.js";
+import { ensureAuthenticated, ensureAdmin, ensureNotPegawai } from "../middleware/authMiddleware.js";
 import { uploadManualPdf } from "../middleware/uploadMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +17,7 @@ router.get("/dashboard", ensureAuthenticated, (req, res) => {
     });
 });
 
-router.get("/manual-book", ensureAuthenticated, (req, res) => {
+router.get("/manual-book", ensureAuthenticated, ensureNotPegawai, (req, res) => {
     const userPdfPath = path.join(__dirname, "..", "public", "docs", "manual-book-user.pdf");
     const adminPdfPath = path.join(__dirname, "..", "public", "docs", "manual-book-admin.pdf");
     const hasCustomUserPdf = fs.existsSync(userPdfPath);

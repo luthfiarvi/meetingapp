@@ -84,6 +84,7 @@ SQL_PERMS="
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS pembuat VARCHAR(100);
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen TEXT;
+    ALTER TABLE meetings ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS thumbnail TEXT;
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS video_url TEXT;
     ALTER TABLE meetings ADD COLUMN IF NOT EXISTS absensi TEXT;
@@ -105,6 +106,7 @@ SQL_PERMS="
         documentation_photos JSONB,
         thumbnail TEXT,
         notulen_pdf TEXT,
+        bahan_rapat TEXT,
         video_url TEXT,
         absensi TEXT,
         sertifikat_bg TEXT,
@@ -124,6 +126,16 @@ SQL_PERMS="
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     ALTER TABLE meeting_sertifikat_counter OWNER TO magangit;
+
+    CREATE TABLE IF NOT EXISTS pegawai_meetings (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(100) NOT NULL,
+        meeting_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, meeting_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_pegawai_meetings_user ON pegawai_meetings(user_id);
+    ALTER TABLE pegawai_meetings OWNER TO magangit;
 
     -- Sinkronisasi zoom credentials dari zoom_requests yang berstatus disetujui ke meetings
     UPDATE meetings m
@@ -162,7 +174,9 @@ for DBNAME in meeting appmeeting; do
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS absensi TEXT;
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen TEXT;
+        ALTER TABLE meetings ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS video_url TEXT;
+        ALTER TABLE meeting_media ADD COLUMN IF NOT EXISTS bahan_rapat TEXT;
     " 2>/dev/null || true
 done
 
@@ -178,10 +192,10 @@ if [ -f batch_generate_aksara.js ] && [ -f peserta_aksara.json ]; then
     node batch_generate_aksara.js 2>&1 || true
 fi
 
-# Memastikan akun user & admin terdaftar dan aktif
+# Memastikan akun user, admin, & pegawai terdaftar dan aktif
 if [ -f seed_users.js ]; then
-    echo "  -> Menyiapkan akun Administrator & User..."
-    node seed_users.js 2>/dev/null || true
+    echo "  -> Menyiapkan akun Administrator, User Tim, & Pegawai..."
+    node seed_users.js 2>&1 || true
 fi
 
 # Pembersihan data rapat hanya jika parameter --clean diberikan secara eksplisit

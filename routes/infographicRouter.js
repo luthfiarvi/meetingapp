@@ -6,9 +6,9 @@ import { uploadEvidence, uploadTranscript, uploadAvatar } from "../middleware/up
 
 const router = express.Router();
 
-import { ensureAuthenticated } from "../middleware/authMiddleware.js";
+import { ensureAuthenticated, ensureNotPegawai } from "../middleware/authMiddleware.js";
 
-const ensureAuth = ensureAuthenticated;
+const ensureAuth = [ensureAuthenticated, ensureNotPegawai];
 
 // Portal Terpadu (App Infografis & Notulen)
 router.get("/infografis", ensureAuth, infographicController.getPortal);

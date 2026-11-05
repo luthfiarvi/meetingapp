@@ -25,7 +25,13 @@ export const showMeeting = async (req, res) => {
             console.warn("⚠️ [AUTO-SYNC] Warning syncApprovedZoomToMeetings:", sErr.message);
         }
 
-        const meetings = await meetingModel.getAllMeeting();
+        let meetings = [];
+        if (currentUser.role === "pegawai") {
+            const uid = currentUser.id || currentUser.username || currentUser.nip;
+            meetings = await meetingModel.getPegawaiMeetings(uid);
+        } else {
+            meetings = await meetingModel.getAllMeeting();
+        }
         
         let pendingZoomCount = 0;
         if (currentUser.role === "admin") {
@@ -124,7 +130,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
 // Helper: Menyimpan file Base64 ke folder uploads di server
-export function saveBase64File(base64Data, subfolder, prefix, meetingId) {
+export function saveBase64File(base64Data, subfolder, prefix, meetingId, originalFileName = null) {
     if (!base64Data || typeof base64Data !== "string") return null;
     if (!base64Data.startsWith("data:")) return base64Data; // sudah berupa path URL
 
@@ -138,11 +144,16 @@ export function saveBase64File(base64Data, subfolder, prefix, meetingId) {
         const mimeMatch = base64Data.match(/^data:([^;]+);/);
         const mime = mimeMatch ? mimeMatch[1].toLowerCase() : "";
 
-        if (mime.includes("jpeg") || mime.includes("jpg")) ext = ".jpg";
+        if (originalFileName && typeof originalFileName === "string" && path.extname(originalFileName)) {
+            ext = path.extname(originalFileName).toLowerCase();
+        } else if (mime.includes("jpeg") || mime.includes("jpg")) ext = ".jpg";
         else if (mime.includes("webp")) ext = ".webp";
         else if (mime.includes("gif")) ext = ".gif";
         else if (mime.includes("png")) ext = ".png";
         else if (mime.includes("pdf")) ext = ".pdf";
+        else if (mime.includes("powerpoint") || mime.includes("presentation") || mime.includes("ppt")) {
+            ext = (mime.includes("presentation") || mime.includes("openxmlformats") || mime.includes("pptx")) ? ".pptx" : ".ppt";
+        }
         else if (mime.includes("mp4")) ext = ".mp4";
         else if (mime.includes("webm")) ext = ".webm";
         else if (mime.includes("spreadsheet") || mime.includes("sheet")) ext = ".xlsx";
@@ -152,6 +163,7 @@ export function saveBase64File(base64Data, subfolder, prefix, meetingId) {
         else if (prefix === "thumb" || prefix === "thumbnail") ext = ".jpg";
         else if (prefix === "notulen") ext = ".pdf";
         else if (prefix === "video") ext = ".mp4";
+        else if (prefix === "bahan") ext = ".pdf";
 
         const fileName = `${prefix}_${meetingId}_${Date.now()}${ext}`;
         const filePath = path.join(uploadDir, fileName);
@@ -185,6 +197,8 @@ export const updateMeetingController = async (req, res) => {
             m_tipe,
             thumbnail,
             notulen_pdf,
+            bahan_rapat,
+            bahan_rapat_name,
             video_url,
             absensi,
             zoom_link,
@@ -232,6 +246,14 @@ export const updateMeetingController = async (req, res) => {
             savedPdf = notulen_pdf;
         }
 
+        let savedBahanRapat = undefined;
+        if (bahan_rapat && bahan_rapat.startsWith("data:")) {
+            savedBahanRapat = saveBase64File(bahan_rapat, "bahan_rapat", "bahan", meeting_id, bahan_rapat_name);
+            if (!savedBahanRapat) savedBahanRapat = bahan_rapat;
+        } else if (bahan_rapat !== undefined) {
+            savedBahanRapat = bahan_rapat;
+        }
+
         let savedVideo = undefined;
         if (video_url && video_url.startsWith("data:")) {
             savedVideo = saveBase64File(video_url, "videos", "video", meeting_id);
@@ -269,6 +291,7 @@ export const updateMeetingController = async (req, res) => {
             m_tipe,
             thumbnail: savedThumbnail,
             notulen_pdf: savedPdf,
+            bahan_rapat: savedBahanRapat,
             video_url: savedVideo,
             absensi: savedAbsensi,
             zoom_link: cleanZoomLink,
@@ -314,6 +337,7 @@ export const updateMeetingController = async (req, res) => {
         }
 
         const finalPdf = savedPdf || updated?.notulen_pdf || updated?.notulen || null;
+        const finalBahan = savedBahanRapat || updated?.bahan_rapat || null;
 
         return res.json({
             success: true,
@@ -325,6 +349,7 @@ export const updateMeetingController = async (req, res) => {
                 sertifikat_layout_mode: updated?.sertifikat_layout_mode,
                 notulen_pdf: finalPdf,
                 notulen: finalPdf,
+                bahan_rapat: finalBahan,
                 thumbnail: savedThumbnail || updated?.thumbnail || null,
                 video_url: savedVideo || updated?.video_url || null,
                 absensi: savedAbsensi || updated?.absensi || null
@@ -512,5 +537,59 @@ export const saveMeetingPhotosController = async (req, res) => {
     } catch (err) {
         console.error("Error saveMeetingPhotosController:", err);
         return res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+// CONTROLLERS KHUSUS USER PEGAWAI (AGENDA PRIBADI)
+export const getAvailableMeetingsPegawaiController = async (req, res) => {
+    try {
+        const currentUser = req.user || res.locals.user;
+        if (!currentUser) {
+            return res.status(401).json({ success: false, message: "Sesi login telah berakhir" });
+        }
+        const uid = currentUser.id || currentUser.username || currentUser.nip;
+        const available = await meetingModel.getAvailableMeetingsForPegawai(uid);
+        return res.json({ success: true, data: available });
+    } catch (err) {
+        console.error("Error getAvailableMeetingsPegawaiController:", err);
+        return res.status(500).json({ success: false, message: "Gagal mengambil daftar ruang rapat" });
+    }
+};
+
+export const enrollMeetingPegawaiController = async (req, res) => {
+    try {
+        const currentUser = req.user || res.locals.user;
+        if (!currentUser) {
+            return res.status(401).json({ success: false, message: "Sesi login telah berakhir" });
+        }
+        const { meeting_id } = req.body;
+        if (!meeting_id) {
+            return res.status(400).json({ success: false, message: "Meeting ID wajib disertakan" });
+        }
+        const uid = currentUser.id || currentUser.username || currentUser.nip;
+        await meetingModel.addPegawaiMeeting(uid, meeting_id);
+        return res.json({ success: true, message: "Rapat berhasil ditambahkan ke agenda pribadi Anda" });
+    } catch (err) {
+        console.error("Error enrollMeetingPegawaiController:", err);
+        return res.status(500).json({ success: false, message: "Gagal menambahkan rapat ke agenda" });
+    }
+};
+
+export const unenrollMeetingPegawaiController = async (req, res) => {
+    try {
+        const currentUser = req.user || res.locals.user;
+        if (!currentUser) {
+            return res.status(401).json({ success: false, message: "Sesi login telah berakhir" });
+        }
+        const { meeting_id } = req.body;
+        if (!meeting_id) {
+            return res.status(400).json({ success: false, message: "Meeting ID wajib disertakan" });
+        }
+        const uid = currentUser.id || currentUser.username || currentUser.nip;
+        await meetingModel.removePegawaiMeeting(uid, meeting_id);
+        return res.json({ success: true, message: "Rapat berhasil dihapus dari agenda pribadi Anda" });
+    } catch (err) {
+        console.error("Error unenrollMeetingPegawaiController:", err);
+        return res.status(500).json({ success: false, message: "Gagal membatalkan keikutsertaan rapat" });
     }
 };

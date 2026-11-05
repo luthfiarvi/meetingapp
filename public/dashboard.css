@@ -2368,6 +2368,61 @@ body:not(.sidebar-minimized) .meeting-cards-grid {
     box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
 }
 
+.btn-card-bahan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    background: #f5f3ff;
+    color: #4f46e5;
+    font-size: 11.5px;
+    font-weight: 700;
+    border: 1px solid #ddd6fe;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.btn-card-bahan:hover {
+    background: #ede9fe;
+    color: #4338ca;
+    border-color: #c4b5fd;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15);
+}
+
+.btn-card-unenroll {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: #fff1f2;
+    color: #e11d48;
+    font-size: 11.5px;
+    font-weight: 700;
+    border: 1px solid #fecdd3;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: inherit;
+    grid-column: 1 / -1;
+}
+
+.btn-card-unenroll:hover {
+    background: #ffe4e6;
+    color: #be123c;
+    border-color: #fda4af;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.15);
+}
+
+
 
 
 
