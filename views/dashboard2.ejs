@@ -152,6 +152,15 @@
                         Kantor Regional V Badan Kepegawaian Negara Jakarta
                     </p>
 
+                    <div style="margin-top: 1.25rem;">
+                        <a href="/manajemenmeeting" class="btn-dashboard-quick"
+                            style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 280px; padding: 11px 20px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; text-decoration: none; font-weight: 700; font-size: 13.5px; border-radius: 12px; box-shadow: 0 4px 14px rgba(37,99,235,0.3); transition: all 0.2s;">
+                            <span>📋</span>
+                            <span><%= (typeof user !== 'undefined' && user && user.role === 'pegawai') ? 'Buka Agenda Rapat Saya' : 'Manajemen Ruang Rapat' %></span>
+                            <span style="font-size: 15px;">→</span>
+                        </a>
+                    </div>
+
                 </div>
             </div>
 

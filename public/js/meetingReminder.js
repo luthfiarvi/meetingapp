@@ -277,15 +277,17 @@
 
     // Update Badge Lonceng Notifikasi
     function updateBellBadge(count) {
-        const badge = document.getElementById('bknBellBadge');
-        if (badge) {
-            if (count > 0) {
-                badge.textContent = count;
-                badge.style.display = 'inline-flex';
-            } else {
-                badge.style.display = 'none';
+        const badges = [document.getElementById('bknBellBadge'), document.getElementById('mobileBellBadge')];
+        badges.forEach(badge => {
+            if (badge) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
-        }
+        });
     }
 
     // Toggle Dropdown Pengingat Lonceng
@@ -306,22 +308,24 @@
     function createBellDropdown() {
         const dropdown = document.createElement('div');
         dropdown.id = 'bknBellDropdown';
+        const isMobile = window.innerWidth <= 800;
+        
         dropdown.style.cssText = `
             display: none;
-            position: absolute;
-            top: 52px;
-            right: 0;
-            width: 340px;
-            max-width: calc(100vw - 32px);
+            position: ${isMobile ? 'fixed' : 'absolute'};
+            top: ${isMobile ? '58px' : '52px'};
+            right: ${isMobile ? '12px' : '0'};
+            ${isMobile ? 'left: 12px; width: auto;' : 'width: 340px;'}
+            max-width: calc(100vw - 24px);
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
             border-radius: 14px;
-            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16);
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.22);
             z-index: 100010;
             padding: 16px;
         `;
         const bellWrapper = document.getElementById('bknBellWrapper');
-        if (bellWrapper) {
+        if (!isMobile && bellWrapper) {
             bellWrapper.style.position = 'relative';
             bellWrapper.appendChild(dropdown);
         } else {
@@ -330,7 +334,7 @@
 
         // Close on outside click
         document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !e.target.closest('#bknBellBtn')) {
+            if (!dropdown.contains(e.target) && !e.target.closest('#bknBellBtn') && !e.target.closest('#mobileBellBtn')) {
                 dropdown.style.display = 'none';
             }
         });

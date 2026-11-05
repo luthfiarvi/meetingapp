@@ -1338,6 +1338,17 @@ footer {
         z-index: 1000 !important;
     }
 
+    .mobile-bottom-nav.mobile-bottom-pegawai {
+        justify-content: space-evenly !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .mobile-bottom-nav.mobile-bottom-pegawai .mobile-bottom-item {
+        max-width: 110px !important;
+        font-size: 11px !important;
+    }
+
     .mobile-bottom-item {
         flex: 1;
         display: flex !important;
@@ -1537,7 +1548,7 @@ footer {
     }
 
     .welcome-box-center {
-        padding: 22px 18px !important;
+        padding: 18px 16px !important;
         border-radius: 20px !important;
         width: 100% !important;
         max-width: 360px !important;
@@ -1545,27 +1556,27 @@ footer {
     }
 
     .welcome-emblem-wrapper {
-        width: 66px !important;
-        height: 66px !important;
-        border-radius: 16px !important;
-        margin-bottom: 12px !important;
+        width: 58px !important;
+        height: 58px !important;
+        border-radius: 14px !important;
+        margin-bottom: 10px !important;
     }
 
     .welcome-emblem-img {
-        width: 42px !important;
+        width: 38px !important;
     }
 
     .welcome-badge-pill {
-        padding: 4px 14px !important;
-        font-size: 10px !important;
-        letter-spacing: 1px !important;
-        margin-bottom: 8px !important;
+        padding: 3px 12px !important;
+        font-size: 9.5px !important;
+        letter-spacing: 0.8px !important;
+        margin-bottom: 6px !important;
     }
 
     .welcome-main-title {
-        font-size: 22px !important;
+        font-size: 20px !important;
         letter-spacing: -0.3px !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 4px !important;
     }
 
     .welcome-main-subtitle {
@@ -1772,16 +1783,19 @@ footer {
         margin-top: 10px !important;
     }
 
-    .meeting-card-actions > button:nth-child(3):last-child {
+    .meeting-card-actions > button:nth-child(3):last-child,
+    .meeting-card-actions > .btn-card-unenroll:last-child {
         grid-column: 1 / -1 !important;
     }
 
     .btn-card-view,
     .btn-card-presensi,
     .btn-card-edit,
-    .btn-card-sertif {
-        padding: 10px 8px !important;
-        font-size: 12px !important;
+    .btn-card-sertif,
+    .btn-card-bahan,
+    .btn-card-unenroll {
+        padding: 9px 6px !important;
+        font-size: 11.5px !important;
         font-weight: 600 !important;
         border-radius: 9px !important;
         white-space: nowrap !important;

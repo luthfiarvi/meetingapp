@@ -89,7 +89,14 @@
 
         const currentPath = window.location.pathname.toLowerCase();
 
-        // 1. Buat Mobile Top Header (Ramping, Tanpa Hamburger)
+        // Deteksi role berdasarkan ketersediaan menu di sidebar
+        const hasZoom = !!sidebar.querySelector('a[href="/request-zoom"]');
+        const hasInfografis = !!sidebar.querySelector('a[href="/infografis"]');
+        const hasManualBook = !!sidebar.querySelector('a[href="/manual-book"]');
+        const hasUserMgmt = !!sidebar.querySelector('a[href="/manajemenuser"]');
+        const isPegawai = !hasZoom && !hasInfografis && !hasManualBook;
+
+        // 1. Buat Mobile Top Header (Ramping, Bersih, ada Bell & Avatar)
         let mobileHeader = document.getElementById('mobileNavHeader');
         if (!mobileHeader) {
             mobileHeader = document.createElement('header');
@@ -100,6 +107,16 @@
             const avatarSrc = userImg ? userImg.getAttribute('src') : '/images/default_avatar.png';
             const userName = userImg ? (userImg.getAttribute('alt') || 'Profil') : 'Profil';
 
+            const avatarActionHtml = isPegawai ? `
+                <button type="button" class="mobile-nav-profile-btn" onclick="if(typeof showLogoutModal==='function'){showLogoutModal(event)}else{window.location.href='/logout'}" title="Klik untuk keluar akun" style="background:none; border:none; padding:0; cursor:pointer; line-height:1;">
+                    <img src="${avatarSrc}" alt="${userName}" class="mobile-nav-avatar">
+                </button>
+            ` : `
+                <a href="/profile" class="mobile-nav-profile-link" title="Profil Pegawai">
+                    <img src="${avatarSrc}" alt="${userName}" class="mobile-nav-avatar">
+                </a>
+            `;
+
             mobileHeader.innerHTML = `
                 <div class="mobile-nav-brand">
                     <img src="/logo-bkn-asli.png" alt="Logo BKN" class="mobile-nav-logo">
@@ -109,9 +126,16 @@
                     </div>
                 </div>
                 <div class="mobile-nav-right">
-                    <a href="/profile" class="mobile-nav-profile-link" title="Profil Pegawai">
-                        <img src="${avatarSrc}" alt="${userName}" class="mobile-nav-avatar">
-                    </a>
+                    <button type="button" id="mobileBellBtn" onclick="if(window.toggleBknBellDropdown) window.toggleBknBellDropdown()"
+                        style="width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; position: relative; margin-right: 6px;"
+                        title="Pengingat Rapat Hari Ini">
+                        🔔
+                        <span id="mobileBellBadge"
+                            style="display: none; position: absolute; top: -4px; right: -4px; background: #ef4444; color: #ffffff; font-size: 9.5px; font-weight: 800; border-radius: 999px; width: 16px; height: 16px; align-items: center; justify-content: center; border: 1.5px solid #0d2b5c;">
+                            0
+                        </span>
+                    </button>
+                    ${avatarActionHtml}
                 </div>
             `;
 
@@ -119,7 +143,7 @@
             dashboard.insertBefore(mobileHeader, dashboard.firstChild);
         }
 
-        // 2. Buat Bottom Navigation Bar (5 Tab Jempol Ergonomis)
+        // 2. Buat Bottom Navigation Bar (Sesuai Role Pengguna)
         let bottomNav = document.getElementById('mobileBottomNav');
         if (!bottomNav) {
             bottomNav = document.createElement('nav');
@@ -132,82 +156,106 @@
             const isInfografis = currentPath.includes('infografis') || currentPath.includes('portal') || currentPath.includes('generator') || currentPath.includes('notulen');
             const isMore = currentPath.includes('manual') || currentPath.includes('manajemenuser') || currentPath.includes('profile');
 
-            bottomNav.innerHTML = `
-                <a href="/dashboard" class="mobile-bottom-item ${isDashboard ? 'active' : ''}">
-                    <span class="bottom-icon">🏠</span>
-                    <span class="bottom-label">Dashboard</span>
-                </a>
-                <a href="/manajemenmeeting" class="mobile-bottom-item ${isMeeting ? 'active' : ''}">
-                    <span class="bottom-icon">📋</span>
-                    <span class="bottom-label">Meeting</span>
-                </a>
-                <a href="/request-zoom" class="mobile-bottom-item ${isZoom ? 'active' : ''}">
-                    <span class="bottom-icon">📹</span>
-                    <span class="bottom-label">Zoom</span>
-                </a>
-                <a href="/infografis" class="mobile-bottom-item ${isInfografis ? 'active' : ''}">
-                    <span class="bottom-icon">📊</span>
-                    <span class="bottom-label">Infografis</span>
-                </a>
-                <button type="button" class="mobile-bottom-item ${isMore ? 'active' : ''}" id="btnBottomMore" onclick="toggleMobileMoreSheet()">
-                    <span class="bottom-icon">⋯</span>
-                    <span class="bottom-label">Lainnya</span>
-                </button>
-            `;
+            if (isPegawai) {
+                // KHUSUS PEGAWAI: Hanya 3 Menu Bersih (Dashboard, Agenda Rapat, Keluar)
+                bottomNav.className = 'mobile-bottom-nav mobile-bottom-pegawai';
+                bottomNav.innerHTML = `
+                    <a href="/dashboard" class="mobile-bottom-item ${isDashboard ? 'active' : ''}">
+                        <span class="bottom-icon">🏠</span>
+                        <span class="bottom-label">Dashboard</span>
+                    </a>
+                    <a href="/manajemenmeeting" class="mobile-bottom-item ${isMeeting ? 'active' : ''}">
+                        <span class="bottom-icon">📋</span>
+                        <span class="bottom-label">Agenda Rapat</span>
+                    </a>
+                    <button type="button" class="mobile-bottom-item" onclick="if(typeof showLogoutModal==='function'){showLogoutModal(event)}else{window.location.href='/logout'}">
+                        <span class="bottom-icon">↪</span>
+                        <span class="bottom-label">Keluar</span>
+                    </button>
+                `;
+            } else {
+                // UNTUK USER TIM & ADMIN: Menu Lengkap
+                bottomNav.innerHTML = `
+                    <a href="/dashboard" class="mobile-bottom-item ${isDashboard ? 'active' : ''}">
+                        <span class="bottom-icon">🏠</span>
+                        <span class="bottom-label">Dashboard</span>
+                    </a>
+                    <a href="/manajemenmeeting" class="mobile-bottom-item ${isMeeting ? 'active' : ''}">
+                        <span class="bottom-icon">📋</span>
+                        <span class="bottom-label">Meeting</span>
+                    </a>
+                    ${hasZoom ? `
+                    <a href="/request-zoom" class="mobile-bottom-item ${isZoom ? 'active' : ''}">
+                        <span class="bottom-icon">📹</span>
+                        <span class="bottom-label">Zoom</span>
+                    </a>` : ''}
+                    ${hasInfografis ? `
+                    <a href="/infografis" class="mobile-bottom-item ${isInfografis ? 'active' : ''}">
+                        <span class="bottom-icon">📊</span>
+                        <span class="bottom-label">Infografis</span>
+                    </a>` : ''}
+                    ${(hasManualBook || hasUserMgmt) ? `
+                    <button type="button" class="mobile-bottom-item ${isMore ? 'active' : ''}" id="btnBottomMore" onclick="toggleMobileMoreSheet()">
+                        <span class="bottom-icon">⋯</span>
+                        <span class="bottom-label">Lainnya</span>
+                    </button>` : ''}
+                `;
+            }
 
             document.body.appendChild(bottomNav);
         }
 
-        // 3. Buat Pop-up Sheet "Lainnya"
-        let moreSheet = document.getElementById('mobileMoreSheet');
-        if (!moreSheet) {
-            moreSheet = document.createElement('div');
-            moreSheet.className = 'mobile-more-sheet';
-            moreSheet.id = 'mobileMoreSheet';
+        // 3. Buat Pop-up Sheet "Lainnya" (Hanya jika bukan Pegawai dan ada fitur tambahan)
+        if (!isPegawai && (hasManualBook || hasUserMgmt)) {
+            let moreSheet = document.getElementById('mobileMoreSheet');
+            if (!moreSheet) {
+                moreSheet = document.createElement('div');
+                moreSheet.className = 'mobile-more-sheet';
+                moreSheet.id = 'mobileMoreSheet';
 
-            // Cek apakah admin (ada manajemen user di sidebar)
-            const hasUserMgmt = !!sidebar.querySelector('a[href="/manajemenuser"]');
-            const logoutLink = sidebar.querySelector('.sidebar-bottom .logout');
-            const logoutOnclick = logoutLink ? (logoutLink.getAttribute('onclick') || '') : '';
+                const logoutLink = sidebar.querySelector('.sidebar-bottom .logout');
+                const logoutOnclick = logoutLink ? (logoutLink.getAttribute('onclick') || '') : '';
 
-            moreSheet.innerHTML = `
-                <a href="/manual-book" class="mobile-more-item ${currentPath.includes('manual') ? 'active' : ''}">
-                    <span>📖</span>
-                    <span>Manual Book</span>
-                </a>
-                ${hasUserMgmt ? `
-                <a href="/manajemenuser" class="mobile-more-item ${currentPath.includes('manajemenuser') ? 'active' : ''}">
-                    <span>👥</span>
-                    <span>Manajemen User</span>
-                </a>` : ''}
-                <a href="/profile" class="mobile-more-item ${currentPath.includes('profile') ? 'active' : ''}">
-                    <span>⚙️</span>
-                    <span>Format & Profil</span>
-                </a>
-                <div class="mobile-more-divider"></div>
-                <a href="/" class="mobile-more-item logout-item" onclick="${logoutOnclick}">
-                    <span>↪</span>
-                    <span>Keluar</span>
-                </a>
-            `;
+                moreSheet.innerHTML = `
+                    ${hasManualBook ? `
+                    <a href="/manual-book" class="mobile-more-item ${currentPath.includes('manual') ? 'active' : ''}">
+                        <span>📖</span>
+                        <span>Manual Book</span>
+                    </a>` : ''}
+                    ${hasUserMgmt ? `
+                    <a href="/manajemenuser" class="mobile-more-item ${currentPath.includes('manajemenuser') ? 'active' : ''}">
+                        <span>👥</span>
+                        <span>Manajemen User</span>
+                    </a>` : ''}
+                    <a href="/profile" class="mobile-more-item ${currentPath.includes('profile') ? 'active' : ''}">
+                        <span>⚙️</span>
+                        <span>Format & Profil</span>
+                    </a>
+                    <div class="mobile-more-divider"></div>
+                    <a href="/" class="mobile-more-item logout-item" onclick="${logoutOnclick}">
+                        <span>↪</span>
+                        <span>Keluar</span>
+                    </a>
+                `;
 
-            moreSheet.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function() {
-                    window.closeMobileMoreSheet();
+                moreSheet.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function() {
+                        window.closeMobileMoreSheet();
+                    });
                 });
-            });
 
-            document.body.appendChild(moreSheet);
-        }
+                document.body.appendChild(moreSheet);
+            }
 
-        // 4. Backdrop untuk menutup Pop-up Sheet
-        let backdrop = document.getElementById('mobileBottomBackdrop');
-        if (!backdrop) {
-            backdrop = document.createElement('div');
-            backdrop.className = 'mobile-bottom-backdrop';
-            backdrop.id = 'mobileBottomBackdrop';
-            backdrop.addEventListener('click', window.closeMobileMoreSheet);
-            document.body.appendChild(backdrop);
+            // 4. Backdrop untuk menutup Pop-up Sheet
+            let backdrop = document.getElementById('mobileBottomBackdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'mobile-bottom-backdrop';
+                backdrop.id = 'mobileBottomBackdrop';
+                backdrop.addEventListener('click', window.closeMobileMoreSheet);
+                document.body.appendChild(backdrop);
+            }
         }
 
         // 5. ESC key menutup Pop-up
