@@ -67,7 +67,10 @@ const profileStorage = multer.diskStorage({
 
 export const uploadProfile = multer({
   storage: profileStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { 
+    fileSize: 10 * 1024 * 1024,
+    fieldSize: 20 * 1024 * 1024
+  },
   fileFilter: fileFilter
 });
 

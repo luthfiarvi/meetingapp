@@ -1350,7 +1350,7 @@ export const notulenController = {
 
           // Simpan ke profil akun pejabat jika dipilih
           if (save_to_profile) {
-            await pool.query("UPDATE users SET signature_path = $1 WHERE id = $2", [signaturePath, user.id]);
+            await pool.query("UPDATE users SET signature_path = $1 WHERE id = $2 OR username = $2 OR (nip IS NOT NULL AND nip <> '' AND nip = $3)", [signaturePath, user.id, user.nip || '']);
             if (req.user) req.user.signature_path = signaturePath;
           }
         } catch (sigErr) {

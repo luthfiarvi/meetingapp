@@ -229,7 +229,7 @@
               </div>
             </div>
             <div>
-              <input type="file" id="profile_sig_file" accept="image/png, image/jpeg, image/jpg" style="display: none;" onchange="handleProfileSigUpload(event)">
+              <input type="file" id="profile_sig_file" name="signature" accept="image/png, image/jpeg, image/jpg" style="display: none;" onchange="handleProfileSigUpload(event)">
               <input type="hidden" id="signature_base64" name="signature_base64">
               <button type="button" onclick="document.getElementById('profile_sig_file').click()" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; font-weight: 600; cursor: pointer;">
                 📁 Unggah File Tanda Tangan
@@ -527,7 +527,7 @@
       if (status) {
         status.style.color = '#059669';
         status.style.fontWeight = '700';
-        status.innerText = '✓ File Baru Terpilih (Klik Simpan di Bawah)';
+        status.innerText = '✓ File Terpilih: ' + file.name + ' (Klik "Simpan Kelengkapan Data Dokumen" di bawah)';
       }
     };
     reader.readAsDataURL(file);

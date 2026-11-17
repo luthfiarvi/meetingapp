@@ -6,10 +6,10 @@ import path from "path";
 function getCurrentUser(req) {
   const user = req.user || {};
   return {
-    id: user.id || "admin",
-    username: user.username || "admin",
+    id: user.id || user.username || "admin",
+    username: user.username || user.id || "admin",
     full_name: user.full_name || "Administrator BKN",
-    nip: user.nip || "198501012010011001",
+    nip: user.nip || "",
     institution: user.institution || "Kantor Regional V BKN Jakarta",
     division: user.division || "Pengelolaan Sistem Informasi Kepegawaian",
     mentor_name: user.mentor_name || "Pembimbing Kepegawaian",
@@ -34,7 +34,10 @@ export const profileController = {
       let user = fallbackUser;
 
       try {
-        const result = await pool.query("SELECT * FROM users WHERE id = $1", [fallbackUser.id]);
+        const result = await pool.query(
+          "SELECT * FROM users WHERE id = $1 OR username = $1 OR (nip IS NOT NULL AND nip <> '' AND nip = $2) LIMIT 1",
+          [fallbackUser.id, fallbackUser.nip || ""]
+        );
         if (result.rows.length > 0) {
           user = { ...fallbackUser, ...result.rows[0] };
         }
@@ -102,8 +105,10 @@ export const profileController = {
       }
 
       // Tanda Tangan path
-      let signaturePath = currentUser.signature_path || null;
-      if (req.body.signature_base64 && req.body.signature_base64.startsWith("data:image/")) {
+      let signaturePath = null;
+      if (req.files?.signature?.[0]) {
+        signaturePath = `/uploads/ttd/${req.files.signature[0].filename}`;
+      } else if (req.body.signature_base64 && req.body.signature_base64.startsWith("data:image/")) {
         try {
           const base64Data = req.body.signature_base64.replace(/^data:image\/\w+;base64,/, "");
           const filename = `ttd-user-${currentUser.id}-${Date.now()}.png`;
@@ -116,12 +121,15 @@ export const profileController = {
         } catch (sigErr) {
           console.error("Gagal menyimpan signature_base64:", sigErr);
         }
-      } else if (req.files?.signature?.[0]) {
-        signaturePath = `/uploads/ttd/${req.files.signature[0].filename}`;
+      }
+
+      // Jika user tidak mengunggah tanda tangan baru, pertahankan yang sudah tersimpan
+      if (!signaturePath) {
+        signaturePath = currentUser.signature_path || null;
       }
 
       try {
-        await pool.query(`
+        const updateRes = await pool.query(`
           UPDATE users SET
             full_name = $1,
             nip = $2,
@@ -136,7 +144,7 @@ export const profileController = {
             sig_city = $11,
             running_footer = $12,
             signature_path = COALESCE($13, signature_path)
-          WHERE id = $14
+          WHERE id = $14 OR username = $14 OR (nip IS NOT NULL AND nip <> '' AND nip = $15)
         `, [
           full_name.trim(),
           nip ? nip.trim() : "",
@@ -151,14 +159,16 @@ export const profileController = {
           sig_city ? sig_city.trim() : "Jakarta",
           running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
           signaturePath,
-          currentUser.id
+          currentUser.id,
+          currentUser.nip || ""
         ]);
+        console.log(`[PROFILE UPDATE] rows affected: ${updateRes?.rowCount || 0}, signaturePath: ${signaturePath}`);
       } catch (updateErr) {
         if (updateErr.message && updateErr.message.includes("signature_path")) {
           // Tambahkan kolom jika belum ada, lalu update kembali
           await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
           try {
-            await pool.query(`UPDATE users SET signature_path = $1 WHERE id = $2`, [signaturePath, currentUser.id]);
+            await pool.query(`UPDATE users SET signature_path = $1 WHERE id = $2 OR username = $2 OR (nip IS NOT NULL AND nip <> '' AND nip = $3)`, [signaturePath, currentUser.id, currentUser.nip || '']);
           } catch (e) {}
 
           await pool.query(`
@@ -175,7 +185,7 @@ export const profileController = {
               kop_contact = $10,
               sig_city = $11,
               running_footer = $12
-            WHERE id = $13
+            WHERE id = $13 OR username = $13 OR (nip IS NOT NULL AND nip <> '' AND nip = $14)
           `, [
             full_name.trim(),
             nip ? nip.trim() : "",
@@ -189,7 +199,8 @@ export const profileController = {
             kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
             sig_city ? sig_city.trim() : "Jakarta",
             running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
-            currentUser.id
+            currentUser.id,
+            currentUser.nip || ""
           ]);
         } else {
           throw updateErr;
@@ -205,7 +216,9 @@ export const profileController = {
         req.user.mentor_name = "";
         req.user.logo_path = logo_path ? logo_path.trim() : "";
         req.user.avatar_path = avatarPath;
-        req.user.signature_path = signaturePath;
+        if (signaturePath) {
+          req.user.signature_path = signaturePath;
+        }
         req.user.institution_kop = institution_kop ? institution_kop.trim() : "";
         req.user.kop_address = kop_address ? kop_address.trim() : "";
         req.user.kop_contact = kop_contact ? kop_contact.trim() : "";
