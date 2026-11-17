@@ -16,23 +16,22 @@ const findById = async (id) => {
 
 const getAllUsers = async () => {
     try {
+        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255);").catch(() => {});
         const result = await pool.query(
-            "SELECT id, username, role, full_name, nip, institution, division, mentor_name, avatar_path, signature_path FROM users ORDER BY role ASC, id ASC"
+            "SELECT * FROM users ORDER BY role ASC, id ASC"
         );
         return result.rows;
     } catch (err) {
-        console.warn("⚠️ [DEV MODE] PostgreSQL database error in getAllUsers:", err.message);
-        return [
-            {
-                id: "admin",
-                username: "Administrator Kanreg V",
-                role: "admin",
-                full_name: "Administrator BKN",
-                nip: "198501012010011001",
-                institution: "Kantor Regional V BKN Jakarta",
-                division: "Pengelolaan Sistem Informasi Kepegawaian"
+        console.warn("⚠️ PostgreSQL database error in getAllUsers:", err.message);
+        try {
+            const fallback = await pool.query("SELECT * FROM users ORDER BY id ASC");
+            if (fallback.rows && fallback.rows.length > 0) {
+                return fallback.rows;
             }
-        ];
+        } catch (fbErr) {
+            console.error("❌ Fallback query failed:", fbErr.message);
+        }
+        return [];
     }
 };
 
