@@ -29,15 +29,25 @@ export const profileController = {
   // GET /profile
   getProfile: async (req, res) => {
     try {
-      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS user_signatures (
+          user_id VARCHAR(100) PRIMARY KEY,
+          signature_path VARCHAR(255),
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `).catch(() => {});
+
       const fallbackUser = getCurrentUser(req);
       let user = fallbackUser;
 
       try {
-        const result = await pool.query(
-          "SELECT * FROM users WHERE id = $1 OR username = $1 OR (nip IS NOT NULL AND nip <> '' AND nip = $2) LIMIT 1",
-          [fallbackUser.id, fallbackUser.nip || ""]
-        );
+        const result = await pool.query(`
+          SELECT u.*, COALESCE(s.signature_path, NULL) AS signature_path
+          FROM users u
+          LEFT JOIN user_signatures s ON (s.user_id = u.id OR s.user_id = u.username OR (u.nip IS NOT NULL AND u.nip <> '' AND s.user_id = u.nip))
+          WHERE u.id = $1 OR u.username = $1 OR (u.nip IS NOT NULL AND u.nip <> '' AND u.nip = $2)
+          LIMIT 1
+        `, [fallbackUser.id, fallbackUser.nip || ""]);
         if (result.rows.length > 0) {
           user = { ...fallbackUser, ...result.rows[0] };
         }
@@ -60,7 +70,14 @@ export const profileController = {
   // POST /profile
   postProfile: async (req, res) => {
     try {
-      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS user_signatures (
+          user_id VARCHAR(100) PRIMARY KEY,
+          signature_path VARCHAR(255),
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `).catch(() => {});
+
       const currentUser = getCurrentUser(req);
       const {
         full_name,
@@ -111,7 +128,8 @@ export const profileController = {
       } else if (req.body.signature_base64 && req.body.signature_base64.startsWith("data:image/")) {
         try {
           const base64Data = req.body.signature_base64.replace(/^data:image\/\w+;base64,/, "");
-          const filename = `ttd-user-${currentUser.id}-${Date.now()}.png`;
+          const safeId = String(currentUser.id || "user").replace(/[^a-zA-Z0-9_-]/g, "_");
+          const filename = `ttd-user-${safeId}-${Date.now()}.png`;
           const uploadDir = path.join(process.cwd(), "public", "uploads", "ttd");
           if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -123,87 +141,54 @@ export const profileController = {
         }
       }
 
-      // Jika user tidak mengunggah tanda tangan baru, pertahankan yang sudah tersimpan
-      if (!signaturePath) {
-        signaturePath = currentUser.signature_path || null;
-      }
+      // Update data utama pegawai di tabel users
+      const updateRes = await pool.query(`
+        UPDATE users SET
+          full_name = $1,
+          nip = $2,
+          institution = $3,
+          division = $4,
+          mentor_name = $5,
+          logo_path = $6,
+          avatar_path = $7,
+          institution_kop = $8,
+          kop_address = $9,
+          kop_contact = $10,
+          sig_city = $11,
+          running_footer = $12
+        WHERE id = $13 OR username = $13 OR (nip IS NOT NULL AND nip <> '' AND nip = $14)
+      `, [
+        full_name.trim(),
+        nip ? nip.trim() : "",
+        institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
+        division.trim(),
+        "",
+        logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
+        avatarPath,
+        institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
+        kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
+        kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
+        sig_city ? sig_city.trim() : "Jakarta",
+        running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
+        currentUser.id,
+        currentUser.nip || ""
+      ]);
 
-      try {
-        const updateRes = await pool.query(`
-          UPDATE users SET
-            full_name = $1,
-            nip = $2,
-            institution = $3,
-            division = $4,
-            mentor_name = $5,
-            logo_path = $6,
-            avatar_path = $7,
-            institution_kop = $8,
-            kop_address = $9,
-            kop_contact = $10,
-            sig_city = $11,
-            running_footer = $12,
-            signature_path = COALESCE($13, signature_path)
-          WHERE id = $14 OR username = $14 OR (nip IS NOT NULL AND nip <> '' AND nip = $15)
-        `, [
-          full_name.trim(),
-          nip ? nip.trim() : "",
-          institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
-          division.trim(),
-          "",
-          logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
-          avatarPath,
-          institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
-          kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
-          kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
-          sig_city ? sig_city.trim() : "Jakarta",
-          running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
-          signaturePath,
+      // Jika ada tanda tangan baru yang diunggah, simpan permanen ke tabel user_signatures
+      if (signaturePath) {
+        const targetIds = Array.from(new Set([
           currentUser.id,
-          currentUser.nip || ""
-        ]);
-        console.log(`[PROFILE UPDATE] rows affected: ${updateRes?.rowCount || 0}, signaturePath: ${signaturePath}`);
-      } catch (updateErr) {
-        if (updateErr.message && updateErr.message.includes("signature_path")) {
-          // Tambahkan kolom jika belum ada, lalu update kembali
-          await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
-          try {
-            await pool.query(`UPDATE users SET signature_path = $1 WHERE id = $2 OR username = $2 OR (nip IS NOT NULL AND nip <> '' AND nip = $3)`, [signaturePath, currentUser.id, currentUser.nip || '']);
-          } catch (e) {}
+          currentUser.username,
+          currentUser.nip,
+          nip ? nip.trim() : ""
+        ].filter(Boolean)));
 
+        for (const uid of targetIds) {
           await pool.query(`
-            UPDATE users SET
-              full_name = $1,
-              nip = $2,
-              institution = $3,
-              division = $4,
-              mentor_name = $5,
-              logo_path = $6,
-              avatar_path = $7,
-              institution_kop = $8,
-              kop_address = $9,
-              kop_contact = $10,
-              sig_city = $11,
-              running_footer = $12
-            WHERE id = $13 OR username = $13 OR (nip IS NOT NULL AND nip <> '' AND nip = $14)
-          `, [
-            full_name.trim(),
-            nip ? nip.trim() : "",
-            institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
-            division.trim(),
-            "",
-            logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
-            avatarPath,
-            institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
-            kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
-            kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
-            sig_city ? sig_city.trim() : "Jakarta",
-            running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
-            currentUser.id,
-            currentUser.nip || ""
-          ]);
-        } else {
-          throw updateErr;
+            INSERT INTO user_signatures (user_id, signature_path, updated_at)
+            VALUES ($1, $2, NOW())
+            ON CONFLICT (user_id) DO UPDATE SET signature_path = EXCLUDED.signature_path, updated_at = NOW();
+          `, [uid, signaturePath]);
         }
       }
 
@@ -228,6 +213,11 @@ export const profileController = {
 
       return res.redirect("/profile?success=" + encodeURIComponent("Data profil pegawai, kop surat, dan footer dokumen berhasil disimpan!"));
     } catch (err) {
+      console.error("Profile save error:", err);
+      return res.redirect("/profile?error=" + encodeURIComponent("Gagal menyimpan profil: " + err.message));
+    }
+  }
+};
       console.error("Profile save error:", err);
       return res.redirect("/profile?error=" + encodeURIComponent("Gagal menyimpan profil: " + err.message));
     }

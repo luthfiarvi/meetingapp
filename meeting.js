@@ -142,9 +142,15 @@ app.use(async (req, res, next) => {
             role: "user"
         };
 
-        let userObj = { ...defaultUser };
+        let userObj = { ...defaultUser, signature_path: null };
         try {
-            const r = await pool.query("SELECT * FROM users WHERE id = $1", [sessionUserId]);
+            const r = await pool.query(`
+                SELECT u.*, COALESCE(s.signature_path, NULL) AS signature_path
+                FROM users u
+                LEFT JOIN user_signatures s ON (s.user_id = u.id OR s.user_id = u.username OR (u.nip IS NOT NULL AND u.nip <> '' AND s.user_id = u.nip))
+                WHERE u.id = $1 OR u.username = $1 OR (u.nip IS NOT NULL AND u.nip <> '' AND u.nip = $1)
+                LIMIT 1
+            `, [sessionUserId]);
             if (r.rows.length > 0) {
                 userObj = { ...defaultUser, ...r.rows[0] };
             }

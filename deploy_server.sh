@@ -63,7 +63,7 @@ SQL_PERMS="
     GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO magangit;
     ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO magangit;
     ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO magangit;
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255);
+    CREATE TABLE IF NOT EXISTS user_signatures (user_id VARCHAR(100) PRIMARY KEY, signature_path VARCHAR(255), updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
     ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT;
     ALTER TABLE notulen ALTER COLUMN user_id TYPE VARCHAR(100);
     ALTER TABLE infographics ALTER COLUMN user_id TYPE VARCHAR(100);
@@ -184,7 +184,7 @@ for DBNAME in meeting appmeeting; do
     (psql -h localhost -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE $DBNAME TO magangit;" 2>/dev/null) || (sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DBNAME TO magangit;" 2>/dev/null) || true
     (psql -h localhost -U postgres -d $DBNAME -c "$SQL_PERMS" 2>/dev/null) || (sudo -u postgres psql -d $DBNAME -c "$SQL_PERMS" 2>/dev/null) || true
     PGPASSWORD=K@nreg5 psql -h localhost -U magangit -d $DBNAME -c "
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255);
+        CREATE TABLE IF NOT EXISTS user_signatures (user_id VARCHAR(100) PRIMARY KEY, signature_path VARCHAR(255), updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS thumbnail TEXT;
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS absensi TEXT;
         ALTER TABLE meetings ADD COLUMN IF NOT EXISTS notulen_pdf TEXT;

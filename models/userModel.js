@@ -3,10 +3,13 @@ import pool from "../config/database.js";
 const findById = async (id) => {
     try {
         const cleanId = String(id || "").trim();
-        const result = await pool.query(
-            "SELECT * FROM users WHERE id = $1 OR username = $1 OR nip = $1",
-            [cleanId]
-        );
+        const result = await pool.query(`
+            SELECT u.*, COALESCE(s.signature_path, NULL) AS signature_path
+            FROM users u
+            LEFT JOIN user_signatures s ON (s.user_id = u.id OR s.user_id = u.username OR (u.nip IS NOT NULL AND u.nip <> '' AND s.user_id = u.nip))
+            WHERE u.id = $1 OR u.username = $1 OR u.nip = $1
+            LIMIT 1
+        `, [cleanId]);
         return result.rows[0] || null;
     } catch (err) {
         console.warn("⚠️ [DATABASE ERROR] Error in findById:", err.message);
@@ -16,10 +19,20 @@ const findById = async (id) => {
 
 const getAllUsers = async () => {
     try {
-        await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255);").catch(() => {});
-        const result = await pool.query(
-            "SELECT * FROM users ORDER BY role ASC, id ASC"
-        );
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS user_signatures (
+                user_id VARCHAR(100) PRIMARY KEY,
+                signature_path VARCHAR(255),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `).catch(() => {});
+
+        const result = await pool.query(`
+            SELECT u.*, COALESCE(s.signature_path, NULL) AS signature_path
+            FROM users u
+            LEFT JOIN user_signatures s ON (s.user_id = u.id OR s.user_id = u.username OR (u.nip IS NOT NULL AND u.nip <> '' AND s.user_id = u.nip))
+            ORDER BY u.role ASC, u.id ASC
+        `);
         return result.rows;
     } catch (err) {
         console.warn("⚠️ PostgreSQL database error in getAllUsers:", err.message);

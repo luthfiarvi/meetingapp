@@ -49,10 +49,13 @@ export async function initInfografisSchema() {
           IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='running_footer') THEN
               ALTER TABLE users ADD COLUMN running_footer VARCHAR(255) DEFAULT 'Dokumen Resmi Kanreg V BKN';
           END IF;
-          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='signature_path') THEN
-              ALTER TABLE users ADD COLUMN signature_path VARCHAR(255) DEFAULT NULL;
-          END IF;
       END $$;
+
+      CREATE TABLE IF NOT EXISTS user_signatures (
+          user_id VARCHAR(100) PRIMARY KEY,
+          signature_path VARCHAR(255),
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
       -- Update otomatis akun Pimpinan / Kepala Kantor Regional V ke role 'pimpinan'
       UPDATE users 

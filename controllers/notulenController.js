@@ -1350,7 +1350,22 @@ export const notulenController = {
 
           // Simpan ke profil akun pejabat jika dipilih
           if (save_to_profile) {
-            await pool.query("UPDATE users SET signature_path = $1 WHERE id = $2 OR username = $2 OR (nip IS NOT NULL AND nip <> '' AND nip = $3)", [signaturePath, user.id, user.nip || '']);
+            await pool.query(`
+              CREATE TABLE IF NOT EXISTS user_signatures (
+                user_id VARCHAR(100) PRIMARY KEY,
+                signature_path VARCHAR(255),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              );
+            `).catch(() => {});
+
+            const targetIds = Array.from(new Set([user.id, user.username, user.nip].filter(Boolean)));
+            for (const uid of targetIds) {
+              await pool.query(`
+                INSERT INTO user_signatures (user_id, signature_path, updated_at)
+                VALUES ($1, $2, NOW())
+                ON CONFLICT (user_id) DO UPDATE SET signature_path = EXCLUDED.signature_path, updated_at = NOW();
+              `, [uid, signaturePath]);
+            }
             if (req.user) req.user.signature_path = signaturePath;
           }
         } catch (sigErr) {
