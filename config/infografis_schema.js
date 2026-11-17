@@ -49,7 +49,16 @@ export async function initInfografisSchema() {
           IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='running_footer') THEN
               ALTER TABLE users ADD COLUMN running_footer VARCHAR(255) DEFAULT 'Dokumen Resmi Kanreg V BKN';
           END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='signature_path') THEN
+              ALTER TABLE users ADD COLUMN signature_path VARCHAR(255) DEFAULT NULL;
+          END IF;
       END $$;
+
+      -- Update otomatis akun Pimpinan / Kepala Kantor Regional V ke role 'pimpinan'
+      UPDATE users 
+      SET role = 'pimpinan' 
+      WHERE (LOWER(full_name) LIKE '%kepala kantor%' OR LOWER(division) LIKE '%kepala kantor%' OR LOWER(id) LIKE '%kakanreg%' OR LOWER(username) LIKE '%kakanreg%')
+        AND role NOT IN ('admin');
     `);
 
     // 2. Pastikan user admin dan user default selalu ada

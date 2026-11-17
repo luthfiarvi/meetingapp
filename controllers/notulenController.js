@@ -27,6 +27,7 @@ function getCurrentUser(req) {
     kop_contact: user.kop_contact || "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
     sig_city: user.sig_city || "Jakarta",
     running_footer: user.running_footer || "Dokumen Resmi Kanreg V BKN",
+    signature_path: user.signature_path || null,
     role: user.role || "admin"
   };
 }
@@ -484,7 +485,9 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
           <div>Mengetahui,</div>
           <div style="font-weight: bold; margin-bottom: 4px;">${docData.approverRole || docData.approver_role || '(Nama Jabatan)'}</div>
           <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
-            ${(docData.approvalStatus === 'approved' || docData.approval_status === 'approved') ? `
+            ${(docData.approver_signature || docData.approverSignature) ? `
+              <img src="${docData.approver_signature || docData.approverSignature}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0;" alt="Tanda Tangan Pejabat" />
+            ` : ((docData.approvalStatus === 'approved' || docData.approval_status === 'approved') ? `
               <div style="display: inline-block; border: 1.5px solid #059669; background: #ECFDF5; color: #065F46; padding: 4px 10px; border-radius: 6px; font-family: sans-serif; font-size: 8pt; line-height: 1.3;">
                 <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
                 <div>${docData.approverName || docData.approver_name || 'Pejabat'}</div>
@@ -492,7 +495,7 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
               </div>
             ` : `
               <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
-            `}
+            `)}
           </div>
           <div style="font-weight: bold; text-decoration: underline;">${docData.approverName || docData.approver_name || 'Nama'}</div>
           ${(docData.approverNip || docData.approver_nip) ? `<div>${String(docData.approverNip || docData.approver_nip).startsWith('NIP') ? (docData.approverNip || docData.approver_nip) : 'NIP. ' + (docData.approverNip || docData.approver_nip)}</div>` : ''}
@@ -560,20 +563,20 @@ export const notulenController = {
         const uRes = await pool.query(`
           SELECT id, username, full_name, nip, division, role 
           FROM users 
-          ORDER BY CASE WHEN role = 'admin' THEN 1 ELSE 2 END, full_name ASC
+          ORDER BY CASE WHEN role = 'pimpinan' THEN 1 WHEN role = 'admin' THEN 2 ELSE 3 END, full_name ASC
         `);
         approverList = uRes.rows;
       } catch (uErr) {
         approverList = [];
       }
 
-      // Ambil notula yang menunggu pengesahan oleh user login saat ini (atau semua jika admin)
+      // Ambil notula yang menunggu pengesahan oleh user login saat ini (atau semua jika admin/pimpinan)
       let pendingApprovals = [];
       try {
         const paRes = await pool.query(`
           SELECT n.id, n.title, n.meeting_date, n.notulis_name, n.created_at, n.meeting_id, n.approval_status
           FROM notulen n
-          WHERE (n.approver_id = $1 OR ($2 = 'admin' AND n.approval_status = 'pending_approval'))
+          WHERE (n.approver_id = $1 OR ($2 IN ('admin', 'pimpinan') AND n.approval_status = 'pending_approval'))
             AND n.approval_status = 'pending_approval'
           ORDER BY n.id DESC
         `, [user.id, user.role]);
@@ -862,7 +865,8 @@ export const notulenController = {
         approverNip: latestDoc.approver_nip || '',
         approverRole: latestDoc.approver_role || '',
         approvedAt: latestDoc.approved_at || null,
-        approvalNotes: latestDoc.approval_notes || ''
+        approvalNotes: latestDoc.approval_notes || '',
+        approverSignature: latestDoc.approver_signature || ''
       } : {
         id: null,
         meetingId: null,
@@ -893,7 +897,8 @@ export const notulenController = {
         approverNip: "",
         approverRole: "",
         approvedAt: null,
-        approvalNotes: ""
+        approvalNotes: "",
+        approverSignature: ""
       };
 
       // Jika dibuka dengan parameter meetingId tapi tanpa id notula tertentu, prefill dari rapat tersebut
@@ -1302,14 +1307,41 @@ export const notulenController = {
       }
       const doc = notulenRes.rows[0];
 
-      // Verifikasi hak akses: approver_id atau admin
-      if (user.role !== 'admin' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
+      // Verifikasi hak akses: approver_id atau admin atau pimpinan
+      if (user.role !== 'admin' && user.role !== 'pimpinan' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
         return res.status(403).json({ success: false, message: "Anda tidak memiliki wewenang untuk mengesahkan notula ini." });
       }
 
       const approverName = doc.approver_name || user.full_name;
       const approverNip = doc.approver_nip || user.nip;
       const approverRole = doc.approver_role || user.division;
+
+      let signaturePath = doc.approver_signature || null;
+      const { signature_base64, use_profile_signature, save_to_profile } = req.body;
+
+      // 1. Jika dikirim data signature baru (base64 image)
+      if (signature_base64 && signature_base64.startsWith("data:image/")) {
+        try {
+          const base64Data = signature_base64.replace(/^data:image\/\w+;base64,/, "");
+          const uploadDir = path.join(process.cwd(), "public", "uploads", "ttd");
+          if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+          const filename = `ttd_approver_${user.id}_${Date.now()}.png`;
+          fs.writeFileSync(path.join(uploadDir, filename), base64Data, "base64");
+          signaturePath = `/uploads/ttd/${filename}`;
+
+          // Simpan ke profil akun pejabat jika dipilih
+          if (save_to_profile) {
+            await pool.query("UPDATE users SET signature_path = $1 WHERE id = $2", [signaturePath, user.id]);
+            if (req.user) req.user.signature_path = signaturePath;
+          }
+        } catch (sigErr) {
+          console.error("Gagal menyimpan file signature approver:", sigErr);
+        }
+      } else if (use_profile_signature && user.signature_path) {
+        signaturePath = user.signature_path;
+      } else if (!signaturePath && user.signature_path) {
+        signaturePath = user.signature_path;
+      }
 
       await pool.query(`
         UPDATE notulen SET
@@ -1318,9 +1350,10 @@ export const notulenController = {
           approver_name = $1,
           approver_nip = $2,
           approver_role = $3,
-          approval_notes = $4
-        WHERE id = $5
-      `, [approverName, approverNip, approverRole, notes || null, targetId]);
+          approval_notes = $4,
+          approver_signature = $5
+        WHERE id = $6
+      `, [approverName, approverNip, approverRole, notes || null, signaturePath, targetId]);
 
       // Regenerate berkas fisik notula dengan cap sah resmi
       let fileUrl = null;
@@ -1358,7 +1391,8 @@ export const notulenController = {
             approverName: approverName,
             approverNip: approverNip,
             approverRole: approverRole,
-            approvedAt: new Date()
+            approvedAt: new Date(),
+            approverSignature: signaturePath
           },
           user,
           notulenId: doc.id,
@@ -2001,29 +2035,56 @@ export const notulenController = {
                     children: [new TextRun({ text: docData.approver_role || "(Nama Jabatan)", bold: true, size: 22, font: "Times New Roman" })],
                     spacing: { after: 100 }
                   }),
-                  ...(isApproved ? [
-                    new Paragraph({
-                      children: [
-                        new TextRun({ text: "✓ DISAHKAN RESMI (DIGITAL)", bold: true, size: 18, color: "047857", font: "Times New Roman" })
-                      ]
-                    }),
-                    new Paragraph({
-                      children: [
-                        new TextRun({ text: docData.approver_name || "Pejabat", size: 18, color: "065F46", font: "Times New Roman" })
-                      ]
-                    }),
-                    new Paragraph({
-                      children: [
-                        new TextRun({ text: approvedDateText, italics: true, size: 16, color: "059669", font: "Times New Roman" })
-                      ],
-                      spacing: { after: 100 }
-                    })
-                  ] : [
-                    new Paragraph({
-                      children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
-                      spacing: { before: 200, after: 300 }
-                    })
-                  ]),
+                  ...((() => {
+                    if (docData.approver_signature) {
+                      try {
+                        const cleanSigPath = docData.approver_signature.replace(/^\//, '').split('?')[0];
+                        const diskSigPath = path.join(process.cwd(), 'public', cleanSigPath);
+                        if (fs.existsSync(diskSigPath)) {
+                          const sigData = fs.readFileSync(diskSigPath);
+                          return [
+                            new Paragraph({
+                              children: [
+                                new ImageRun({
+                                  data: sigData,
+                                  transformation: { width: 140, height: 60 }
+                                })
+                              ],
+                              spacing: { before: 80, after: 80 }
+                            })
+                          ];
+                        }
+                      } catch (sigErr) {
+                        console.warn("Sig embed docx error:", sigErr.message);
+                      }
+                    }
+                    if (isApproved) {
+                      return [
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: "✓ DISAHKAN RESMI (DIGITAL)", bold: true, size: 18, color: "047857", font: "Times New Roman" })
+                          ]
+                        }),
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: docData.approver_name || "Pejabat", size: 18, color: "065F46", font: "Times New Roman" })
+                          ]
+                        }),
+                        new Paragraph({
+                          children: [
+                            new TextRun({ text: approvedDateText, italics: true, size: 16, color: "059669", font: "Times New Roman" })
+                          ],
+                          spacing: { after: 100 }
+                        })
+                      ];
+                    }
+                    return [
+                      new Paragraph({
+                        children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
+                        spacing: { before: 200, after: 300 }
+                      })
+                    ];
+                  })()),
                   new Paragraph({
                     children: [new TextRun({ text: docData.approver_name || "Nama", bold: true, underline: {}, size: 22, font: "Times New Roman" })]
                   }),

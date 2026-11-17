@@ -41,6 +41,36 @@ export const uploadAvatar = multer({
   fileFilter: fileFilter
 });
 
+const ttdDir = path.join(__dirname, "..", "public", "uploads", "ttd");
+if (!fs.existsSync(ttdDir)) {
+  fs.mkdirSync(ttdDir, { recursive: true });
+}
+
+const profileStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === "signature") {
+      cb(null, ttdDir);
+    } else {
+      cb(null, uploadDir);
+    }
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    if (file.fieldname === "signature") {
+      cb(null, "ttd-" + uniqueSuffix + ext);
+    } else {
+      cb(null, "avatar-" + uniqueSuffix + ext);
+    }
+  }
+});
+
+export const uploadProfile = multer({
+  storage: profileStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: fileFilter
+});
+
 const evidenceDir = path.join(__dirname, "..", "public", "uploads", "evidence");
 if (!fs.existsSync(evidenceDir)) {
   fs.mkdirSync(evidenceDir, { recursive: true });

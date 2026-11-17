@@ -1430,37 +1430,141 @@ async function handleSubmitApproval() {
   }
 }
 
-async function handleApproveNotulen() {
+let uploadedSigBase64 = null;
+
+function openApprovalModal() {
   const notulenId = notulenState.id;
   if (!notulenId) {
-    showNotificationToast('Notula belum tersimpan.', 'warning', 3000);
+    showNotificationToast('Notula belum tersimpan atau ID tidak valid.', 'warning', 3000);
     return;
   }
-  if (!confirm('Apakah Anda yakin ingin menyetujui & mengesahkan notula ini secara resmi?')) return;
+  const modal = document.getElementById('approvalModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeApprovalModal() {
+  const modal = document.getElementById('approvalModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function handleUseProfileSigChange() {
+  const chk = document.getElementById('chkUseProfileSig');
+  const uploadSection = document.getElementById('uploadSigSection');
+  if (!chk || !uploadSection) return;
+  if (chk.checked) {
+    uploadSection.style.display = 'none';
+  } else {
+    uploadSection.style.display = 'block';
+  }
+}
+
+function toggleUploadSigSection() {
+  const uploadSection = document.getElementById('uploadSigSection');
+  const chk = document.getElementById('chkUseProfileSig');
+  if (!uploadSection) return;
+  if (uploadSection.style.display === 'none') {
+    uploadSection.style.display = 'block';
+    if (chk) chk.checked = false;
+  } else {
+    uploadSection.style.display = 'none';
+    if (chk) chk.checked = true;
+  }
+}
+
+function handleModalSigFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (!file.type.match(/^image\/(png|jpe?g)$/i)) {
+    showNotificationToast('Hanya berkas gambar format PNG atau JPG yang diperbolehkan.', 'error', 3000);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    uploadedSigBase64 = evt.target.result;
+    const previewImg = document.getElementById('modalNewSigPreview');
+    const container = document.getElementById('modalNewSigPreviewContainer');
+    if (previewImg && container) {
+      previewImg.src = uploadedSigBase64;
+      container.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitFinalApproval() {
+  const notulenId = notulenState.id;
+  if (!notulenId) {
+    showNotificationToast('ID Notula tidak ditemukan.', 'error', 3000);
+    return;
+  }
+
+  const chkUseProfile = document.getElementById('chkUseProfileSig');
+  const chkSaveToProfile = document.getElementById('chkSaveToProfile');
+  const notes = document.getElementById('modalApprovalNotes')?.value?.trim() || '';
+
+  const useProfile = Boolean(chkUseProfile && chkUseProfile.checked && window.currentUserSignature);
+
+  if (!useProfile && !uploadedSigBase64 && !window.currentUserSignature) {
+    showNotificationToast('Harap pilih atau unggah file tanda tangan resmi terlebih dahulu.', 'warning', 4000);
+    return;
+  }
+
+  const btnConfirm = document.getElementById('btnConfirmApprovalModal');
+  if (btnConfirm) {
+    btnConfirm.disabled = true;
+    btnConfirm.innerText = 'Menyimpan & Mengesahkan...';
+  }
 
   try {
-    showNotificationToast('Memproses pengesahan digital notula...', 'loading', 0);
+    showNotificationToast('Mengesahkan notula kedinasan secara resmi...', 'loading', 0);
     const res = await fetch('/api/notulen/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: notulenId,
-        notulenId: notulenId
+        notulenId: notulenId,
+        notes: notes,
+        use_profile_signature: useProfile,
+        signature_base64: (!useProfile && uploadedSigBase64) ? uploadedSigBase64 : null,
+        save_to_profile: Boolean(chkSaveToProfile && chkSaveToProfile.checked)
       })
     });
     const data = await res.json();
     if (data.success) {
-      showNotificationToast('Notula berhasil disahkan secara resmi!', 'success', 3000);
+      showNotificationToast('Notula berhasil disahkan secara resmi dengan tanda tangan digital!', 'success', 3000);
+      closeApprovalModal();
       setTimeout(() => {
         window.location.reload();
-      }, 1200);
+      }, 1000);
     } else {
       showNotificationToast(data.message || 'Gagal mengesahkan notula.', 'error', 5000);
+      if (btnConfirm) {
+        btnConfirm.disabled = false;
+        btnConfirm.innerText = '✓ Sahkan & Bubuhkan Tanda Tangan';
+      }
     }
   } catch (err) {
-    console.error('Approve error:', err);
+    console.error('Submit approval error:', err);
     showNotificationToast('Terjadi kesalahan jaringan saat mengesahkan notula.', 'error', 4000);
+    if (btnConfirm) {
+      btnConfirm.disabled = false;
+      btnConfirm.innerText = '✓ Sahkan & Bubuhkan Tanda Tangan';
+    }
   }
+}
+
+// Ekspor ke window global untuk event inline HTML
+window.openApprovalModal = openApprovalModal;
+window.closeApprovalModal = closeApprovalModal;
+window.handleUseProfileSigChange = handleUseProfileSigChange;
+window.toggleUploadSigSection = toggleUploadSigSection;
+window.handleModalSigFileSelect = handleModalSigFileSelect;
+window.submitFinalApproval = submitFinalApproval;
+
+async function handleApproveNotulen() {
+  openApprovalModal();
 }
 
 async function handleRejectNotulen() {

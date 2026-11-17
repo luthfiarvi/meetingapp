@@ -217,6 +217,41 @@
           </div>
         </div>
 
+        <!-- Spesimen Tanda Tangan Resmi Akun -->
+        <div style="background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: #1E293B; margin-bottom: 2px;">
+                Spesimen Tanda Tangan Kedinasan (File Gambar PNG / JPG)
+              </label>
+              <div style="font-size: 0.775rem; color: #64748B;">
+                File tanda tangan ini otomatis digunakan saat Anda mengesahkan dokumen notula rapat.
+              </div>
+            </div>
+            <div>
+              <input type="file" id="profile_sig_file" accept="image/png, image/jpeg, image/jpg" style="display: none;" onchange="handleProfileSigUpload(event)">
+              <input type="hidden" id="signature_base64" name="signature_base64">
+              <button type="button" onclick="document.getElementById('profile_sig_file').click()" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 0.45rem 0.95rem; font-weight: 600; cursor: pointer;">
+                📁 Unggah File Tanda Tangan
+              </button>
+            </div>
+          </div>
+
+          <div id="profile-sig-display-container" style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem; padding: 0.65rem 1rem; background: #ffffff; border-radius: 8px; border: 1px solid #E2E8F0;">
+            <div style="width: 140px; height: 60px; border-radius: 6px; border: 1px dashed #94A3B8; background: #FAFAFA; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+              <img id="profile-sig-img" src="<%= user.signature_path || '' %>" style="<%= (user.signature_path) ? '' : 'display: none;' %> max-width: 100%; max-height: 100%; object-fit: contain;" alt="Spesimen Tanda Tangan">
+              <span id="profile-sig-placeholder" style="<%= (user.signature_path) ? 'display: none;' : '' %> font-size: 0.75rem; color: #94A3B8; font-style: italic;">(Belum ada TTD)</span>
+            </div>
+            <div style="font-size: 0.775rem; color: #475569; line-height: 1.4;">
+              <strong>Status Tanda Tangan:</strong> 
+              <span id="profile-sig-status" style="<%= (user.signature_path) ? 'color: #059669; font-weight: 700;' : 'color: #D97706;' %>">
+                <%= (user.signature_path) ? '✓ Tersedia & Siap Digunakan' : '⚠️ Belum Ada (Silakan unggah file gambar TTD)' %>
+              </span>
+              <div style="font-size: 0.725rem; color: #64748B; margin-top: 2px;">Format yang didukung: PNG transparan (sangat disarankan) atau JPG.</div>
+            </div>
+          </div>
+        </div>
+
 
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem;">
           <a href="/infografis" class="btn btn-secondary">Batal</a>
@@ -472,6 +507,32 @@
       });
     }
   })();
+
+  function handleProfileSigUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const b64 = evt.target.result;
+      const sigInput = document.getElementById('signature_base64');
+      const img = document.getElementById('profile-sig-img');
+      const placeholder = document.getElementById('profile-sig-placeholder');
+      const status = document.getElementById('profile-sig-status');
+      if (sigInput) sigInput.value = b64;
+      if (img) {
+        img.src = b64;
+        img.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+      if (status) {
+        status.style.color = '#059669';
+        status.style.fontWeight = '700';
+        status.innerText = '✓ File Baru Terpilih (Klik Simpan di Bawah)';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  window.handleProfileSigUpload = handleProfileSigUpload;
 </script>
 
 <%- include('layouts/footer') %>

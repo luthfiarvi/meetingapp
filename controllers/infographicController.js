@@ -18,6 +18,7 @@ function getCurrentUser(req) {
     kop_contact: user.kop_contact || "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
     sig_city: user.sig_city || "Jakarta",
     running_footer: user.running_footer || "Dokumen Resmi Kanreg V BKN",
+    signature_path: user.signature_path || null,
     role: user.role || "admin"
   };
 }

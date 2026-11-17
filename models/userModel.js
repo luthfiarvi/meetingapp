@@ -17,7 +17,7 @@ const findById = async (id) => {
 const getAllUsers = async () => {
     try {
         const result = await pool.query(
-            "SELECT id, username, role, full_name, nip, institution, division, mentor_name, avatar_path FROM users ORDER BY role ASC, id ASC"
+            "SELECT id, username, role, full_name, nip, institution, division, mentor_name, avatar_path, signature_path FROM users ORDER BY role ASC, id ASC"
         );
         return result.rows;
     } catch (err) {

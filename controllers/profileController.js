@@ -20,6 +20,7 @@ function getCurrentUser(req) {
     kop_contact: user.kop_contact || "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
     sig_city: user.sig_city || "Jakarta",
     running_footer: user.running_footer || "Dokumen Resmi Kanreg V BKN",
+    signature_path: user.signature_path || null,
     role: user.role || "admin"
   };
 }
@@ -94,6 +95,27 @@ export const profileController = {
         }
       } else if (req.file) {
         avatarPath = `/uploads/avatars/${req.file.filename}`;
+      } else if (req.files?.avatar?.[0]) {
+        avatarPath = `/uploads/avatars/${req.files.avatar[0].filename}`;
+      }
+
+      // Tanda Tangan path
+      let signaturePath = currentUser.signature_path || null;
+      if (req.body.signature_base64 && req.body.signature_base64.startsWith("data:image/")) {
+        try {
+          const base64Data = req.body.signature_base64.replace(/^data:image\/\w+;base64,/, "");
+          const filename = `ttd-user-${currentUser.id}-${Date.now()}.png`;
+          const uploadDir = path.join(process.cwd(), "public", "uploads", "ttd");
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+          fs.writeFileSync(path.join(uploadDir, filename), base64Data, "base64");
+          signaturePath = `/uploads/ttd/${filename}`;
+        } catch (sigErr) {
+          console.error("Gagal menyimpan signature_base64:", sigErr);
+        }
+      } else if (req.files?.signature?.[0]) {
+        signaturePath = `/uploads/ttd/${req.files.signature[0].filename}`;
       }
 
       await pool.query(`
@@ -109,8 +131,9 @@ export const profileController = {
           kop_address = $9,
           kop_contact = $10,
           sig_city = $11,
-          running_footer = $12
-        WHERE id = $13
+          running_footer = $12,
+          signature_path = COALESCE($13, signature_path)
+        WHERE id = $14
       `, [
         full_name.trim(),
         nip ? nip.trim() : "",
@@ -124,6 +147,7 @@ export const profileController = {
         kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
         sig_city ? sig_city.trim() : "Jakarta",
         running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
+        signaturePath,
         currentUser.id
       ]);
 
@@ -136,6 +160,7 @@ export const profileController = {
         req.user.mentor_name = "";
         req.user.logo_path = logo_path ? logo_path.trim() : "";
         req.user.avatar_path = avatarPath;
+        req.user.signature_path = signaturePath;
         req.user.institution_kop = institution_kop ? institution_kop.trim() : "";
         req.user.kop_address = kop_address ? kop_address.trim() : "";
         req.user.kop_contact = kop_contact ? kop_contact.trim() : "";

@@ -2,7 +2,7 @@ import express from "express";
 import infographicController from "../controllers/infographicController.js";
 import notulenController from "../controllers/notulenController.js";
 import profileController from "../controllers/profileController.js";
-import { uploadEvidence, uploadTranscript, uploadAvatar } from "../middleware/uploadMiddleware.js";
+import { uploadEvidence, uploadTranscript, uploadAvatar, uploadProfile } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -14,21 +14,21 @@ const ensureAuth = [ensureAuthenticated, ensureNotPegawai];
 router.get("/infografis", ensureAuth, infographicController.getPortal);
 router.get("/portal", ensureAuth, infographicController.getPortal);
 
-// Manajemen Profil Pegawai, Kop Surat, & Footer Dokumen
-router.get("/profile", ensureAuth, profileController.getProfile);
-router.post("/profile", ensureAuth, uploadAvatar.single("avatar"), profileController.postProfile);
+// Manajemen Profil Pegawai, Kop Surat, & Footer Dokumen (Akses untuk semua user yang login)
+router.get("/profile", ensureAuthenticated, profileController.getProfile);
+router.post("/profile", ensureAuthenticated, uploadProfile.fields([{ name: "avatar", maxCount: 1 }, { name: "signature", maxCount: 1 }]), profileController.postProfile);
 
-// Modul Notulen Rapat Kedinasan BKN
-router.get("/notulen", ensureAuth, notulenController.getNotulenGenerator);
-router.get("/notulen/preview/:id", ensureAuth, notulenController.getNotulenPreview);
-router.get("/notulen/export-docx/:id", ensureAuth, notulenController.exportDocx);
-router.post("/api/notulen", ensureAuth, notulenController.saveNotulen);
-router.delete("/api/notulen/:id", ensureAuth, notulenController.deleteNotulen);
-router.post("/api/notulen/ai-generate", ensureAuth, notulenController.aiGenerateNotulen);
-router.post("/api/notulen/parse-transcript-file", ensureAuth, uploadTranscript.single("file"), notulenController.parseTranscriptFile);
-router.post("/api/notulen/submit-approval", ensureAuth, notulenController.submitApproval);
-router.post("/api/notulen/approve", ensureAuth, notulenController.approveNotulen);
-router.post("/api/notulen/reject", ensureAuth, notulenController.rejectNotulen);
+// Modul Notulen Rapat Kedinasan BKN (Dapat diakses oleh Pimpinan, Tim Kerja, Admin, dan Notulis/Approver)
+router.get("/notulen", ensureAuthenticated, notulenController.getNotulenGenerator);
+router.get("/notulen/preview/:id", ensureAuthenticated, notulenController.getNotulenPreview);
+router.get("/notulen/export-docx/:id", ensureAuthenticated, notulenController.exportDocx);
+router.post("/api/notulen", ensureAuthenticated, notulenController.saveNotulen);
+router.delete("/api/notulen/:id", ensureAuthenticated, notulenController.deleteNotulen);
+router.post("/api/notulen/ai-generate", ensureAuthenticated, notulenController.aiGenerateNotulen);
+router.post("/api/notulen/parse-transcript-file", ensureAuthenticated, uploadTranscript.single("file"), notulenController.parseTranscriptFile);
+router.post("/api/notulen/submit-approval", ensureAuthenticated, notulenController.submitApproval);
+router.post("/api/notulen/approve", ensureAuthenticated, notulenController.approveNotulen);
+router.post("/api/notulen/reject", ensureAuthenticated, notulenController.rejectNotulen);
 
 // Modul Infografis Kinerja BKN
 router.get("/generator", ensureAuth, infographicController.getGenerator);
