@@ -18,10 +18,13 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
         const paRes = await pool.query(`
             SELECT n.id, n.title, n.meeting_date, n.notulis_name, n.created_at, n.meeting_id, n.approval_status
             FROM notulen n
-            WHERE (n.approver_id = $1 OR ($2 = 'admin' AND n.approval_status = 'pending_approval'))
-              AND n.approval_status = 'pending_approval'
+            WHERE n.approval_status = 'pending_approval'
+              AND (
+                (n.approver_id IS NOT NULL AND LOWER(n.approver_id) = LOWER($1))
+                OR (n.approver_nip IS NOT NULL AND n.approver_nip <> '' AND LOWER(n.approver_nip) = LOWER($2))
+              )
             ORDER BY n.id DESC
-        `, [String(currentUser.id || ''), currentUser.role || 'user']);
+        `, [String(currentUser.id || ''), String(currentUser.nip || '')]);
         pendingApprovals = paRes.rows;
     } catch (e) {
         pendingApprovals = [];

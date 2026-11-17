@@ -50,8 +50,16 @@
           💾 Simpan Draft
         </button>
 
-        <!-- Tombol Pengesahan / Persetujuan -->
-        <% if (initialData.approvalStatus === 'pending_approval' && (user.role === 'admin' || user.role === 'pimpinan' || (initialData.approverId && String(initialData.approverId) === String(user.id)))) { %>
+        <!-- Tombol Pengesahan / Persetujuan (HANYA MUNCUL UNTUK PEJABAT YANG DITUNJUK) -->
+        <% 
+          const curUid = (typeof user !== 'undefined' && user && user.id) ? String(user.id).trim().toLowerCase() : '';
+          const curNip = (typeof user !== 'undefined' && user && user.nip) ? String(user.nip).trim().toLowerCase() : '';
+          const targetApproverId = (initialData && initialData.approverId) ? String(initialData.approverId).trim().toLowerCase() : '';
+          const targetApproverNip = (initialData && initialData.approverNip) ? String(initialData.approverNip).trim().toLowerCase() : '';
+          const isDesignatedApprover = (targetApproverId && curUid && targetApproverId === curUid) || 
+                                       (targetApproverNip && curNip && targetApproverNip === curNip);
+        %>
+        <% if (initialData.approvalStatus === 'pending_approval' && isDesignatedApprover) { %>
           <button type="button" id="btnApproveNotulen" class="btn btn-sm" style="font-size: 0.8rem; font-weight: 700; padding: 0.45rem 0.95rem; background: #059669; color: #fff; border: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; box-shadow: 0 4px 10px rgba(5,150,105,0.3);">
             ✓ Sahkan Notula
           </button>

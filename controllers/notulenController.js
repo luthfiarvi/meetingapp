@@ -570,16 +570,19 @@ export const notulenController = {
         approverList = [];
       }
 
-      // Ambil notula yang menunggu pengesahan oleh user login saat ini (atau semua jika admin/pimpinan)
+      // Ambil notula yang menunggu pengesahan KHUSUS untuk Pejabat yang ditunjuk saja (Admin pun tidak melihat jika bukan yang dituju)
       let pendingApprovals = [];
       try {
         const paRes = await pool.query(`
           SELECT n.id, n.title, n.meeting_date, n.notulis_name, n.created_at, n.meeting_id, n.approval_status
           FROM notulen n
-          WHERE (n.approver_id = $1 OR ($2 IN ('admin', 'pimpinan') AND n.approval_status = 'pending_approval'))
-            AND n.approval_status = 'pending_approval'
+          WHERE n.approval_status = 'pending_approval'
+            AND (
+              (n.approver_id IS NOT NULL AND LOWER(n.approver_id) = LOWER($1))
+              OR (n.approver_nip IS NOT NULL AND n.approver_nip <> '' AND LOWER(n.approver_nip) = LOWER($2))
+            )
           ORDER BY n.id DESC
-        `, [user.id, user.role]);
+        `, [String(user.id || ''), String(user.nip || '')]);
         pendingApprovals = paRes.rows;
       } catch (paErr) {
         pendingApprovals = [];
@@ -1307,9 +1310,20 @@ export const notulenController = {
       }
       const doc = notulenRes.rows[0];
 
-      // Verifikasi hak akses: approver_id atau admin atau pimpinan
-      if (user.role !== 'admin' && user.role !== 'pimpinan' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
-        return res.status(403).json({ success: false, message: "Anda tidak memiliki wewenang untuk mengesahkan notula ini." });
+      // Verifikasi hak akses: HANYA Pejabat yang ditunjuk untuk Mengetahui (Admin pun tidak berhak mengesahkan jika bukan yang dituju)
+      const uId = String(user.id || '').trim().toLowerCase();
+      const uNip = String(user.nip || '').trim().toLowerCase();
+      const docAppId = String(doc.approver_id || '').trim().toLowerCase();
+      const docAppNip = String(doc.approver_nip || '').trim().toLowerCase();
+
+      const isDesignatedApprover = (docAppId && uId && docAppId === uId) ||
+                                   (docAppNip && uNip && docAppNip === uNip);
+
+      if (!isDesignatedApprover) {
+        return res.status(403).json({
+          success: false,
+          message: `Akses ditolak. Pengesahan notula ini hanya dapat dilakukan secara resmi oleh ${doc.approver_name || 'Pejabat yang ditunjuk untuk Mengetahui'}.`
+        });
       }
 
       const approverName = doc.approver_name || user.full_name;
@@ -1436,8 +1450,20 @@ export const notulenController = {
       }
       const doc = notulenRes.rows[0];
 
-      if (user.role !== 'admin' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
-        return res.status(403).json({ success: false, message: "Anda tidak berhak merevisi notula ini." });
+      // Verifikasi hak akses: HANYA Pejabat yang ditunjuk untuk Mengetahui
+      const uId = String(user.id || '').trim().toLowerCase();
+      const uNip = String(user.nip || '').trim().toLowerCase();
+      const docAppId = String(doc.approver_id || '').trim().toLowerCase();
+      const docAppNip = String(doc.approver_nip || '').trim().toLowerCase();
+
+      const isDesignatedApprover = (docAppId && uId && docAppId === uId) ||
+                                   (docAppNip && uNip && docAppNip === uNip);
+
+      if (!isDesignatedApprover) {
+        return res.status(403).json({
+          success: false,
+          message: `Akses ditolak. Permintaan revisi notula ini hanya dapat dilakukan oleh ${doc.approver_name || 'Pejabat yang ditunjuk untuk Mengetahui'}.`
+        });
       }
 
       await pool.query(`

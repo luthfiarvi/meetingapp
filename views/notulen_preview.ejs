@@ -62,7 +62,14 @@
     </div>
 
     <div style="display: flex; gap: 0.5rem; align-items: center;">
-      <% if (doc.approvalStatus === 'pending_approval' && (user.role === 'admin' || (doc.approver_id && String(doc.approver_id) === String(user.id)))) { %>
+      <% 
+        const pUid = (typeof user !== 'undefined' && user && user.id) ? String(user.id).trim().toLowerCase() : '';
+        const pNip = (typeof user !== 'undefined' && user && user.nip) ? String(user.nip).trim().toLowerCase() : '';
+        const docAppId = (doc && (doc.approver_id || doc.approverId)) ? String(doc.approver_id || doc.approverId).trim().toLowerCase() : '';
+        const docAppNip = (doc && (doc.approver_nip || doc.approverNip)) ? String(doc.approver_nip || doc.approverNip).trim().toLowerCase() : '';
+        const isTargetApprover = (docAppId && pUid && docAppId === pUid) || (docAppNip && pNip && docAppNip === pNip);
+      %>
+      <% if (doc.approvalStatus === 'pending_approval' && isTargetApprover) { %>
         <button type="button" onclick="confirmApproval(<%= doc.id %>)" class="btn btn-sm" style="background: #059669; color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 10px rgba(5,150,105,0.3); display: flex; align-items: center; gap: 4px; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer;">
           ✓ Setujui & Sahkan Notula
         </button>
