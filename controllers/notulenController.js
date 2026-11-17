@@ -349,13 +349,47 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
     .notula-main-title { font-size: 13pt; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
     .notula-sub-title { font-size: 11pt; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
     .notula-meta-line { font-size: 10.5pt; font-weight: bold; margin-bottom: 3px; }
-    .notula-box-header { font-weight: bold; text-transform: uppercase; margin-top: 14px; margin-bottom: 6px; font-size: 11pt; }
+    .notula-shaded-box {
+      background-color: #E2E8F0;
+      border: 1.5px solid #000000;
+      text-align: center;
+      padding: 4px 6px;
+      font-weight: bold;
+      font-size: 11pt;
+      letter-spacing: 0.05em;
+      margin: 18px 0 8px 0;
+      text-transform: uppercase;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .pelaksanaan-subheading {
+      font-weight: bold;
+      font-size: 10.5pt;
+      margin: 10px 0 3px 0;
+      color: #000000;
+    }
+    .pelaksanaan-text {
+      font-size: 10.5pt;
+      line-height: 1.5;
+      text-align: justify;
+      margin-bottom: 8px;
+      white-space: pre-line;
+    }
     .notula-list { margin: 0 0 14px 20px; padding: 0; }
     .notula-list li { margin-bottom: 4px; text-align: justify; }
-    .notula-activity-item { margin-bottom: 12px; }
-    .notula-speaker { font-weight: bold; margin-bottom: 3px; }
+    .notula-num-list { margin: 0 0 12px 22px; padding: 0; }
+    .notula-num-list li { font-size: 10.5pt; line-height: 1.45; margin-bottom: 4px; text-align: justify; }
+    .notula-subnote { font-size: 9pt; font-style: italic; color: #475569; margin-bottom: 8px; }
+    .notula-sig-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+      margin-top: 25px;
+      page-break-inside: avoid;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+    }
+    .notula-sig-table td { vertical-align: top; border: none; padding: 0; }
     .notula-closing { text-align: justify; margin: 14px 0; }
-    .notula-signature { width: 280px; margin-left: auto; text-align: left; margin-top: 25px; }
     @media print {
       body { background: white !important; padding: 0 !important; }
       .preview-actions { display: none !important; }
@@ -394,68 +428,87 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
     <div class="notula-title-block">
       <div class="notula-main-title">NOTULA</div>
       <div class="notula-sub-title">(${docData.title})</div>
-      <div class="notula-meta-line">${formattedDate}, Waktu: ${docData.meetingTime || '-'}</div>
+      <div class="notula-meta-line">Hari, Tanggal, Waktu: ${formattedDate}, ${docData.meetingTime || '-'}</div>
       <div class="notula-meta-line">Tempat: ${docData.meetingPlace || '-'}</div>
     </div>
 
-    <div class="notula-box-header">1. AGENDA KEGIATAN</div>
+    <div class="notula-shaded-box">AGENDA RAPAT</div>
     <ul class="notula-list">
       ${agenda.map(item => `<li>${item}</li>`).join('')}
     </ul>
 
-    <div class="notula-box-header">2. PESERTA / UNSUR YANG HADIR</div>
-    <ul class="notula-list">
+    <div class="notula-shaded-box">PESERTA RAPAT</div>
+    <ol class="notula-num-list">
       ${attendees.map(item => `<li>${item}</li>`).join('')}
-    </ul>
+    </ol>
 
-    <div class="notula-box-header">3. URAIAN KEGIATAN & PAPARAN</div>
-    ${activities.map((act, idx) => `
-      <div class="notula-activity-item">
-        <div class="notula-speaker">${act.sectionTitle || `${idx + 1}. Paparan`} ${act.speaker ? `(${act.speaker})` : ''}</div>
-        <ul class="notula-list">
-          ${(act.points || []).map(pt => `<li>${pt}</li>`).join('')}
-        </ul>
-      </div>
-    `).join('')}
+    <div class="notula-shaded-box">PELAKSANAAN</div>
+    <div>
+      <div class="pelaksanaan-subheading">1. Pembukaan</div>
+      <div class="pelaksanaan-text">${docData.pelaksanaanPembukaan || docData.pelaksanaan_pembukaan || (activities.length > 0 && activities[0].points ? activities[0].points.join('\n') : '-')}</div>
 
-    ${kertasKerjaMtHtml}
+      <div class="pelaksanaan-subheading">2. Pembahasan</div>
+      <div class="pelaksanaan-text">${docData.pelaksanaanPembahasan || docData.pelaksanaan_pembahasan || (activities.length > 1 ? activities.slice(1).map(a => `${a.sectionTitle}:\n${(a.points || []).join('\n')}`).join('\n\n') : (activities.length === 1 && activities[0].points ? activities[0].points.join('\n') : '-'))}</div>
 
-    <div class="notula-box-header">4. POKOK TINDAK LANJUT</div>
-    <ul class="notula-list">
-      ${actionItems.map(item => `<li>${item}</li>`).join('')}
-    </ul>
+      ${kertasKerjaMtHtml}
 
-    <div class="notula-box-header">5. KESIMPULAN RAPAT</div>
-    <ul class="notula-list">
-      ${conclusions.map(item => `<li>${item}</li>`).join('')}
-    </ul>
+      <div class="pelaksanaan-subheading">3. Diskusi / Tanya Jawab</div>
+      <div class="pelaksanaan-text">${docData.pelaksanaanDiskusi || docData.pelaksanaan_diskusi || '-'}</div>
 
-    <div class="notula-closing">
-      ${docData.closingText || 'Demikian notula rapat kedinasan ini dibuat dengan sebenarnya untuk dipergunakan sebagaimana mestinya.'}
+      <div class="pelaksanaan-subheading">4. Rekomendasi/Tindak Lanjut</div>
+      <div class="pelaksanaan-text">${docData.pelaksanaanRekomendasi || docData.pelaksanaan_rekomendasi || (actionItems.length > 0 ? actionItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : (conclusions.length > 0 ? conclusions.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : '-'))}</div>
     </div>
 
-    <div class="notula-signature">
-      <div>${user.sig_city || 'Jakarta'}, ${formattedDate}</div>
-      <div style="margin-top: 4px; font-weight: bold;">Notulis,</div>
-      <div style="height: 60px;"></div>
-      <div style="font-weight: bold; text-decoration: underline;">${docData.notulisName || user.full_name}</div>
-      ${(docData.notulisNip || user.nip) ? `<div>${String(docData.notulisNip || user.nip).startsWith('NIP') ? (docData.notulisNip || user.nip) : 'NIP. ' + (docData.notulisNip || user.nip)}</div>` : ''}
-      <div style="font-size: 9.5pt; color: #333;">${docData.notulisRole || user.division}</div>
-    </div>
-
+    <div class="notula-shaded-box">DOKUMENTASI</div>
+    <div class="notula-subnote">(Foto, screenshoot, evidence, link dok pendukung, dll)</div>
     ${processedPhotos.length > 0 ? `
-      <div style="margin-top: 30px; page-break-before: auto;">
-        <div class="notula-box-header" style="border-top: 1px dashed #ccc; padding-top: 15px;">DOKUMENTASI FOTO KEGIATAN:</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-          ${processedPhotos.map(p => `
-            <div style="border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; padding: 4px; background: #f8fafc; text-align: center;">
-              <img src="${p.src}" style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 4px;" alt="Dokumentasi ${p.index}">
-              ${p.caption ? `<div style="font-size: 8.5pt; margin-top: 4px; color: #475569;">${p.caption}</div>` : ''}
-            </div>
-          `).join('')}
-        </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; margin-bottom: 15px;">
+        ${processedPhotos.map(p => `
+          <div style="border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; padding: 4px; background: #f8fafc; text-align: center;">
+            <img src="${p.src}" style="max-width: 100%; height: 160px; object-fit: cover; border-radius: 4px;" alt="Dokumentasi ${p.index}">
+            ${p.caption ? `<div style="font-size: 8.5pt; margin-top: 4px; color: #475569;">${p.caption}</div>` : ''}
+          </div>
+        `).join('')}
       </div>
     ` : ''}
+
+    <div class="notula-shaded-box">PENUTUP</div>
+    <div class="notula-closing">
+      ${docData.closingText || 'Demikian notula ini disusun untuk dipergunakan sebagaimana mestinya.'}
+    </div>
+
+    <!-- Tanda Tangan 2 Kolom (Kiri: Mengetahui, Kanan: Notulis) -->
+    <table class="notula-sig-table">
+      <tr>
+        <td style="width: 50%; padding-right: 15px;">
+          <div>Mengetahui,</div>
+          <div style="font-weight: bold; margin-bottom: 4px;">${docData.approverRole || docData.approver_role || '(Nama Jabatan)'}</div>
+          <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
+            ${(docData.approvalStatus === 'approved' || docData.approval_status === 'approved') ? `
+              <div style="display: inline-block; border: 1.5px solid #059669; background: #ECFDF5; color: #065F46; padding: 4px 10px; border-radius: 6px; font-family: sans-serif; font-size: 8pt; line-height: 1.3;">
+                <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
+                <div>${docData.approverName || docData.approver_name || 'Pejabat'}</div>
+                <div style="font-size: 7.5pt; color: #059669;">${docData.approvedAt || docData.approved_at ? new Date(docData.approvedAt || docData.approved_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : (formattedDate.includes(',') ? formattedDate.split(',')[1].trim() : formattedDate)}</div>
+              </div>
+            ` : `
+              <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            `}
+          </div>
+          <div style="font-weight: bold; text-decoration: underline;">${docData.approverName || docData.approver_name || 'Nama'}</div>
+          ${(docData.approverNip || docData.approver_nip) ? `<div>${String(docData.approverNip || docData.approver_nip).startsWith('NIP') ? (docData.approverNip || docData.approver_nip) : 'NIP. ' + (docData.approverNip || docData.approver_nip)}</div>` : ''}
+        </td>
+
+        <td style="width: 50%; padding-left: 15px;">
+          <div>${user.sig_city || 'Jakarta'}, ${formattedDate.includes(',') ? formattedDate.split(',')[1].trim() : formattedDate}</div>
+          <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
+          <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
+            <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+          </div>
+          <div style="font-weight: bold; text-decoration: underline;">${docData.notulisName || docData.notulis_name || user.full_name}</div>
+          ${(docData.notulisNip || docData.notulis_nip || user.nip) ? `<div>${String(docData.notulisNip || docData.notulis_nip || user.nip).startsWith('NIP') ? (docData.notulisNip || docData.notulis_nip || user.nip) : 'NIP. ' + (docData.notulisNip || docData.notulis_nip || user.nip)}</div>` : ''}
+        </td>
+      </tr>
+    </table>
   </div>
 </body>
 </html>`;
@@ -499,6 +552,34 @@ export const notulenController = {
         } catch (fbErr) {
           meetingsList = [];
         }
+      }
+
+      // Ambil daftar pegawai / pejabat untuk dropdown Pihak yang Mengetahui (Pengesahan)
+      let approverList = [];
+      try {
+        const uRes = await pool.query(`
+          SELECT id, username, full_name, nip, division, role 
+          FROM users 
+          ORDER BY CASE WHEN role = 'admin' THEN 1 ELSE 2 END, full_name ASC
+        `);
+        approverList = uRes.rows;
+      } catch (uErr) {
+        approverList = [];
+      }
+
+      // Ambil notula yang menunggu pengesahan oleh user login saat ini (atau semua jika admin)
+      let pendingApprovals = [];
+      try {
+        const paRes = await pool.query(`
+          SELECT n.id, n.title, n.meeting_date, n.notulis_name, n.created_at, n.meeting_id, n.approval_status
+          FROM notulen n
+          WHERE (n.approver_id = $1 OR ($2 = 'admin' AND n.approval_status = 'pending_approval'))
+            AND n.approval_status = 'pending_approval'
+          ORDER BY n.id DESC
+        `, [user.id, user.role]);
+        pendingApprovals = paRes.rows;
+      } catch (paErr) {
+        pendingApprovals = [];
       }
 
       const queryMeetingId = req.query.meetingId ? parseInt(req.query.meetingId, 10) : null;
@@ -747,6 +828,10 @@ export const notulenController = {
       const rawLatestMt = latestDoc ? latestDoc.kertas_kerja_mt : null;
       const parsedLatestMt = rawLatestMt ? (Array.isArray(rawLatestMt) ? rawLatestMt : safeParseJson(rawLatestMt, null)) : null;
 
+      const parsedActivities = safeParseJson(latestDoc?.activities_data || latestDoc?.activities);
+      const parsedActions = safeParseJson(latestDoc?.action_items || latestDoc?.actionItems);
+      const parsedConclusions = safeParseJson(latestDoc?.conclusions || latestDoc?.conclusions);
+
       const defaultData = latestDoc ? {
         id: latestDoc.id,
         meetingId: selectedMeetingId || latestDoc.meeting_id || null,
@@ -757,16 +842,27 @@ export const notulenController = {
         meetingPlace: latestDoc.meeting_place || "Di Tempat",
         agenda: safeParseJson(latestDoc.agenda_data || latestDoc.agenda),
         attendees: safeParseJson(latestDoc.attendees_data || latestDoc.attendees),
-        activities: safeParseJson(latestDoc.activities_data || latestDoc.activities),
-        actionItems: safeParseJson(latestDoc.action_items || latestDoc.actionItems),
-        conclusions: safeParseJson(latestDoc.conclusions || latestDoc.conclusions),
+        activities: parsedActivities,
+        actionItems: parsedActions,
+        conclusions: parsedConclusions,
+        pelaksanaanPembukaan: latestDoc.pelaksanaan_pembukaan || (parsedActivities.length > 0 && parsedActivities[0]?.points ? parsedActivities[0].points.join('\n') : ''),
+        pelaksanaanPembahasan: latestDoc.pelaksanaan_pembahasan || (parsedActivities.length > 1 ? parsedActivities.slice(1).map(a => `${a.sectionTitle}:\n${(a.points || []).join('\n')}`).join('\n\n') : (parsedActivities.length === 1 && parsedActivities[0]?.points ? parsedActivities[0].points.join('\n') : '')),
+        pelaksanaanDiskusi: latestDoc.pelaksanaan_diskusi || '',
+        pelaksanaanRekomendasi: latestDoc.pelaksanaan_rekomendasi || (parsedActions.length > 0 ? parsedActions.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : (parsedConclusions.length > 0 ? parsedConclusions.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : '')),
         closingText: latestDoc.closing_text || latestDoc.closingText || "",
         documentationPhotos: safeParseJson(latestDoc.documentation_photos || latestDoc.documentationPhotos),
         isMt: Boolean(parsedLatestMt && parsedLatestMt.length > 0),
         kertasKerjaMt: parsedLatestMt,
         notulisName: latestDoc.notulis_name || latestDoc.notulisName || user.full_name,
         notulisNip: latestDoc.notulis_nip || latestDoc.notulisNip || user.nip || "",
-        notulisRole: latestDoc.notulis_role || latestDoc.notulisRole || user.division
+        notulisRole: latestDoc.notulis_role || latestDoc.notulisRole || user.division,
+        approvalStatus: latestDoc.approval_status || 'draft',
+        approverId: latestDoc.approver_id || null,
+        approverName: latestDoc.approver_name || '',
+        approverNip: latestDoc.approver_nip || '',
+        approverRole: latestDoc.approver_role || '',
+        approvedAt: latestDoc.approved_at || null,
+        approvalNotes: latestDoc.approval_notes || ''
       } : {
         id: null,
         meetingId: null,
@@ -780,13 +876,24 @@ export const notulenController = {
         activities: [],
         actionItems: [],
         conclusions: [],
+        pelaksanaanPembukaan: "",
+        pelaksanaanPembahasan: "",
+        pelaksanaanDiskusi: "",
+        pelaksanaanRekomendasi: "",
         closingText: "",
         documentationPhotos: [],
         isMt: false,
         kertasKerjaMt: null,
         notulisName: user.full_name,
         notulisNip: user.nip || "",
-        notulisRole: user.division
+        notulisRole: user.division,
+        approvalStatus: 'draft',
+        approverId: null,
+        approverName: "",
+        approverNip: "",
+        approverRole: "",
+        approvedAt: null,
+        approvalNotes: ""
       };
 
       // Jika dibuka dengan parameter meetingId tapi tanpa id notula tertentu, prefill dari rapat tersebut
@@ -815,6 +922,8 @@ export const notulenController = {
         todayFormatted: formattedDate,
         meetings: meetingsList,
         selectedMeetingId: selectedMeetingId,
+        approverList: approverList,
+        pendingApprovals: pendingApprovals,
         fromMeetingManagement: Boolean(req.query.meetingId || (latestDoc && latestDoc.meeting_id)),
         isEditing: isEditing
       });
@@ -847,7 +956,25 @@ export const notulenController = {
         notulis_nip,
         notulisRole,
         kertasKerjaMt,
-        kertas_kerja_mt
+        kertas_kerja_mt,
+        pelaksanaanPembukaan,
+        pelaksanaan_pembukaan,
+        pelaksanaanPembahasan,
+        pelaksanaan_pembahasan,
+        pelaksanaanDiskusi,
+        pelaksanaan_diskusi,
+        pelaksanaanRekomendasi,
+        pelaksanaan_rekomendasi,
+        approverId,
+        approver_id,
+        approverName,
+        approver_name,
+        approverNip,
+        approver_nip,
+        approverRole,
+        approver_role,
+        approvalStatus,
+        approval_status
       } = req.body;
 
       if (!title || !meetingDate) {
@@ -885,6 +1012,17 @@ export const notulenController = {
       const mtJson = mtArray ? JSON.stringify(mtArray) : null;
       const finalNotulisNip = (notulisNip !== undefined && notulisNip !== null) ? notulisNip : (notulis_nip || user.nip || null);
 
+      const finalPembukaan = (pelaksanaanPembukaan !== undefined) ? pelaksanaanPembukaan : (pelaksanaan_pembukaan || null);
+      const finalPembahasan = (pelaksanaanPembahasan !== undefined) ? pelaksanaanPembahasan : (pelaksanaan_pembahasan || null);
+      const finalDiskusi = (pelaksanaanDiskusi !== undefined) ? pelaksanaanDiskusi : (pelaksanaan_diskusi || null);
+      const finalRekomendasi = (pelaksanaanRekomendasi !== undefined) ? pelaksanaanRekomendasi : (pelaksanaan_rekomendasi || null);
+
+      const finalApproverId = (approverId !== undefined) ? approverId : (approver_id || null);
+      const finalApproverName = (approverName !== undefined) ? approverName : (approver_name || null);
+      const finalApproverNip = (approverNip !== undefined) ? approverNip : (approver_nip || null);
+      const finalApproverRole = (approverRole !== undefined) ? approverRole : (approver_role || null);
+      const finalApprovalStatus = approvalStatus || approval_status || 'draft';
+
       let savedId;
       if (id) {
         await pool.query(`
@@ -904,8 +1042,17 @@ export const notulenController = {
             notulis_role = $13,
             meeting_id = COALESCE($14, meeting_id),
             kertas_kerja_mt = $15,
-            notulis_nip = $16
-          WHERE id = $17
+            notulis_nip = $16,
+            pelaksanaan_pembukaan = $17,
+            pelaksanaan_pembahasan = $18,
+            pelaksanaan_diskusi = $19,
+            pelaksanaan_rekomendasi = $20,
+            approver_id = COALESCE($21, approver_id),
+            approver_name = COALESCE($22, approver_name),
+            approver_nip = COALESCE($23, approver_nip),
+            approver_role = COALESCE($24, approver_role),
+            approval_status = COALESCE($25, approval_status)
+          WHERE id = $26
         `, [
           title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
@@ -913,6 +1060,15 @@ export const notulenController = {
           targetMeetingId,
           mtJson,
           finalNotulisNip,
+          finalPembukaan,
+          finalPembahasan,
+          finalDiskusi,
+          finalRekomendasi,
+          finalApproverId,
+          finalApproverName,
+          finalApproverNip,
+          finalApproverRole,
+          finalApprovalStatus,
           id
         ]);
         savedId = id;
@@ -922,8 +1078,10 @@ export const notulenController = {
             user_id, title, meeting_date, meeting_time, meeting_place,
             agenda_data, attendees_data, activities_data, action_items, conclusions,
             closing_text, documentation_photos, notulis_name, notulis_role, meeting_id,
-            kertas_kerja_mt, notulis_nip
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            kertas_kerja_mt, notulis_nip,
+            pelaksanaan_pembukaan, pelaksanaan_pembahasan, pelaksanaan_diskusi, pelaksanaan_rekomendasi,
+            approver_id, approver_name, approver_nip, approver_role, approval_status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
           RETURNING id
         `, [
           String(user?.id || "user"), title, meetingDate, meetingTime || "-", meetingPlace || "-",
@@ -931,7 +1089,16 @@ export const notulenController = {
           closingText || "", docsJson, notulisName || user.full_name, notulisRole || user.division,
           targetMeetingId,
           mtJson,
-          finalNotulisNip
+          finalNotulisNip,
+          finalPembukaan,
+          finalPembahasan,
+          finalDiskusi,
+          finalRekomendasi,
+          finalApproverId,
+          finalApproverName,
+          finalApproverNip,
+          finalApproverRole,
+          finalApprovalStatus
         ]);
         savedId = insertRes.rows[0]?.id;
       }
@@ -957,9 +1124,18 @@ export const notulenController = {
             activities: Array.isArray(activities) ? activities : [],
             actionItems: Array.isArray(actionItems) ? actionItems : [],
             conclusions: Array.isArray(conclusions) ? conclusions : [],
+            pelaksanaanPembukaan: finalPembukaan,
+            pelaksanaanPembahasan: finalPembahasan,
+            pelaksanaanDiskusi: finalDiskusi,
+            pelaksanaanRekomendasi: finalRekomendasi,
             closingText, documentationPhotos: Array.isArray(documentationPhotos) ? documentationPhotos : [],
             kertasKerjaMt: mtArray,
-            notulisName, notulisNip: finalNotulisNip, notulisRole
+            notulisName, notulisNip: finalNotulisNip, notulisRole,
+            approverId: finalApproverId,
+            approverName: finalApproverName,
+            approverNip: finalApproverNip,
+            approverRole: finalApproverRole,
+            approvalStatus: finalApprovalStatus
           },
           user,
           notulenId: savedId,
@@ -1027,6 +1203,173 @@ export const notulenController = {
     }
   },
 
+  // POST /api/notulen/submit-approval (Notulis mengajukan pengesahan ke Pejabat yang Mengetahui)
+  submitApproval: async (req, res) => {
+    try {
+      const user = getCurrentUser(req);
+      const { id, approverId, approverName, approverNip, approverRole } = req.body;
+      if (!id) {
+        return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
+      }
+      if (!approverName && !approverId) {
+        return res.status(400).json({ success: false, message: "Pihak yang mengetahui (pejabat yang mengesahkan) wajib dipilih." });
+      }
+
+      await pool.query(`
+        UPDATE notulen SET
+          approval_status = 'pending_approval',
+          approver_id = $1,
+          approver_name = $2,
+          approver_nip = $3,
+          approver_role = $4
+        WHERE id = $5
+      `, [approverId || null, approverName || 'Pejabat Terkait', approverNip || null, approverRole || 'Pejabat BKN', id]);
+
+      return res.json({
+        success: true,
+        message: `Notula berhasil diajukan untuk persetujuan dan pengesahan ke ${approverName || 'Pejabat Terkait'}.`
+      });
+    } catch (err) {
+      console.error("submitApproval error:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengajukan persetujuan: " + err.message });
+    }
+  },
+
+  // POST /api/notulen/approve (Pejabat yang Mengetahui menyetujui & mengesahkan notula secara resmi)
+  approveNotulen: async (req, res) => {
+    try {
+      const user = getCurrentUser(req);
+      const { id, notes } = req.body;
+      if (!id) {
+        return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
+      }
+
+      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [id]);
+      if (notulenRes.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Dokumen notulen tidak ditemukan." });
+      }
+      const doc = notulenRes.rows[0];
+
+      // Verifikasi hak akses: approver_id atau admin
+      if (user.role !== 'admin' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
+        return res.status(403).json({ success: false, message: "Anda tidak memiliki wewenang untuk mengesahkan notula ini." });
+      }
+
+      const approverName = doc.approver_name || user.full_name;
+      const approverNip = doc.approver_nip || user.nip;
+      const approverRole = doc.approver_role || user.division;
+
+      await pool.query(`
+        UPDATE notulen SET
+          approval_status = 'approved',
+          approved_at = NOW(),
+          approver_name = $1,
+          approver_nip = $2,
+          approver_role = $3,
+          approval_notes = $4
+        WHERE id = $5
+      `, [approverName, approverNip, approverRole, notes || null, id]);
+
+      // Regenerate berkas fisik notula dengan cap sah resmi
+      let fileUrl = null;
+      try {
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "notulen");
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+        const fileName = `notulen_rapat_${doc.meeting_id || doc.id}_${Date.now()}.html`;
+        const filePath = path.join(uploadDir, fileName);
+        fileUrl = `/uploads/notulen/${fileName}`;
+
+        const htmlContent = generateNotulenHtmlFile({
+          docData: {
+            title: doc.title,
+            meetingDate: doc.meeting_date,
+            meetingTime: doc.meeting_time,
+            meetingPlace: doc.meeting_place,
+            agenda: safeParseJson(doc.agenda_data),
+            attendees: safeParseJson(doc.attendees_data),
+            activities: safeParseJson(doc.activities_data),
+            actionItems: safeParseJson(doc.action_items),
+            conclusions: safeParseJson(doc.conclusions),
+            pelaksanaanPembukaan: doc.pelaksanaan_pembukaan,
+            pelaksanaanPembahasan: doc.pelaksanaan_pembahasan,
+            pelaksanaanDiskusi: doc.pelaksanaan_diskusi,
+            pelaksanaanRekomendasi: doc.pelaksanaan_rekomendasi,
+            closingText: doc.closing_text,
+            documentationPhotos: safeParseJson(doc.documentation_photos),
+            kertasKerjaMt: safeParseJson(doc.kertas_kerja_mt, null),
+            notulisName: doc.notulis_name,
+            notulisNip: doc.notulis_nip,
+            notulisRole: doc.notulis_role,
+            approvalStatus: 'approved',
+            approverId: doc.approver_id || user.id,
+            approverName: approverName,
+            approverNip: approverNip,
+            approverRole: approverRole,
+            approvedAt: new Date()
+          },
+          user,
+          notulenId: doc.id,
+          meetingId: doc.meeting_id
+        });
+
+        fs.writeFileSync(filePath, htmlContent, "utf-8");
+
+        // Hubungkan ke rapat di meetings
+        if (doc.meeting_id) {
+          await pool.query("UPDATE meetings SET notulen = $1, notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+        }
+      } catch (fErr) {
+        console.warn("⚠️ Gagal regenerate file disahkan:", fErr.message);
+      }
+
+      return res.json({
+        success: true,
+        message: "Notula resmi telah disetujui & disahkan! Dokumen final telah diterbitkan ke Manajemen Meeting.",
+        fileUrl
+      });
+    } catch (err) {
+      console.error("approveNotulen error:", err);
+      return res.status(500).json({ success: false, message: "Gagal mengesahkan notula: " + err.message });
+    }
+  },
+
+  // POST /api/notulen/reject (Pejabat mengembalikan notula ke Notulis untuk revisi)
+  rejectNotulen: async (req, res) => {
+    try {
+      const user = getCurrentUser(req);
+      const { id, notes } = req.body;
+      if (!id) {
+        return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
+      }
+
+      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [id]);
+      if (notulenRes.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Dokumen notulen tidak ditemukan." });
+      }
+      const doc = notulenRes.rows[0];
+
+      if (user.role !== 'admin' && doc.approver_id && String(doc.approver_id) !== String(user.id)) {
+        return res.status(403).json({ success: false, message: "Anda tidak berhak merevisi notula ini." });
+      }
+
+      await pool.query(`
+        UPDATE notulen SET
+          approval_status = 'rejected',
+          approval_notes = $1
+        WHERE id = $2
+      `, [notes || "Perlu revisi pada beberapa bagian catatan.", id]);
+
+      return res.json({
+        success: true,
+        message: "Notula telah dikembalikan ke Notulis dengan catatan revisi."
+      });
+    } catch (err) {
+      console.error("rejectNotulen error:", err);
+      return res.status(500).json({ success: false, message: "Gagal memproses pengembalian notula: " + err.message });
+    }
+  },
+
   // GET /notulen/preview/:id (Pratinjau Standar Tata Naskah BKN)
   getNotulenPreview: async (req, res) => {
     try {
@@ -1067,6 +1410,17 @@ export const notulenController = {
           activities,
           actionItems,
           conclusions,
+          pelaksanaanPembukaan: doc.pelaksanaan_pembukaan,
+          pelaksanaanPembahasan: doc.pelaksanaan_pembahasan,
+          pelaksanaanDiskusi: doc.pelaksanaan_diskusi,
+          pelaksanaanRekomendasi: doc.pelaksanaan_rekomendasi,
+          approvalStatus: doc.approval_status || 'draft',
+          approverId: doc.approver_id,
+          approverName: doc.approver_name,
+          approverNip: doc.approver_nip,
+          approverRole: doc.approver_role,
+          approvedAt: doc.approved_at,
+          approvalNotes: doc.approval_notes,
           documentationPhotos,
           kertasKerjaMt
         }
@@ -1221,117 +1575,135 @@ export const notulenController = {
         })
       );
 
-      // Judul Dokumen
+      // Judul Dokumen Sesuai Format Baru Notula BKN
       docChildren.push(
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
             new TextRun({ text: "NOTULA", bold: true, size: 26, font: "Times New Roman" })
-          ]
+          ],
+          spacing: { after: 60 }
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: `(${docData.title})`, bold: true, size: 22, font: "Times New Roman" })
-          ]
+            new TextRun({ text: `(${docData.title || "JUDUL KEGIATAN"})`, bold: true, size: 24, font: "Times New Roman" })
+          ],
+          spacing: { after: 140 }
         }),
         new Paragraph({
-          alignment: AlignmentType.CENTER,
+          alignment: AlignmentType.LEFT,
           children: [
-            new TextRun({ text: `${formattedDate}, Waktu: ${docData.meeting_time}`, italics: true, size: 20, font: "Times New Roman" })
-          ]
+            new TextRun({ text: `Hari, Tanggal, Waktu : ${formattedDate}, ${docData.meeting_time || "09.00 – 11.30 WIB"}`, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { after: 60 }
         }),
         new Paragraph({
-          alignment: AlignmentType.CENTER,
+          alignment: AlignmentType.LEFT,
           children: [
-            new TextRun({ text: `Tempat: ${docData.meeting_place}`, italics: true, size: 20, font: "Times New Roman" })
+            new TextRun({ text: `Tempat               : ${docData.meeting_place || "Daring melalui Zoom Meeting"}`, size: 22, font: "Times New Roman" })
           ],
-          spacing: { after: 300 }
+          spacing: { after: 250 }
         })
       );
 
-      // 1. Agenda Kegiatan
-      docChildren.push(
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          children: [
-            new TextRun({ text: "AGENDA KEGIATAN", bold: true, size: 22, font: "Times New Roman" })
-          ],
-          border: {
-            top: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
-            bottom: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
-            left: { style: BorderStyle.SINGLE, size: 6, color: "000000" },
-            right: { style: BorderStyle.SINGLE, size: 6, color: "000000" }
-          },
-          spacing: { before: 200, after: 150 }
-        })
-      );
-
-      (agenda || []).forEach(item => {
-        docChildren.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: item, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { after: 80 }
-          })
-        );
-      });
-
-      // 2. Peserta
-      docChildren.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: "PESERTA / UNSUR YANG HADIR", bold: true, size: 22, font: "Times New Roman" })
-          ],
-          spacing: { before: 300, after: 150 }
-        })
-      );
-
-      (attendees || []).forEach(item => {
-        docChildren.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: item, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { after: 80 }
-          })
-        );
-      });
-
-      // 3. Uraian Kegiatan
-      docChildren.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: "URAIAN KEGIATAN", bold: true, size: 22, font: "Times New Roman" })
-          ],
-          spacing: { before: 300, after: 150 }
-        })
-      );
-
-      (activities || []).forEach(act => {
-        docChildren.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: act.sectionTitle, bold: true, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { before: 150, after: 80 }
-          })
-        );
-        (act.points || []).forEach(pt => {
-          docChildren.push(
-            new Paragraph({
-              bullet: { level: 0 },
+      // Helper untuk membuat Kotak Judul Berwarna Abu-Abu (Shaded Box) sesuai template resmi BKN
+      function createDocxShadedHeader(titleText) {
+        return new Table({
+          rows: [
+            new TableRow({
               children: [
-                new TextRun({ text: pt, size: 22, font: "Times New Roman" })
-              ],
-              spacing: { after: 80 }
+                new TableCell({
+                  shading: { fill: "D9D9D9" },
+                  borders: {
+                    top: { style: BorderStyle.SINGLE, size: 4, color: "888888" },
+                    bottom: { style: BorderStyle.SINGLE, size: 4, color: "888888" },
+                    left: { style: BorderStyle.SINGLE, size: 4, color: "888888" },
+                    right: { style: BorderStyle.SINGLE, size: 4, color: "888888" }
+                  },
+                  children: [
+                    new Paragraph({
+                      alignment: AlignmentType.CENTER,
+                      children: [
+                        new TextRun({ text: titleText, bold: true, size: 22, font: "Times New Roman" })
+                      ],
+                      spacing: { before: 80, after: 80 }
+                    })
+                  ]
+                })
+              ]
             })
-          );
+          ],
+          width: { size: 100, type: WidthType.PERCENTAGE }
         });
+      }
+
+      // 1. AGENDA RAPAT
+      docChildren.push(createDocxShadedHeader("AGENDA RAPAT"));
+      (agenda && agenda.length > 0 ? agenda : ["-"]).forEach(item => {
+        docChildren.push(
+          new Paragraph({
+            bullet: { level: 0 },
+            children: [
+              new TextRun({ text: item, size: 22, font: "Times New Roman" })
+            ],
+            spacing: { before: 40, after: 60 }
+          })
+        );
       });
+
+      // 2. PESERTA RAPAT
+      docChildren.push(new Paragraph({ spacing: { before: 140 } }));
+      docChildren.push(createDocxShadedHeader("PESERTA RAPAT"));
+      (attendees && attendees.length > 0 ? attendees : ["-"]).forEach((item, idx) => {
+        docChildren.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${idx + 1}. `, bold: true, size: 22, font: "Times New Roman" }),
+              new TextRun({ text: item, size: 22, font: "Times New Roman" })
+            ],
+            spacing: { before: 40, after: 60 }
+          })
+        );
+      });
+
+      // 3. PELAKSANAAN (4 Tahapan Resmi BKN)
+      docChildren.push(new Paragraph({ spacing: { before: 140 } }));
+      docChildren.push(createDocxShadedHeader("PELAKSANAAN"));
+
+      // 3.1 Pembukaan
+      const pembukaanText = docData.pelaksanaan_pembukaan || (activities && activities[0]?.points ? activities[0].points.join("\n") : "-");
+      docChildren.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "1. Pembukaan", bold: true, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { before: 120, after: 60 }
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: pembukaanText, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { after: 120 }
+        })
+      );
+
+      // 3.2 Pembahasan
+      const pembahasanText = docData.pelaksanaan_pembahasan || (activities && activities.length > 1 ? activities.slice(1).map(a => `${a.sectionTitle}:\n${(a.points || []).join("\n")}`).join("\n\n") : (activities && activities.length === 1 && activities[0].points ? activities[0].points.join("\n") : "-"));
+      docChildren.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "2. Pembahasan", bold: true, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { before: 120, after: 60 }
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: pembahasanText, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { after: 120 }
+        })
+      );
 
       // Tabel Kertas Kerja Manajemen Talenta (Khusus Rapat MT)
       const rawMtExport = docData.kertas_kerja_mt;
@@ -1341,9 +1713,9 @@ export const notulenController = {
         docChildren.push(
           new Paragraph({
             children: [
-              new TextRun({ text: "PENYAMPAIAN KERTAS KERJA EVALUASI MANAJEMEN TALENTA", bold: true, size: 22, font: "Times New Roman" })
+              new TextRun({ text: "Penyampaian Kertas Kerja Evaluasi Manajemen Talenta", bold: true, size: 22, font: "Times New Roman" })
             ],
-            spacing: { before: 300, after: 150 }
+            spacing: { before: 140, after: 100 }
           })
         );
 
@@ -1442,77 +1814,56 @@ export const notulenController = {
         );
       }
 
-      // 4. Pokok Tindak Lanjut
+      // 3.3 Diskusi / Tanya Jawab
+      const diskusiText = docData.pelaksanaan_diskusi || "-";
       docChildren.push(
         new Paragraph({
           children: [
-            new TextRun({ text: "POKOK TINDAK LANJUT", bold: true, size: 22, font: "Times New Roman" })
+            new TextRun({ text: "3. Diskusi / Tanya Jawab", bold: true, size: 22, font: "Times New Roman" })
           ],
-          spacing: { before: 300, after: 150 }
-        })
-      );
-
-      (actionItems || []).forEach(item => {
-        docChildren.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: item, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { after: 80 }
-          })
-        );
-      });
-
-      // 5. Kesimpulan
-      docChildren.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: "KESIMPULAN", bold: true, size: 22, font: "Times New Roman" })
-          ],
-          spacing: { before: 300, after: 150 }
-        })
-      );
-
-      (conclusions || []).forEach(item => {
-        docChildren.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [
-              new TextRun({ text: item, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { after: 80 }
-          })
-        );
-      });
-
-      // 6. Penutup
-      docChildren.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: "PENUTUP", bold: true, size: 22, font: "Times New Roman" })
-          ],
-          spacing: { before: 300, after: 100 }
+          spacing: { before: 120, after: 60 }
         }),
         new Paragraph({
           children: [
-            new TextRun({ text: docData.closing_text || "", size: 22, font: "Times New Roman" })
+            new TextRun({ text: diskusiText, size: 22, font: "Times New Roman" })
           ],
-          spacing: { after: 300 }
+          spacing: { after: 120 }
         })
       );
 
-      // 7. Dokumentasi Foto Kegiatan (Jika Ada)
-      if (documentationPhotos && documentationPhotos.length > 0) {
-        docChildren.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "DOKUMENTASI FOTO KEGIATAN", bold: true, size: 22, font: "Times New Roman" })
-            ],
-            spacing: { before: 300, after: 150 }
-          })
-        );
+      // 3.4 Rekomendasi/Tindak Lanjut
+      const rekomendasiText = docData.pelaksanaan_rekomendasi || (actionItems && actionItems.length > 0 ? actionItems.map((item, idx) => `${idx + 1}. ${item}`).join("\n") : (conclusions && conclusions.length > 0 ? conclusions.map((item, idx) => `${idx + 1}. ${item}`).join("\n") : "-"));
+      docChildren.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "4. Rekomendasi/Tindak Lanjut", bold: true, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { before: 120, after: 60 }
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: rekomendasiText, size: 22, font: "Times New Roman" })
+          ],
+          spacing: { after: 120 }
+        })
+      );
 
+      // 4. DOKUMENTASI
+      docChildren.push(new Paragraph({ spacing: { before: 140 } }));
+      docChildren.push(createDocxShadedHeader("DOKUMENTASI"));
+      docChildren.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "(Foto, screenshoot, evidence, link dok pendukung, dll)", italics: true, size: 20, color: "555555", font: "Times New Roman" })
+          ],
+          spacing: { before: 60, after: 120 }
+        })
+      );
+
+      // Embed Foto Dokumentasi Jika Ada
+      const rawPhotos = docData.documentation_photos;
+      const documentationPhotos = Array.isArray(rawPhotos) ? rawPhotos : (typeof rawPhotos === "string" ? safeParseJson(rawPhotos, []) : []);
+      if (documentationPhotos && documentationPhotos.length > 0) {
         for (let idx = 0; idx < documentationPhotos.length; idx++) {
           const photo = documentationPhotos[idx];
           const rawUrl = typeof photo === "string" ? photo : (photo.url || photo.dataUrl || photo.previewUrl || photo.path || "");
@@ -1533,7 +1884,7 @@ export const notulenController = {
                         type: ext === "png" ? "png" : "jpg"
                       })
                     ],
-                    spacing: { before: 150, after: 80 }
+                    spacing: { before: 100, after: 60 }
                   })
                 );
                 const caption = typeof photo === "object" && photo ? (photo.caption || "") : "";
@@ -1544,7 +1895,7 @@ export const notulenController = {
                       children: [
                         new TextRun({ text: caption, italics: true, size: 18, font: "Times New Roman" })
                       ],
-                      spacing: { after: 200 }
+                      spacing: { after: 140 }
                     })
                   );
                 }
@@ -1556,50 +1907,135 @@ export const notulenController = {
         }
       }
 
-      // Tanda Tangan
-      const sigDateOnly = formattedDate.includes(",") ? formattedDate.split(",")[1].trim() : formattedDate;
+      // 5. PENUTUP
+      docChildren.push(new Paragraph({ spacing: { before: 140 } }));
+      docChildren.push(createDocxShadedHeader("PENUTUP"));
       docChildren.push(
         new Paragraph({
-          alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: `${user.sig_city || "Jakarta"}, ${sigDateOnly}`, size: 22, font: "Times New Roman" })
+            new TextRun({ text: docData.closing_text || "Demikian notula ini disusun untuk dipergunakan sebagaimana mestinya.", size: 22, font: "Times New Roman" })
           ],
-          spacing: { before: 400 }
-        }),
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          children: [
-            new TextRun({ text: "Notulis,", size: 22, font: "Times New Roman" })
-          ],
-          spacing: { after: 900 }
-        }),
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          children: [
-            new TextRun({ text: docData.notulis_name || docData.notulisName || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })
-          ]
-        }),
-        ...((docData.notulis_nip || docData.notulisNip || user.nip) ? [
-          new Paragraph({
-            alignment: AlignmentType.RIGHT,
+          spacing: { before: 100, after: 300 }
+        })
+      );
+
+      // 6. TANDA TANGAN 2 KOLOM (KIRI: Mengetahui, KANAN: Notulis)
+      const sigDateOnly = formattedDate.includes(",") ? formattedDate.split(",")[1].trim() : formattedDate;
+      const isApproved = docData.approval_status === "approved";
+      const approvedDateText = docData.approved_at
+        ? new Date(docData.approved_at).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+        : sigDateOnly;
+
+      const sigTable = new Table({
+        rows: [
+          new TableRow({
             children: [
-              new TextRun({
-                text: String(docData.notulis_nip || docData.notulisNip || user.nip).startsWith('NIP')
-                  ? String(docData.notulis_nip || docData.notulisNip || user.nip)
-                  : `NIP. ${docData.notulis_nip || docData.notulisNip || user.nip}`,
-                size: 20,
-                font: "Times New Roman"
+              // Kolom Kiri: Mengetahui
+              new TableCell({
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: BorderStyle.NONE },
+                  bottom: { style: BorderStyle.NONE },
+                  left: { style: BorderStyle.NONE },
+                  right: { style: BorderStyle.NONE }
+                },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: "Mengetahui,", size: 22, font: "Times New Roman" })],
+                    spacing: { after: 40 }
+                  }),
+                  new Paragraph({
+                    children: [new TextRun({ text: docData.approver_role || "(Nama Jabatan)", bold: true, size: 22, font: "Times New Roman" })],
+                    spacing: { after: 100 }
+                  }),
+                  ...(isApproved ? [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "✓ DISAHKAN RESMI (DIGITAL)", bold: true, size: 18, color: "047857", font: "Times New Roman" })
+                      ]
+                    }),
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: docData.approver_name || "Pejabat", size: 18, color: "065F46", font: "Times New Roman" })
+                      ]
+                    }),
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: approvedDateText, italics: true, size: 16, color: "059669", font: "Times New Roman" })
+                      ],
+                      spacing: { after: 100 }
+                    })
+                  ] : [
+                    new Paragraph({
+                      children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
+                      spacing: { before: 200, after: 300 }
+                    })
+                  ]),
+                  new Paragraph({
+                    children: [new TextRun({ text: docData.approver_name || "Nama", bold: true, underline: {}, size: 22, font: "Times New Roman" })]
+                  }),
+                  ...(docData.approver_nip ? [
+                    new Paragraph({
+                      children: [new TextRun({
+                        text: String(docData.approver_nip).startsWith("NIP")
+                          ? String(docData.approver_nip)
+                          : `NIP. ${docData.approver_nip}`,
+                        size: 20,
+                        font: "Times New Roman"
+                      })]
+                    })
+                  ] : [])
+                ]
+              }),
+
+              // Kolom Kanan: Notulis
+              new TableCell({
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: BorderStyle.NONE },
+                  bottom: { style: BorderStyle.NONE },
+                  left: { style: BorderStyle.NONE },
+                  right: { style: BorderStyle.NONE }
+                },
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: `${user.sig_city || "Jakarta"}, ${sigDateOnly}`, size: 22, font: "Times New Roman" })],
+                    spacing: { after: 40 }
+                  }),
+                  new Paragraph({
+                    children: [new TextRun({ text: "Notulis,", bold: true, size: 22, font: "Times New Roman" })],
+                    spacing: { after: 100 }
+                  }),
+                  new Paragraph({
+                    children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
+                    spacing: { before: 200, after: 300 }
+                  }),
+                  new Paragraph({
+                    children: [new TextRun({ text: docData.notulis_name || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })]
+                  }),
+                  ...((docData.notulis_nip || user.nip) ? [
+                    new Paragraph({
+                      children: [new TextRun({
+                        text: String(docData.notulis_nip || user.nip).startsWith("NIP")
+                          ? String(docData.notulis_nip || user.nip)
+                          : `NIP. ${docData.notulis_nip || user.nip}`,
+                        size: 20,
+                        font: "Times New Roman"
+                      })]
+                    })
+                  ] : []),
+                  new Paragraph({
+                    children: [new TextRun({ text: docData.notulis_role || user.division, size: 20, font: "Times New Roman" })]
+                  })
+                ]
               })
             ]
           })
-        ] : []),
-        new Paragraph({
-          alignment: AlignmentType.RIGHT,
-          children: [
-            new TextRun({ text: docData.notulis_role || docData.notulisRole || user.division, size: 20, font: "Times New Roman" })
-          ]
-        })
-      );
+        ],
+        width: { size: 100, type: WidthType.PERCENTAGE }
+      });
+
+      docChildren.push(sigTable);
 
       const wordDoc = new Document({
         sections: [{

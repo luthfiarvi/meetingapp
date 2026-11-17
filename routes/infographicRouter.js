@@ -26,6 +26,9 @@ router.post("/api/notulen", ensureAuth, notulenController.saveNotulen);
 router.delete("/api/notulen/:id", ensureAuth, notulenController.deleteNotulen);
 router.post("/api/notulen/ai-generate", ensureAuth, notulenController.aiGenerateNotulen);
 router.post("/api/notulen/parse-transcript-file", ensureAuth, uploadTranscript.single("file"), notulenController.parseTranscriptFile);
+router.post("/api/notulen/submit-approval", ensureAuth, notulenController.submitApproval);
+router.post("/api/notulen/approve", ensureAuth, notulenController.approveNotulen);
+router.post("/api/notulen/reject", ensureAuth, notulenController.rejectNotulen);
 
 // Modul Infografis Kinerja BKN
 router.get("/generator", ensureAuth, infographicController.getGenerator);

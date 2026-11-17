@@ -24,6 +24,18 @@ async function main() {
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS sertifikat_enable_ttd BOOLEAN DEFAULT TRUE;
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS sertifikat_layout_mode VARCHAR(50) DEFAULT 'full';
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS sertifikat_format_nomor VARCHAR(255);
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) DEFAULT 'draft';
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_id VARCHAR(100);
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_name VARCHAR(255);
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_nip VARCHAR(100);
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_role VARCHAR(255);
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approval_notes TEXT;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS pelaksanaan_pembukaan TEXT;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS pelaksanaan_pembahasan TEXT;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS pelaksanaan_diskusi TEXT;
+            ALTER TABLE notulen ADD COLUMN IF NOT EXISTS pelaksanaan_rekomendasi TEXT;
         `).catch(() => {});
 
         await pool.query(`

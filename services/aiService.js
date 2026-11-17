@@ -490,6 +490,12 @@ Hasilkan HANYA objek JSON valid (tanpa blok markdown, tanpa awalan/akhiran apapu
     "Poin kesimpulan rapat 1",
     "Poin kesimpulan rapat 2"
   ],
+  "pelaksanaan": {
+    "pembukaan": "Uraian jalannya pembukaan rapat oleh pimpinan / MC / pembawa acara",
+    "pembahasan": "Uraian komprehensif materi pokok bahasan dan paparan rapat",
+    "diskusi": "Uraian dinamika diskusi, tanya jawab, kendala yang diutarakan, dan solusi yang disepakati",
+    "rekomendasi": "Uraian butir-butir rekomendasi konkret, arahan pimpinan, dan tindak lanjut pasca rapat"
+  },
   "closingText": "Paragraf narasi penutup rapat dinas secara formal dan santun.",
   "isMT": true,
   "kertasKerjaMT": [
@@ -778,6 +784,18 @@ function smartLocalNotulenParser(rawText, user = {}) {
 
   const closingText = `Kegiatan ${title.toLowerCase()} ditutup secara resmi dengan komitmen bersama untuk segera menindaklanjuti seluruh catatan review demi mendukung percepatan implementasi standar manajemen talenta.`;
 
+  const pembukaanPoints = activities.length > 0 && activities[0].points ? activities[0].points.join('. ') : `Rapat ${title} dibuka secara resmi dan dihadiri oleh seluruh unsur peserta terkait.`;
+  const pembahasanPoints = activities.slice(1).map(a => `${a.sectionTitle}: ${a.points.join('; ')}`).join('\n\n') || activities.map(a => a.points.join('; ')).join('\n\n');
+  const diskusiPoints = activities.filter(a => /(?:diskusi|tanya|tanggapan|jawaban)/i.test(a.sectionTitle)).map(a => a.points.join('; ')).join('\n\n') || 'Terdapat diskusi mendalam antara pihak penyelenggara dan peserta mengenai langkah strategis dan teknis pelaksanaan agenda.';
+  const rekomendasiPoints = actionItems.concat(conclusions).map((item, idx) => `${idx + 1}. ${item}`).join('\n') || 'Perlu tindak lanjut koordinasi berkala dan penyelesaian dokumen pendukung tepat waktu.';
+
+  const pelaksanaan = {
+    pembukaan: pembukaanPoints,
+    pembahasan: pembahasanPoints || pembukaanPoints,
+    diskusi: diskusiPoints,
+    rekomendasi: rekomendasiPoints
+  };
+
   return {
     title,
     meetingTime,
@@ -787,6 +805,7 @@ function smartLocalNotulenParser(rawText, user = {}) {
     activities,
     actionItems,
     conclusions,
+    pelaksanaan,
     closingText,
     isMT,
     kertasKerjaMT,

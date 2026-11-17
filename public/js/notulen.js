@@ -13,13 +13,25 @@ const defaultNotulenState = {
   meetingPlace: 'Daring melalui Zoom Meeting',
   agenda: [],
   attendees: [],
+  pelaksanaanPembukaan: '',
+  pelaksanaanPembahasan: '',
+  pelaksanaanDiskusi: '',
+  pelaksanaanRekomendasi: '',
   activities: [],
   actionItems: [],
   conclusions: [],
-  closingText: '',
+  closingText: 'Demikian notula ini disusun untuk dipergunakan sebagaimana mestinya.',
+  approverId: null,
+  approverName: '',
+  approverNip: '',
+  approverRole: '',
+  approvalStatus: 'draft',
+  approvedAt: null,
+  approvalNotes: '',
   notulisName: '',
   notulisNip: '',
   notulisRole: '',
+  notulisCity: 'Jakarta',
   documentationPhotos: [],
   isMT: false,
   kertasKerjaMT: null
@@ -193,6 +205,21 @@ if (rawInit.formattedDate) notulenState.formattedDate = rawInit.formattedDate;
 if (rawInit.meetingTime) notulenState.meetingTime = rawInit.meetingTime;
 if (rawInit.meetingPlace) notulenState.meetingPlace = rawInit.meetingPlace;
 if (rawInit.closingText) notulenState.closingText = rawInit.closingText;
+
+if (rawInit.pelaksanaanPembukaan || rawInit.pelaksanaan_pembukaan) notulenState.pelaksanaanPembukaan = rawInit.pelaksanaanPembukaan || rawInit.pelaksanaan_pembukaan;
+if (rawInit.pelaksanaanPembahasan || rawInit.pelaksanaan_pembahasan) notulenState.pelaksanaanPembahasan = rawInit.pelaksanaanPembahasan || rawInit.pelaksanaan_pembahasan;
+if (rawInit.pelaksanaanDiskusi || rawInit.pelaksanaan_diskusi) notulenState.pelaksanaanDiskusi = rawInit.pelaksanaanDiskusi || rawInit.pelaksanaan_diskusi;
+if (rawInit.pelaksanaanRekomendasi || rawInit.pelaksanaan_rekomendasi) notulenState.pelaksanaanRekomendasi = rawInit.pelaksanaanRekomendasi || rawInit.pelaksanaan_rekomendasi;
+
+if (rawInit.approverId || rawInit.approver_id) notulenState.approverId = rawInit.approverId || rawInit.approver_id;
+if (rawInit.approverName || rawInit.approver_name) notulenState.approverName = rawInit.approverName || rawInit.approver_name;
+if (rawInit.approverNip || rawInit.approver_nip) notulenState.approverNip = rawInit.approverNip || rawInit.approver_nip;
+if (rawInit.approverRole || rawInit.approver_role) notulenState.approverRole = rawInit.approverRole || rawInit.approver_role;
+if (rawInit.approvalStatus || rawInit.approval_status) notulenState.approvalStatus = rawInit.approvalStatus || rawInit.approval_status;
+if (rawInit.approvedAt || rawInit.approved_at) notulenState.approvedAt = rawInit.approvedAt || rawInit.approved_at;
+if (rawInit.approvalNotes || rawInit.approval_notes) notulenState.approvalNotes = rawInit.approvalNotes || rawInit.approval_notes;
+if (rawInit.notulisCity || rawInit.sig_city) notulenState.notulisCity = rawInit.notulisCity || rawInit.sig_city || 'Jakarta';
+
 if (rawInit.notulisName) notulenState.notulisName = rawInit.notulisName;
 if (rawInit.notulisNip || rawInit.notulis_nip) notulenState.notulisNip = rawInit.notulisNip || rawInit.notulis_nip;
 else if (window.currentUserNip) notulenState.notulisNip = window.currentUserNip;
@@ -217,9 +244,21 @@ function initFormValues() {
   const fPlace = document.getElementById('notulaPlace');
   const fCustomPlace = document.getElementById('notulaCustomPlace');
   const fClosing = document.getElementById('notulaClosing');
+
+  const fPembukaan = document.getElementById('pelaksanaanPembukaan');
+  const fPembahasan = document.getElementById('pelaksanaanPembahasan');
+  const fDiskusi = document.getElementById('pelaksanaanDiskusi');
+  const fRekomendasi = document.getElementById('pelaksanaanRekomendasi');
+
+  const fApproverUser = document.getElementById('selectApproverUser');
+  const fApproverName = document.getElementById('approverName');
+  const fApproverNip = document.getElementById('approverNip');
+  const fApproverRole = document.getElementById('approverRole');
+
   const fNotulisName = document.getElementById('notulisName');
   const fNotulisNip = document.getElementById('notulisNip');
   const fNotulisRole = document.getElementById('notulisRole');
+  const fNotulisCity = document.getElementById('notulisCity');
   const fMeeting = document.getElementById('selectMeetingId');
 
   if (fMeeting) {
@@ -233,9 +272,23 @@ function initFormValues() {
   if (fDate) fDate.value = notulenState.meetingDate || '';
   if (fTime) fTime.value = notulenState.meetingTime || '';
   if (fClosing) fClosing.value = notulenState.closingText || '';
+
+  if (fPembukaan) fPembukaan.value = notulenState.pelaksanaanPembukaan || '';
+  if (fPembahasan) fPembahasan.value = notulenState.pelaksanaanPembahasan || '';
+  if (fDiskusi) fDiskusi.value = notulenState.pelaksanaanDiskusi || '';
+  if (fRekomendasi) fRekomendasi.value = notulenState.pelaksanaanRekomendasi || '';
+
+  if (fApproverUser && notulenState.approverId) {
+    fApproverUser.value = String(notulenState.approverId);
+  }
+  if (fApproverName) fApproverName.value = notulenState.approverName || '';
+  if (fApproverNip) fApproverNip.value = notulenState.approverNip || '';
+  if (fApproverRole) fApproverRole.value = notulenState.approverRole || '';
+
   if (fNotulisName) fNotulisName.value = notulenState.notulisName || '';
   if (fNotulisNip) fNotulisNip.value = notulenState.notulisNip || '';
   if (fNotulisRole) fNotulisRole.value = notulenState.notulisRole || '';
+  if (fNotulisCity) fNotulisCity.value = notulenState.notulisCity || 'Jakarta';
 
   // Setup Tempat Dropdown
   if (fPlace) {
@@ -403,6 +456,95 @@ function setupEventListeners() {
       notulenState.notulisRole = e.target.value;
       updateLivePreview();
     });
+  }
+
+  const fNotulisCity = document.getElementById('notulisCity');
+  if (fNotulisCity) {
+    fNotulisCity.addEventListener('input', (e) => {
+      notulenState.notulisCity = e.target.value;
+      updateLivePreview();
+    });
+  }
+
+  // 4 Tahap Pelaksanaan Kedinasan BKN
+  ['pelaksanaanPembukaan', 'pelaksanaanPembahasan', 'pelaksanaanDiskusi', 'pelaksanaanRekomendasi'].forEach(fieldId => {
+    const el = document.getElementById(fieldId);
+    if (el) {
+      el.addEventListener('input', (e) => {
+        notulenState[fieldId] = e.target.value;
+        updateLivePreview();
+      });
+    }
+  });
+
+  // Pemilihan Pejabat yang Mengetahui (Opsi A: Digital Approval)
+  const fApproverUser = document.getElementById('selectApproverUser');
+  if (fApproverUser) {
+    fApproverUser.addEventListener('change', (e) => {
+      const selectedOption = e.target.selectedOptions[0];
+      if (selectedOption && selectedOption.value) {
+        notulenState.approverId = selectedOption.value;
+        const name = selectedOption.getAttribute('data-name') || '';
+        const nip = selectedOption.getAttribute('data-nip') || '';
+        const role = selectedOption.getAttribute('data-role') || '';
+
+        notulenState.approverName = name;
+        notulenState.approverNip = nip;
+        notulenState.approverRole = role;
+
+        const fName = document.getElementById('approverName');
+        const fNip = document.getElementById('approverNip');
+        const fRole = document.getElementById('approverRole');
+        if (fName) fName.value = name;
+        if (fNip) fNip.value = nip;
+        if (fRole) fRole.value = role;
+
+        updateLivePreview();
+        showNotificationToast(`Pejabat pengesah dipilih: ${name}`);
+      } else {
+        notulenState.approverId = null;
+      }
+    });
+  }
+
+  const fApproverName = document.getElementById('approverName');
+  if (fApproverName) {
+    fApproverName.addEventListener('input', (e) => {
+      notulenState.approverName = e.target.value;
+      updateLivePreview();
+    });
+  }
+
+  const fApproverNip = document.getElementById('approverNip');
+  if (fApproverNip) {
+    fApproverNip.addEventListener('input', (e) => {
+      notulenState.approverNip = e.target.value;
+      updateLivePreview();
+    });
+  }
+
+  const fApproverRole = document.getElementById('approverRole');
+  if (fApproverRole) {
+    fApproverRole.addEventListener('input', (e) => {
+      notulenState.approverRole = e.target.value;
+      updateLivePreview();
+    });
+  }
+
+  // Tombol Aksi Pengesahan / Approval Workflow
+  const btnSubmitAppr = document.getElementById('btnSubmitApproval');
+  if (btnSubmitAppr) {
+    btnSubmitAppr.addEventListener('click', handleSubmitApproval);
+  }
+
+  const btnApprove = document.getElementById('btnApproveNotulen');
+  if (btnApprove) {
+    btnApprove.addEventListener('click', handleApproveNotulen);
+  }
+
+  const btnReject = document.getElementById('btnRejectNotulen');
+  if (btnReject) {
+    btnReject.addEventListener('click', handleRejectNotulen);
   }
 
   // File transkrip upload (.docx, .pdf, .txt, .md)
@@ -803,21 +945,17 @@ function updateLivePreview() {
     pAttendees.innerHTML = (notulenState.attendees || []).map(att => att ? `<li>${escapeHtml(att)}</li>` : '').join('');
   }
 
-  // Uraian Kegiatan
-  const pActivities = document.getElementById('previewActivitiesContainer');
-  if (pActivities) {
-    let actHtml = '';
-    (notulenState.activities || []).forEach(act => {
-      actHtml += `
-        <div style="margin-bottom: 1.25rem;">
-          <div class="notula-subsection-title">${escapeHtml(act.sectionTitle || '')}</div>
-          <ul class="notula-list">
-            ${(act.points || []).map(pt => pt ? `<li>${escapeHtml(pt)}</li>` : '').join('')}
-          </ul>
-        </div>
-      `;
-    });
-    pActivities.innerHTML = actHtml;
+  // Pelaksanaan: 4 Tahap Resmi BKN
+  const pPembukaan = document.getElementById('previewPembukaan');
+  if (pPembukaan) {
+    const pembukaanVal = notulenState.pelaksanaanPembukaan || (notulenState.activities && notulenState.activities[0]?.points ? notulenState.activities[0].points.join('\n') : '-');
+    pPembukaan.textContent = pembukaanVal;
+  }
+
+  const pPembahasan = document.getElementById('previewPembahasan');
+  if (pPembahasan) {
+    const pembahasanVal = notulenState.pelaksanaanPembahasan || (notulenState.activities && notulenState.activities.length > 1 ? notulenState.activities.slice(1).map(a => `${a.sectionTitle}:\n${(a.points || []).join('\n')}`).join('\n\n') : '-');
+    pPembahasan.textContent = pembahasanVal;
   }
 
   // Khusus Rapat MT: Render Live Preview Tabel Kertas Kerja
@@ -855,22 +993,21 @@ function updateLivePreview() {
     }
   }
 
-  // Pokok Tindak Lanjut
-  const pAction = document.getElementById('previewActionList');
-  if (pAction) {
-    pAction.innerHTML = (notulenState.actionItems || []).map(act => act ? `<li>${escapeHtml(act)}</li>` : '').join('');
+  const pDiskusi = document.getElementById('previewDiskusi');
+  if (pDiskusi) {
+    pDiskusi.textContent = notulenState.pelaksanaanDiskusi || '-';
   }
 
-  // Kesimpulan
-  const pConclusions = document.getElementById('previewConclusionsList');
-  if (pConclusions) {
-    pConclusions.innerHTML = (notulenState.conclusions || []).map(c => c ? `<li>${escapeHtml(c)}</li>` : '').join('');
+  const pRekomendasi = document.getElementById('previewRekomendasi');
+  if (pRekomendasi) {
+    const rekVal = notulenState.pelaksanaanRekomendasi || (notulenState.actionItems && notulenState.actionItems.length > 0 ? notulenState.actionItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : (notulenState.conclusions && notulenState.conclusions.length > 0 ? notulenState.conclusions.map((item, idx) => `${idx + 1}. ${item}`).join('\n') : '-'));
+    pRekomendasi.textContent = rekVal;
   }
 
   // Penutup
   const pClosing = document.getElementById('previewClosing');
   if (pClosing) {
-    pClosing.textContent = notulenState.closingText || '';
+    pClosing.textContent = notulenState.closingText || 'Demikian notula ini disusun untuk dipergunakan sebagaimana mestinya.';
   }
 
   // Bukti Giat / Dokumentasi Kegiatan (DIBAWAH PENUTUP & DIATAS TANDA TANGAN)
@@ -895,10 +1032,51 @@ function updateLivePreview() {
     }
   }
 
-  // Tanda Tangan
+  // Tanda Tangan 2 Kolom
+  // Kolom Kiri: Mengetahui (Pejabat yang Mengesahkan)
+  const pApprRole = document.getElementById('previewApproverRole');
+  if (pApprRole) pApprRole.textContent = notulenState.approverRole || '(Nama Jabatan)';
+
+  const pApprSigArea = document.getElementById('previewApproverSigArea');
+  if (pApprSigArea) {
+    if (notulenState.approvalStatus === 'approved') {
+      const apprDate = notulenState.approvedAt
+        ? new Date(notulenState.approvedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        : extractDateOnly(dateFormatted);
+      pApprSigArea.innerHTML = `
+        <div class="notula-approval-badge">
+          <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
+          <div>${escapeHtml(notulenState.approverName || 'Pejabat')}</div>
+          <div style="font-size: 7.5pt; color: #059669;">${apprDate}</div>
+        </div>
+      `;
+    } else {
+      pApprSigArea.innerHTML = `<div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>`;
+    }
+  }
+
+  const pApprName = document.getElementById('previewApproverName');
+  if (pApprName) pApprName.textContent = notulenState.approverName || 'Nama';
+
+  const pApprNip = document.getElementById('previewApproverNip');
+  if (pApprNip) {
+    const nipVal = (notulenState.approverNip || '').trim();
+    if (nipVal) {
+      pApprNip.textContent = nipVal.startsWith('NIP') ? nipVal : `NIP. ${nipVal}`;
+      pApprNip.style.display = 'block';
+    } else {
+      pApprNip.textContent = '';
+      pApprNip.style.display = 'none';
+    }
+  }
+
+  // Kolom Kanan: Notulis
+  const pSigCity = document.getElementById('previewSigCity');
+  if (pSigCity) pSigCity.textContent = notulenState.notulisCity || 'Jakarta';
+
   const pSigDate = document.getElementById('previewSigDate');
   if (pSigDate) {
-    pSigDate.textContent = `Jakarta, ${extractDateOnly(dateFormatted)}`;
+    pSigDate.textContent = extractDateOnly(dateFormatted);
   }
 
   const pSigName = document.getElementById('previewSigName');
@@ -977,6 +1155,25 @@ async function handleAiGenerate() {
     if (d.meetingPlace) notulenState.meetingPlace = d.meetingPlace;
     if (Array.isArray(d.agenda)) notulenState.agenda = d.agenda;
     if (Array.isArray(d.attendees)) notulenState.attendees = d.attendees;
+
+    // 4 Tahapan Pelaksanaan Resmi BKN
+    if (d.pelaksanaanPembukaan) notulenState.pelaksanaanPembukaan = d.pelaksanaanPembukaan;
+    else if (Array.isArray(d.activities) && d.activities.length > 0 && d.activities[0]?.points) {
+      notulenState.pelaksanaanPembukaan = d.activities[0].points.join('\n');
+    }
+
+    if (d.pelaksanaanPembahasan) notulenState.pelaksanaanPembahasan = d.pelaksanaanPembahasan;
+    else if (Array.isArray(d.activities) && d.activities.length > 1) {
+      notulenState.pelaksanaanPembahasan = d.activities.slice(1).map(a => `${a.sectionTitle}:\n${(a.points || []).join('\n')}`).join('\n\n');
+    }
+
+    if (d.pelaksanaanDiskusi) notulenState.pelaksanaanDiskusi = d.pelaksanaanDiskusi;
+
+    if (d.pelaksanaanRekomendasi) notulenState.pelaksanaanRekomendasi = d.pelaksanaanRekomendasi;
+    else if (Array.isArray(d.actionItems) && d.actionItems.length > 0) {
+      notulenState.pelaksanaanRekomendasi = d.actionItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n');
+    }
+
     if (Array.isArray(d.activities)) notulenState.activities = d.activities;
     if (Array.isArray(d.actionItems)) notulenState.actionItems = d.actionItems;
     if (Array.isArray(d.conclusions)) notulenState.conclusions = d.conclusions;
@@ -1009,7 +1206,7 @@ async function handleAiGenerate() {
 }
 
 // Save Notulen Handler
-async function handleSaveNotulen() {
+async function handleSaveNotulen(redirectAfter = true) {
   const btn = document.getElementById('btnSaveNotulen');
   const orig = btn ? btn.innerHTML : 'Simpan';
 
@@ -1022,12 +1219,35 @@ async function handleSaveNotulen() {
   if (fTime) notulenState.meetingTime = fTime.value;
   const fClosing = document.getElementById('notulaClosing');
   if (fClosing) notulenState.closingText = fClosing.value;
+
+  // 4 Tahapan Pelaksanaan
+  const fPembukaan = document.getElementById('pelaksanaanPembukaan');
+  if (fPembukaan) notulenState.pelaksanaanPembukaan = fPembukaan.value;
+  const fPembahasan = document.getElementById('pelaksanaanPembahasan');
+  if (fPembahasan) notulenState.pelaksanaanPembahasan = fPembahasan.value;
+  const fDiskusi = document.getElementById('pelaksanaanDiskusi');
+  if (fDiskusi) notulenState.pelaksanaanDiskusi = fDiskusi.value;
+  const fRekomendasi = document.getElementById('pelaksanaanRekomendasi');
+  if (fRekomendasi) notulenState.pelaksanaanRekomendasi = fRekomendasi.value;
+
+  // Pejabat Pengesah & Notulis
+  const fApproverUser = document.getElementById('selectApproverUser');
+  if (fApproverUser && fApproverUser.value) notulenState.approverId = fApproverUser.value;
+  const fApproverName = document.getElementById('approverName');
+  if (fApproverName) notulenState.approverName = fApproverName.value;
+  const fApproverNip = document.getElementById('approverNip');
+  if (fApproverNip) notulenState.approverNip = fApproverNip.value;
+  const fApproverRole = document.getElementById('approverRole');
+  if (fApproverRole) notulenState.approverRole = fApproverRole.value;
+
   const fNotulisName = document.getElementById('notulisName');
   if (fNotulisName) notulenState.notulisName = fNotulisName.value;
   const fNotulisNip = document.getElementById('notulisNip');
   if (fNotulisNip) notulenState.notulisNip = fNotulisNip.value;
   const fNotulisRole = document.getElementById('notulisRole');
   if (fNotulisRole) notulenState.notulisRole = fNotulisRole.value;
+  const fNotulisCity = document.getElementById('notulisCity');
+  if (fNotulisCity) notulenState.notulisCity = fNotulisCity.value;
 
   // Sinkronkan status Kertas Kerja MT ke notulenState sebelum disimpan
   notulenState.kertasKerjaMt = notulenState.isMT ? notulenState.kertasKerjaMT : null;
@@ -1122,10 +1342,10 @@ async function handleSaveNotulen() {
     const targetMid = data.meetingId || notulenState.meetingId;
     if (targetMid) notulenState.meetingId = targetMid;
 
-    showNotificationToast(data.message || '✅ Hasil edit notulen berhasil disimpan!');
+    showNotificationToast(data.message || '✅ Hasil notulen berhasil disimpan!');
 
-    // Masuk sesuai ID rapat yang dituju di Manajemen Meeting
-    if (targetMid) {
+    // Masuk sesuai ID rapat yang dituju di Manajemen Meeting jika diarahkan
+    if (redirectAfter && targetMid) {
       setTimeout(() => {
         window.location.href = `/manajemenmeeting?meetingId=${targetMid}`;
       }, 1000);
@@ -1144,17 +1364,115 @@ async function handleSaveNotulen() {
   }
 }
 
+// Handler Workflow Pengesahan (Opsi A)
+async function handleSubmitApproval() {
+  if (!confirm('Kirimkan notula ini ke pejabat terkait untuk diverifikasi dan disahkan?')) return;
+
+  // Pastikan draft tersimpan terlebih dahulu tanpa langsung redirect
+  const savedId = await handleSaveNotulen(false);
+  const notulenId = savedId || notulenState.id;
+  if (!notulenId) {
+    alert('Gagal mendapatkan ID notula. Mohon simpan draft terlebih dahulu.');
+    return;
+  }
+
+  try {
+    showNotificationToast('⏳ Mengirim pengajuan pengesahan...');
+    const res = await fetch('/api/notulen/submit-approval', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notulenId,
+        approverId: notulenState.approverId,
+        approverName: notulenState.approverName,
+        approverNip: notulenState.approverNip,
+        approverRole: notulenState.approverRole
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('🚀 ' + data.message);
+      window.location.reload();
+    } else {
+      alert('Gagal mengajukan pengesahan: ' + data.message);
+    }
+  } catch (err) {
+    console.error('Submit approval error:', err);
+    alert('Terjadi kesalahan koneksi saat mengajukan pengesahan.');
+  }
+}
+
+async function handleApproveNotulen() {
+  if (!notulenState.id) {
+    alert('Notula belum disimpan.');
+    return;
+  }
+  if (!confirm('Apakah Anda yakin ingin mengesahkan notula ini? Pengesahan digital resmi akan dicantumkan pada dokumen.')) return;
+
+  try {
+    showNotificationToast('⏳ Memproses pengesahan notula...');
+    const res = await fetch('/api/notulen/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notulenId: notulenState.id
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('🎉 ' + data.message);
+      window.location.reload();
+    } else {
+      alert('Gagal mengesahkan: ' + data.message);
+    }
+  } catch (err) {
+    console.error('Approve error:', err);
+    alert('Terjadi kesalahan koneksi saat mengesahkan notula.');
+  }
+}
+
+async function handleRejectNotulen() {
+  if (!notulenState.id) {
+    alert('Notula belum disimpan.');
+    return;
+  }
+  const notes = prompt('Masukkan catatan perbaikan / revisi untuk notulis:');
+  if (notes === null) return; // Dibatalkan pengguna
+
+  try {
+    showNotificationToast('⏳ Mengirim catatan revisi...');
+    const res = await fetch('/api/notulen/reject', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notulenId: notulenState.id,
+        notes: notes || 'Perlu perbaikan materi.'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('⚠️ ' + data.message);
+      window.location.reload();
+    } else {
+      alert('Gagal mengirim revisi: ' + data.message);
+    }
+  } catch (err) {
+    console.error('Reject error:', err);
+    alert('Terjadi kesalahan koneksi saat mengirim revisi.');
+  }
+}
+
 // Export Docx Handler
 async function handleExportDocx() {
   if (!notulenState.id) {
     showNotificationToast('⏳ Menyimpan notulen terlebih dahulu sebelum unduh Word...');
-    const savedId = await handleSaveNotulen();
+    const savedId = await handleSaveNotulen(false);
     if (savedId) {
       window.location.href = `/notulen/export-docx/${savedId}`;
     }
   } else {
     // Simpan perubahan terakhir lalu unduh
-    await handleSaveNotulen();
+    await handleSaveNotulen(false);
     window.location.href = `/notulen/export-docx/${notulenState.id}`;
   }
 }

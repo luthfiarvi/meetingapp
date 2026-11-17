@@ -292,3 +292,119 @@
     page-break-after: always;
   }
 }
+
+/* ==========================================================
+   FORMAT BARU SESUAI TATA NASKAH KEDINASAN BKN (TEMPLATE BARU)
+   ========================================================== */
+
+.notula-shaded-box {
+  background-color: #E2E8F0;
+  border: 1.5px solid #000000;
+  text-align: center;
+  padding: 0.35rem 0.5rem;
+  font-weight: bold;
+  font-size: 11pt;
+  letter-spacing: 0.05em;
+  margin: 1.25rem 0 0.75rem 0;
+  text-transform: uppercase;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.pelaksanaan-subheading {
+  font-weight: bold;
+  font-size: 10.5pt;
+  margin: 0.85rem 0 0.25rem 0;
+  color: #000000;
+}
+
+.pelaksanaan-text {
+  font-size: 10.5pt;
+  line-height: 1.5;
+  text-align: justify;
+  margin-bottom: 0.75rem;
+  white-space: pre-line;
+}
+
+.notula-num-list {
+  margin: 0 0 1rem 1.25rem;
+  padding-left: 0.5rem;
+}
+
+.notula-num-list li {
+  font-size: 10.5pt;
+  line-height: 1.45;
+  margin-bottom: 0.35rem;
+  text-align: justify;
+}
+
+.notula-subnote {
+  font-size: 9pt;
+  font-style: italic;
+  color: #475569;
+  margin-bottom: 0.65rem;
+}
+
+/* Dual Column Signature Table */
+.notula-sig-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+  margin-top: 2.25rem;
+  page-break-inside: avoid;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10.5pt;
+}
+
+.notula-sig-table td {
+  vertical-align: top;
+  border: none;
+  padding: 0;
+}
+
+.notula-sig-cell-left {
+  width: 50%;
+  text-align: left;
+  padding-right: 1.5rem;
+}
+
+.notula-sig-cell-right {
+  width: 50%;
+  text-align: left;
+  padding-left: 1.5rem;
+}
+
+.notula-sig-space {
+  min-height: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.notula-approval-badge {
+  display: inline-block;
+  border: 1.5px solid #059669;
+  background: #ECFDF5;
+  color: #065F46;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8.5pt;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.status-pill-draft { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+.status-pill-pending { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
+.status-pill-approved { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.status-pill-rejected { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }

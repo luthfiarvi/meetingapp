@@ -45,17 +45,37 @@
 <body>
 
   <div class="preview-actions">
-    <div style="display: flex; gap: 0.5rem;">
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
       <a href="/notulen?id=<%= doc.id %>" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
         <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         <span>Kembali ke Editor</span>
       </a>
+      <% if (doc.approvalStatus === 'approved') { %>
+        <span class="status-pill status-pill-approved">✓ Telah Disahkan</span>
+      <% } else if (doc.approvalStatus === 'pending_approval') { %>
+        <span class="status-pill status-pill-pending">⏳ Menunggu Pengesahan</span>
+      <% } else if (doc.approvalStatus === 'rejected') { %>
+        <span class="status-pill status-pill-rejected">⚠️ Perlu Revisi</span>
+      <% } else { %>
+        <span class="status-pill status-pill-draft">📝 Draft</span>
+      <% } %>
     </div>
 
-    <div style="display: flex; gap: 0.5rem;">
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <% if (doc.approvalStatus === 'pending_approval' && (user.role === 'admin' || (doc.approver_id && String(doc.approver_id) === String(user.id)))) { %>
+        <button type="button" onclick="confirmApproval(<%= doc.id %>)" class="btn btn-sm" style="background: #059669; color: #fff; font-weight: 700; border: none; box-shadow: 0 4px 10px rgba(5,150,105,0.3); display: flex; align-items: center; gap: 4px; padding: 0.45rem 0.9rem; border-radius: 6px; cursor: pointer;">
+          ✓ Setujui & Sahkan Notula
+        </button>
+        <button type="button" onclick="confirmReject(<%= doc.id %>)" class="btn btn-secondary btn-sm" style="color: #DC2626; border-color: #FCA5A5; font-weight: 600; cursor: pointer;">
+          ⚠️ Kembalikan (Revisi)
+        </button>
+      <% } %>
+      <a href="/notulen/export-docx/<%= doc.id %>" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; text-decoration: none;">
+        <span>📄 Ekspor Word (.docx)</span>
+      </a>
       <button type="button" onclick="window.print()" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.4rem;">
         <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-        <span>Cetak / Simpan PDF A4</span>
+        <span>Cetak / PDF A4</span>
       </button>
     </div>
   </div>
@@ -81,16 +101,16 @@
         (<%= doc.title %>)
       </div>
       <div class="notula-meta-line">
-        <%= doc.formattedDate %>, Waktu: <%= doc.meetingTime %>
+        Hari, Tanggal, Waktu: <%= doc.formattedDate %>, <%= doc.meetingTime %>
       </div>
       <div class="notula-meta-line">
         Tempat: <%= doc.meetingPlace %>
       </div>
     </div>
 
-    <!-- 1. Agenda Kegiatan -->
-    <div class="notula-box-header">
-      AGENDA KEGIATAN
+    <!-- 1. Agenda Rapat -->
+    <div class="notula-shaded-box">
+      AGENDA RAPAT
     </div>
     <ul class="notula-list">
       <% (doc.agenda || []).forEach(function(item) { %>
@@ -98,133 +118,222 @@
       <% }); %>
     </ul>
 
-    <!-- 2. Peserta / Unsur yang Hadir -->
-    <div class="notula-section-heading">
-      PESERTA / UNSUR YANG HADIR
+    <!-- 2. Peserta Rapat -->
+    <div class="notula-shaded-box">
+      PESERTA RAPAT
     </div>
-    <ul class="notula-list">
+    <ol class="notula-num-list">
       <% (doc.attendees || []).forEach(function(item) { %>
         <li><%= item %></li>
       <% }); %>
-    </ul>
+    </ol>
 
-    <!-- 3. Uraian Kegiatan -->
-    <div class="notula-section-heading" style="margin-top: 2rem;">
-      URAIAN KEGIATAN
+    <!-- 3. Pelaksanaan Rapat -->
+    <div class="notula-shaded-box">
+      PELAKSANAAN
     </div>
     <div>
-      <% (doc.activities || []).forEach(function(act) { %>
-        <div style="margin-bottom: 1.25rem;">
-          <div class="notula-subsection-title"><%= act.sectionTitle %></div>
-          <ul class="notula-list">
-            <% (act.points || []).forEach(function(pt) { %>
-              <li><%= pt %></li>
-            <% }); %>
-          </ul>
+      <div class="pelaksanaan-subheading">1. Pembukaan</div>
+      <div class="pelaksanaan-text">
+        <%= doc.pelaksanaanPembukaan || (doc.activities && doc.activities[0]?.points ? doc.activities[0].points.join('\n') : '-') %>
+      </div>
+
+      <div class="pelaksanaan-subheading">2. Pembahasan</div>
+      <div class="pelaksanaan-text">
+        <% if (doc.pelaksanaanPembahasan) { %>
+          <%= doc.pelaksanaanPembahasan %>
+        <% } else if (doc.activities && doc.activities.length > 1) { %>
+          <% doc.activities.slice(1).forEach(function(a) { %>
+            <strong><%= a.sectionTitle %></strong><br>
+            <%= (a.points || []).join('\n') %><br><br>
+          <% }); %>
+        <% } else if (doc.activities && doc.activities.length === 1 && doc.activities[0].points) { %>
+          <%= doc.activities[0].points.join('\n') %>
+        <% } else { %>
+          -
+        <% } %>
+      </div>
+
+      <!-- Khusus Rapat MT: Tabel Kertas Kerja Evaluasi MT -->
+      <% if (doc.kertasKerjaMt && doc.kertasKerjaMt.length > 0) { %>
+        <div style="margin-top: 1rem; margin-bottom: 1.5rem;">
+          <div class="notula-subsection-title" style="font-weight: bold; margin-bottom: 0.6rem; font-size: 11pt;">
+            Penyampaian Kertas Kerja Evaluasi Manajemen Talenta
+          </div>
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-family: 'Times New Roman', serif;">
+            <thead>
+              <tr style="background-color: #D9E2EC; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 9.5pt;">
+                <th style="border: 1px solid #000; padding: 6px 4px; width: 35px;">No</th>
+                <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Komponen Penilaian</th>
+                <th style="border: 1px solid #000; padding: 6px 6px;">Indikator Penilaian</th>
+                <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Bukti Output</th>
+                <th style="border: 1px solid #000; padding: 6px 4px; width: 45px; text-align: center;">Status</th>
+                <th style="border: 1px solid #000; padding: 6px 6px; width: 130px;">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% let currentPilar = ''; %>
+              <% doc.kertasKerjaMt.forEach(function(row) { %>
+                <% if (row.pilar && row.pilar !== currentPilar) { %>
+                  <% currentPilar = row.pilar; %>
+                  <tr style="background-color: #FDE8D7; font-weight: bold; border: 1px solid #000;">
+                    <td colspan="6" style="padding: 6px 8px; border: 1px solid #000; font-weight: bold; font-size: 9.5pt;"><%= row.pilar %></td>
+                  </tr>
+                <% } %>
+                <tr style="border: 1px solid #000;">
+                  <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 9.5pt;"><%= row.no || '-' %></td>
+                  <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt; font-weight: 500;"><%= row.komponen || '-' %></td>
+                  <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.indikator || '-' %></td>
+                  <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.buktiOutput || '-' %></td>
+                  <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 11pt; font-weight: bold;"><%= row.status === '✓' ? '✓' : '-' %></td>
+                  <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.keterangan || '-' %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
         </div>
-      <% }); %>
+      <% } %>
+
+      <div class="pelaksanaan-subheading">3. Diskusi / Tanya Jawab</div>
+      <div class="pelaksanaan-text">
+        <%= doc.pelaksanaanDiskusi || '-' %>
+      </div>
+
+      <div class="pelaksanaan-subheading">4. Rekomendasi/Tindak Lanjut</div>
+      <div class="pelaksanaan-text">
+        <% if (doc.pelaksanaanRekomendasi) { %>
+          <%= doc.pelaksanaanRekomendasi %>
+        <% } else if (doc.actionItems && doc.actionItems.length > 0) { %>
+          <% doc.actionItems.forEach(function(item, idx) { %>
+            <%= idx + 1 %>. <%= item %><br>
+          <% }); %>
+        <% } else if (doc.conclusions && doc.conclusions.length > 0) { %>
+          <% doc.conclusions.forEach(function(item, idx) { %>
+            <%= idx + 1 %>. <%= item %><br>
+          <% }); %>
+        <% } else { %>
+          -
+        <% } %>
+      </div>
     </div>
 
-    <!-- Khusus Rapat MT: Tabel Kertas Kerja Evaluasi MT -->
-    <% if (doc.kertasKerjaMt && doc.kertasKerjaMt.length > 0) { %>
-      <div style="margin-top: 1.5rem; margin-bottom: 2rem;">
-        <div class="notula-subsection-title" style="font-weight: bold; margin-bottom: 0.6rem; font-size: 11pt;">
-          Penyampaian Kertas Kerja Evaluasi Manajemen Talenta
-        </div>
-        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-family: 'Times New Roman', serif;">
-          <thead>
-            <tr style="background-color: #D9E2EC; border: 1px solid #000; text-align: center; font-weight: bold; font-size: 9.5pt;">
-              <th style="border: 1px solid #000; padding: 6px 4px; width: 35px;">No</th>
-              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Komponen Penilaian</th>
-              <th style="border: 1px solid #000; padding: 6px 6px;">Indikator Penilaian</th>
-              <th style="border: 1px solid #000; padding: 6px 6px; width: 140px;">Bukti Output</th>
-              <th style="border: 1px solid #000; padding: 6px 4px; width: 45px; text-align: center;">Status</th>
-              <th style="border: 1px solid #000; padding: 6px 6px; width: 130px;">Keterangan</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% let currentPilar = ''; %>
-            <% doc.kertasKerjaMt.forEach(function(row) { %>
-              <% if (row.pilar && row.pilar !== currentPilar) { %>
-                <% currentPilar = row.pilar; %>
-                <tr style="background-color: #FDE8D7; font-weight: bold; border: 1px solid #000;">
-                  <td colspan="6" style="padding: 6px 8px; border: 1px solid #000; font-weight: bold; font-size: 9.5pt;"><%= row.pilar %></td>
-                </tr>
-              <% } %>
-              <tr style="border: 1px solid #000;">
-                <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 9.5pt;"><%= row.no || '-' %></td>
-                <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt; font-weight: 500;"><%= row.komponen || '-' %></td>
-                <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.indikator || '-' %></td>
-                <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.buktiOutput || '-' %></td>
-                <td style="border: 1px solid #000; padding: 5px 4px; text-align: center; vertical-align: top; font-size: 11pt; font-weight: bold;"><%= row.status === '✓' ? '✓' : '-' %></td>
-                <td style="border: 1px solid #000; padding: 5px 6px; vertical-align: top; font-size: 9.5pt;"><%= row.keterangan || '-' %></td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
+    <!-- 4. Dokumentasi -->
+    <div class="notula-shaded-box">
+      DOKUMENTASI
+    </div>
+    <div class="notula-subnote">(Foto, screenshoot, evidence, link dok pendukung, dll)</div>
+    <% if (doc.documentationPhotos && doc.documentationPhotos.length > 0) { %>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 0.5rem; margin-bottom: 1.25rem;">
+        <% doc.documentationPhotos.forEach(function(photo) { %>
+          <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
+            <img src="<%= photo.url || photo.dataUrl || photo.previewUrl || '' %>" alt="<%= photo.caption || 'Dokumentasi Giat' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
+            <% if (photo.caption) { %>
+              <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;"><%= photo.caption %></div>
+            <% } %>
+          </div>
+        <% }); %>
       </div>
     <% } %>
 
-    <!-- 4. Pokok Tindak Lanjut -->
-    <div class="notula-section-heading" style="margin-top: 2rem;">
-      POKOK TINDAK LANJUT
-    </div>
-    <ul class="notula-list">
-      <% (doc.actionItems || []).forEach(function(item) { %>
-        <li><%= item %></li>
-      <% }); %>
-    </ul>
-
-    <!-- 5. Kesimpulan -->
-    <div class="notula-section-heading" style="margin-top: 2rem;">
-      KESIMPULAN
-    </div>
-    <ul class="notula-list">
-      <% (doc.conclusions || []).forEach(function(item) { %>
-        <li><%= item %></li>
-      <% }); %>
-    </ul>
-
-    <!-- 6. Penutup -->
-    <div class="notula-section-heading" style="margin-top: 2rem;">
+    <!-- 5. Penutup -->
+    <div class="notula-shaded-box">
       PENUTUP
     </div>
-    <p style="text-align: justify; margin-bottom: 2rem; line-height: 1.5; font-size: 10.5pt;">
-      <%= doc.closingText %>
+    <p style="text-align: justify; margin-bottom: 1.5rem; line-height: 1.5; font-size: 10.5pt;">
+      <%= doc.closingText || 'Demikian notula ini disusun untuk dipergunakan sebagaimana mestinya.' %>
     </p>
 
-    <!-- BUKTI GIAT / DOKUMENTASI KEGIATAN (LANGSUNG DIBAWAH PENUTUP & DIATAS TANDA TANGAN) -->
-    <% if (doc.documentationPhotos && doc.documentationPhotos.length > 0) { %>
-      <div style="margin-top: 2rem; margin-bottom: 2rem; page-break-inside: avoid;">
-        <div class="notula-section-heading" style="margin-bottom: 1rem;">
-          DOKUMENTASI / BUKTI KEGIATAN
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-          <% doc.documentationPhotos.forEach(function(photo) { %>
-            <div style="border: 1px solid #CBD5E1; border-radius: 4px; padding: 6px; background: #fafafa; text-align: center;">
-              <img src="<%= photo.url || photo.dataUrl || photo.previewUrl || '' %>" alt="<%= photo.caption || 'Dokumentasi Giat' %>" style="max-height: 180px; width: 100%; object-fit: cover; border-radius: 2px;">
-              <% if (photo.caption) { %>
-                <div style="font-size: 8.5pt; color: #475569; margin-top: 4px; font-style: italic;"><%= photo.caption %></div>
-              <% } %>
-            </div>
-          <% }); %>
-        </div>
-      </div>
-    <% } %>
+    <!-- 6. Tanda Tangan 2 Kolom (Mengetahui di Kiri, Notulis di Kanan) -->
+    <table class="notula-sig-table">
+      <tr>
+        <!-- Kolom Kiri: Mengetahui -->
+        <td class="notula-sig-cell-left">
+          <div>Mengetahui,</div>
+          <div style="font-weight: bold; margin-bottom: 4px;"><%= doc.approverRole || doc.approver_role || '(Nama Jabatan)' %></div>
+          <div class="notula-sig-space">
+            <% if (doc.approvalStatus === 'approved' || doc.approval_status === 'approved') { %>
+              <div class="notula-approval-badge">
+                <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
+                <div><%= doc.approverName || doc.approver_name || 'Pejabat' %></div>
+                <div style="font-size: 7.5pt; color: #059669;"><%= doc.approvedAt || doc.approved_at ? new Date(doc.approvedAt || doc.approved_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : doc.formattedDate %></div>
+              </div>
+            <% } else { %>
+              <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            <% } %>
+          </div>
+          <div style="font-weight: bold; text-decoration: underline;"><%= doc.approverName || doc.approver_name || 'Nama' %></div>
+          <% const appNip = doc.approverNip || doc.approver_nip; %>
+          <% if (appNip) { %>
+            <div><%= String(appNip).startsWith('NIP') ? appNip : 'NIP. ' + appNip %></div>
+          <% } %>
+        </td>
 
-    <!-- 7. Tanda Tangan Notulis (Rata Kanan) -->
-    <div style="display: flex; justify-content: flex-end; margin-top: 2.5rem; page-break-inside: avoid;">
-      <div class="notula-signature-block">
-        <div class="notula-sig-date"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= doc.formattedDate.includes(',') ? doc.formattedDate.split(',')[1].trim() : doc.formattedDate %></div>
-        <div class="notula-sig-role">Notulis,</div>
-        <div class="notula-sig-name"><%= doc.notulisName %></div>
-        <% const previewNip = doc.notulisNip || (typeof user !== 'undefined' && user.nip ? user.nip : ''); %>
-        <% if (previewNip) { %>
-          <div class="notula-sig-nip"><%= String(previewNip).startsWith('NIP') ? previewNip : 'NIP. ' + previewNip %></div>
-        <% } %>
-        <div class="notula-sig-division"><%= doc.notulisRole %></div>
-      </div>
+        <!-- Kolom Kanan: Notulis -->
+        <td class="notula-sig-cell-right">
+          <div><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= doc.formattedDate.includes(',') ? doc.formattedDate.split(',')[1].trim() : doc.formattedDate %></div>
+          <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
+          <div class="notula-sig-space">
+            <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+          </div>
+          <div style="font-weight: bold; text-decoration: underline;"><%= doc.notulisName || doc.notulis_name || user.full_name %></div>
+          <% const previewNip = doc.notulisNip || doc.notulis_nip || (typeof user !== 'undefined' && user.nip ? user.nip : ''); %>
+          <% if (previewNip) { %>
+            <div><%= String(previewNip).startsWith('NIP') ? previewNip : 'NIP. ' + previewNip %></div>
+          <% } %>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Running Footer Cetak -->
+    <div class="notula-running-footer">
+      <span>Notula <%= doc.title %></span>
+      <span><%= (typeof user !== 'undefined' && user.running_footer) ? user.running_footer : 'Dokumen Resmi Kanreg V BKN' %></span>
     </div>
+
+  </div>
+
+  <script>
+    async function confirmApproval(id) {
+      if (!confirm("Apakah Anda yakin ingin menyetujui dan mengesahkan notula ini?")) return;
+      try {
+        const res = await fetch("/api/notulen/approve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert("✓ Notula berhasil disetujui & disahkan!");
+          window.location.reload();
+        } else {
+          alert("Gagal mengesahkan: " + (result.message || "Terjadi kesalahan"));
+        }
+      } catch (e) {
+        alert("Gagal koneksi ke server: " + e.message);
+      }
+    }
+
+    async function confirmReject(id) {
+      const reason = prompt("Masukkan catatan / poin yang perlu direvisi oleh Notulis:");
+      if (!reason) return;
+      try {
+        const res = await fetch("/api/notulen/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, notes: reason })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert("Notula telah dikembalikan untuk revisi.");
+          window.location.reload();
+        } else {
+          alert("Gagal mengembalikan notula: " + (result.message || "Terjadi kesalahan"));
+        }
+      } catch (e) {
+        alert("Gagal koneksi ke server: " + e.message);
+      }
+    }
+  </script>
 
     <!-- Running Footer Cetak -->
     <div class="notula-running-footer">

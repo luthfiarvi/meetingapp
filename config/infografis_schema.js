@@ -167,6 +167,42 @@ export async function initInfografisSchema() {
           IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='notulis_nip') THEN
               ALTER TABLE notulen ADD COLUMN notulis_nip VARCHAR(100) DEFAULT NULL;
           END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approval_status') THEN
+              ALTER TABLE notulen ADD COLUMN approval_status VARCHAR(50) DEFAULT 'draft';
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approver_id') THEN
+              ALTER TABLE notulen ADD COLUMN approver_id VARCHAR(100) DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approver_name') THEN
+              ALTER TABLE notulen ADD COLUMN approver_name VARCHAR(255) DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approver_nip') THEN
+              ALTER TABLE notulen ADD COLUMN approver_nip VARCHAR(100) DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approver_role') THEN
+              ALTER TABLE notulen ADD COLUMN approver_role VARCHAR(255) DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approved_at') THEN
+              ALTER TABLE notulen ADD COLUMN approved_at TIMESTAMP DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approval_notes') THEN
+              ALTER TABLE notulen ADD COLUMN approval_notes TEXT DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='approver_signature') THEN
+              ALTER TABLE notulen ADD COLUMN approver_signature TEXT DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='pelaksanaan_pembukaan') THEN
+              ALTER TABLE notulen ADD COLUMN pelaksanaan_pembukaan TEXT DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='pelaksanaan_pembahasan') THEN
+              ALTER TABLE notulen ADD COLUMN pelaksanaan_pembahasan TEXT DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='pelaksanaan_diskusi') THEN
+              ALTER TABLE notulen ADD COLUMN pelaksanaan_diskusi TEXT DEFAULT NULL;
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='notulen' AND column_name='pelaksanaan_rekomendasi') THEN
+              ALTER TABLE notulen ADD COLUMN pelaksanaan_rekomendasi TEXT DEFAULT NULL;
+          END IF;
           BEGIN
               ALTER TABLE notulen ALTER COLUMN user_id TYPE VARCHAR(100);
           EXCEPTION WHEN OTHERS THEN NULL;
