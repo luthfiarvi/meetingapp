@@ -120,38 +120,81 @@ export const profileController = {
         signaturePath = `/uploads/ttd/${req.files.signature[0].filename}`;
       }
 
-      await pool.query(`
-        UPDATE users SET
-          full_name = $1,
-          nip = $2,
-          institution = $3,
-          division = $4,
-          mentor_name = $5,
-          logo_path = $6,
-          avatar_path = $7,
-          institution_kop = $8,
-          kop_address = $9,
-          kop_contact = $10,
-          sig_city = $11,
-          running_footer = $12,
-          signature_path = COALESCE($13, signature_path)
-        WHERE id = $14
-      `, [
-        full_name.trim(),
-        nip ? nip.trim() : "",
-        institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
-        division.trim(),
-        "",
-        logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
-        avatarPath,
-        institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
-        kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
-        kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
-        sig_city ? sig_city.trim() : "Jakarta",
-        running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
-        signaturePath,
-        currentUser.id
-      ]);
+      try {
+        await pool.query(`
+          UPDATE users SET
+            full_name = $1,
+            nip = $2,
+            institution = $3,
+            division = $4,
+            mentor_name = $5,
+            logo_path = $6,
+            avatar_path = $7,
+            institution_kop = $8,
+            kop_address = $9,
+            kop_contact = $10,
+            sig_city = $11,
+            running_footer = $12,
+            signature_path = COALESCE($13, signature_path)
+          WHERE id = $14
+        `, [
+          full_name.trim(),
+          nip ? nip.trim() : "",
+          institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
+          division.trim(),
+          "",
+          logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
+          avatarPath,
+          institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
+          kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
+          kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
+          sig_city ? sig_city.trim() : "Jakarta",
+          running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
+          signaturePath,
+          currentUser.id
+        ]);
+      } catch (updateErr) {
+        if (updateErr.message && updateErr.message.includes("signature_path")) {
+          // Tambahkan kolom jika belum ada, lalu update kembali
+          await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+          try {
+            await pool.query(`UPDATE users SET signature_path = $1 WHERE id = $2`, [signaturePath, currentUser.id]);
+          } catch (e) {}
+
+          await pool.query(`
+            UPDATE users SET
+              full_name = $1,
+              nip = $2,
+              institution = $3,
+              division = $4,
+              mentor_name = $5,
+              logo_path = $6,
+              avatar_path = $7,
+              institution_kop = $8,
+              kop_address = $9,
+              kop_contact = $10,
+              sig_city = $11,
+              running_footer = $12
+            WHERE id = $13
+          `, [
+            full_name.trim(),
+            nip ? nip.trim() : "",
+            institution ? institution.trim() : "Kantor Regional V BKN Jakarta",
+            division.trim(),
+            "",
+            logo_path ? logo_path.trim() : "/images/Logo_Badan_Kepegawaian_Negara.png",
+            avatarPath,
+            institution_kop ? institution_kop.trim() : "BADAN KEPEGAWAIAN NEGARA KANTOR REGIONAL V",
+            kop_address ? kop_address.trim() : "Jalan Raya Ciracas Nomor 36, Ciracas, Jakarta Timur, Jakarta 13730",
+            kop_contact ? kop_contact.trim() : "Telepon (021) 87721084 - 87721085; Faksimile (021) 87721085; Laman: jakarta.bkn.go.id; Pos-el: kanreg5.jakarta@bkn.go.id",
+            sig_city ? sig_city.trim() : "Jakarta",
+            running_footer ? running_footer.trim() : "Dokumen Resmi Kanreg V BKN",
+            currentUser.id
+          ]);
+        } else {
+          throw updateErr;
+        }
+      }
 
       // Update in-memory session user so changes take effect immediately
       if (req.user) {

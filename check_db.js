@@ -9,6 +9,7 @@ async function main() {
 
         // 1. Tambah kolom yang diperlukan jika belum ada
         await pool.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255);
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS user_id VARCHAR(100);
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS tipe_rapat VARCHAR(50) DEFAULT 'Rapat Biasa';
             ALTER TABLE zoom_requests ADD COLUMN IF NOT EXISTS ruangan VARCHAR(150);
