@@ -1207,12 +1207,13 @@ export const notulenController = {
   submitApproval: async (req, res) => {
     try {
       const user = getCurrentUser(req);
-      const { id, approverId, approverName, approverNip, approverRole } = req.body;
-      if (!id) {
+      const targetId = req.body.id || req.body.notulenId;
+      const { approverId, approverName, approverNip, approverRole } = req.body;
+      if (!targetId) {
         return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
       }
       if (!approverName && !approverId) {
-        return res.status(400).json({ success: false, message: "Pihak yang mengetahui (pejabat yang mengesahkan) wajib dipilih." });
+        return res.status(400).json({ success: false, message: "Pihak yang mengetahui (pejabat yang mengesahkan) wajib dipilih pada bagian 7. Pengesahan." });
       }
 
       await pool.query(`
@@ -1223,7 +1224,57 @@ export const notulenController = {
           approver_nip = $3,
           approver_role = $4
         WHERE id = $5
-      `, [approverId || null, approverName || 'Pejabat Terkait', approverNip || null, approverRole || 'Pejabat BKN', id]);
+      `, [approverId || null, approverName || 'Pejabat Terkait', approverNip || null, approverRole || 'Pejabat BKN', targetId]);
+
+      // Regenerate file notula fisik agar status pending_approval tersimpan ke berkas
+      try {
+        const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [targetId]);
+        if (notulenRes.rows.length > 0) {
+          const doc = notulenRes.rows[0];
+          const uploadDir = path.join(process.cwd(), "public", "uploads", "notulen");
+          if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+          const fileName = `notulen_rapat_${doc.meeting_id || doc.id}_${Date.now()}.html`;
+          const filePath = path.join(uploadDir, fileName);
+          const fileUrl = `/uploads/notulen/${fileName}`;
+          const htmlContent = generateNotulenHtmlFile({
+            docData: {
+              title: doc.title,
+              meetingDate: doc.meeting_date,
+              meetingTime: doc.meeting_time,
+              meetingPlace: doc.meeting_place,
+              agenda: safeParseJson(doc.agenda_data),
+              attendees: safeParseJson(doc.attendees_data),
+              activities: safeParseJson(doc.activities_data),
+              actionItems: safeParseJson(doc.action_items),
+              conclusions: safeParseJson(doc.conclusions),
+              pelaksanaanPembukaan: doc.pelaksanaan_pembukaan,
+              pelaksanaanPembahasan: doc.pelaksanaan_pembahasan,
+              pelaksanaanDiskusi: doc.pelaksanaan_diskusi,
+              pelaksanaanRekomendasi: doc.pelaksanaan_rekomendasi,
+              closingText: doc.closing_text,
+              documentationPhotos: safeParseJson(doc.documentation_photos),
+              kertasKerjaMt: safeParseJson(doc.kertas_kerja_mt, null),
+              notulisName: doc.notulis_name,
+              notulisNip: doc.notulis_nip,
+              notulisRole: doc.notulis_role,
+              approverId: doc.approver_id,
+              approverName: doc.approver_name,
+              approverNip: doc.approver_nip,
+              approverRole: doc.approver_role,
+              approvalStatus: 'pending_approval'
+            },
+            user,
+            notulenId: doc.id,
+            meetingId: doc.meeting_id
+          });
+          fs.writeFileSync(filePath, htmlContent, "utf-8");
+          if (doc.meeting_id) {
+            await pool.query("UPDATE meetings SET notulen = $1, notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+          }
+        }
+      } catch (e) {
+        console.warn("Regenerate notulen html warning:", e.message);
+      }
 
       return res.json({
         success: true,
@@ -1239,12 +1290,13 @@ export const notulenController = {
   approveNotulen: async (req, res) => {
     try {
       const user = getCurrentUser(req);
-      const { id, notes } = req.body;
-      if (!id) {
+      const targetId = req.body.id || req.body.notulenId;
+      const { notes } = req.body;
+      if (!targetId) {
         return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
       }
 
-      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [id]);
+      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [targetId]);
       if (notulenRes.rows.length === 0) {
         return res.status(404).json({ success: false, message: "Dokumen notulen tidak ditemukan." });
       }
@@ -1268,7 +1320,7 @@ export const notulenController = {
           approver_role = $3,
           approval_notes = $4
         WHERE id = $5
-      `, [approverName, approverNip, approverRole, notes || null, id]);
+      `, [approverName, approverNip, approverRole, notes || null, targetId]);
 
       // Regenerate berkas fisik notula dengan cap sah resmi
       let fileUrl = null;
@@ -1338,12 +1390,13 @@ export const notulenController = {
   rejectNotulen: async (req, res) => {
     try {
       const user = getCurrentUser(req);
-      const { id, notes } = req.body;
-      if (!id) {
+      const targetId = req.body.id || req.body.notulenId;
+      const { notes } = req.body;
+      if (!targetId) {
         return res.status(400).json({ success: false, message: "ID notula wajib disertakan." });
       }
 
-      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [id]);
+      const notulenRes = await pool.query("SELECT * FROM notulen WHERE id = $1", [targetId]);
       if (notulenRes.rows.length === 0) {
         return res.status(404).json({ success: false, message: "Dokumen notulen tidak ditemukan." });
       }
@@ -1358,7 +1411,7 @@ export const notulenController = {
           approval_status = 'rejected',
           approval_notes = $1
         WHERE id = $2
-      `, [notes || "Perlu revisi pada beberapa bagian catatan.", id]);
+      `, [notes || "Perlu revisi pada beberapa bagian catatan.", targetId]);
 
       return res.json({
         success: true,

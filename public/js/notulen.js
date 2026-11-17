@@ -1366,23 +1366,49 @@ async function handleSaveNotulen(redirectAfter = true) {
 
 // Handler Workflow Pengesahan (Opsi A)
 async function handleSubmitApproval() {
-  if (!confirm('Kirimkan notula ini ke pejabat terkait untuk diverifikasi dan disahkan?')) return;
+  // Sinkronkan input pejabat terlebih dahulu dari formulir
+  const fApproverUser = document.getElementById('selectApproverUser');
+  if (fApproverUser && fApproverUser.value) notulenState.approverId = fApproverUser.value;
+  const fApproverName = document.getElementById('approverName');
+  if (fApproverName && fApproverName.value) notulenState.approverName = fApproverName.value.trim();
+  const fApproverNip = document.getElementById('approverNip');
+  if (fApproverNip && fApproverNip.value) notulenState.approverNip = fApproverNip.value.trim();
+  const fApproverRole = document.getElementById('approverRole');
+  if (fApproverRole && fApproverRole.value) notulenState.approverRole = fApproverRole.value.trim();
+
+  // Validasi Pejabat yang Mengetahui
+  if (!notulenState.approverName && !notulenState.approverId) {
+    showNotificationToast('Mohon pilih atau isi Pejabat yang Mengetahui pada bagian 7. Pengesahan terlebih dahulu.', 'warning', 5000);
+    const targetEl = document.getElementById('selectApproverUser') || document.getElementById('approverName');
+    if (targetEl) {
+      targetEl.focus();
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+
+  if (!confirm(`Kirimkan notula ini ke ${notulenState.approverName || 'Pejabat yang Mengetahui'} untuk diverifikasi dan disahkan secara resmi?`)) {
+    return;
+  }
+
+  showNotificationToast('Menyimpan draft notula sebelum diajukan...', 'loading', 0);
 
   // Pastikan draft tersimpan terlebih dahulu tanpa langsung redirect
   const savedId = await handleSaveNotulen(false);
   const notulenId = savedId || notulenState.id;
   if (!notulenId) {
-    alert('Gagal mendapatkan ID notula. Mohon simpan draft terlebih dahulu.');
+    showNotificationToast('Gagal menyimpan draft notula. Mohon periksa kembali formulir.', 'error', 4000);
     return;
   }
 
   try {
-    showNotificationToast('⏳ Mengirim pengajuan pengesahan...');
+    showNotificationToast('Mengirim pengajuan pengesahan ke pejabat...', 'loading', 0);
     const res = await fetch('/api/notulen/submit-approval', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        notulenId,
+        id: notulenId,
+        notulenId: notulenId,
         approverId: notulenState.approverId,
         approverName: notulenState.approverName,
         approverNip: notulenState.approverNip,
@@ -1391,81 +1417,91 @@ async function handleSubmitApproval() {
     });
     const data = await res.json();
     if (data.success) {
-      alert('🚀 ' + data.message);
-      window.location.reload();
+      showNotificationToast('Pengajuan pengesahan berhasil dikirim!', 'success', 3000);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
     } else {
-      alert('Gagal mengajukan pengesahan: ' + data.message);
+      showNotificationToast(data.message || 'Gagal mengajukan pengesahan.', 'error', 5000);
     }
   } catch (err) {
     console.error('Submit approval error:', err);
-    alert('Terjadi kesalahan koneksi saat mengajukan pengesahan.');
+    showNotificationToast('Terjadi kesalahan jaringan saat mengajukan pengesahan.', 'error', 4000);
   }
 }
 
 async function handleApproveNotulen() {
-  if (!notulenState.id) {
-    alert('Notula belum disimpan.');
+  const notulenId = notulenState.id;
+  if (!notulenId) {
+    showNotificationToast('Notula belum tersimpan.', 'warning', 3000);
     return;
   }
-  if (!confirm('Apakah Anda yakin ingin mengesahkan notula ini? Pengesahan digital resmi akan dicantumkan pada dokumen.')) return;
+  if (!confirm('Apakah Anda yakin ingin menyetujui & mengesahkan notula ini secara resmi?')) return;
 
   try {
-    showNotificationToast('⏳ Memproses pengesahan notula...');
+    showNotificationToast('Memproses pengesahan digital notula...', 'loading', 0);
     const res = await fetch('/api/notulen/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        notulenId: notulenState.id
+        id: notulenId,
+        notulenId: notulenId
       })
     });
     const data = await res.json();
     if (data.success) {
-      alert('🎉 ' + data.message);
-      window.location.reload();
+      showNotificationToast('Notula berhasil disahkan secara resmi!', 'success', 3000);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
     } else {
-      alert('Gagal mengesahkan: ' + data.message);
+      showNotificationToast(data.message || 'Gagal mengesahkan notula.', 'error', 5000);
     }
   } catch (err) {
     console.error('Approve error:', err);
-    alert('Terjadi kesalahan koneksi saat mengesahkan notula.');
+    showNotificationToast('Terjadi kesalahan jaringan saat mengesahkan notula.', 'error', 4000);
   }
 }
 
 async function handleRejectNotulen() {
-  if (!notulenState.id) {
-    alert('Notula belum disimpan.');
+  const notulenId = notulenState.id;
+  if (!notulenId) {
+    showNotificationToast('Notula belum tersimpan.', 'warning', 3000);
     return;
   }
   const notes = prompt('Masukkan catatan perbaikan / revisi untuk notulis:');
-  if (notes === null) return; // Dibatalkan pengguna
+  if (notes === null) return;
 
   try {
-    showNotificationToast('⏳ Mengirim catatan revisi...');
+    showNotificationToast('Mengirimkan catatan revisi...', 'loading', 0);
     const res = await fetch('/api/notulen/reject', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        notulenId: notulenState.id,
+        id: notulenId,
+        notulenId: notulenId,
         notes: notes || 'Perlu perbaikan materi.'
       })
     });
     const data = await res.json();
     if (data.success) {
-      alert('⚠️ ' + data.message);
-      window.location.reload();
+      showNotificationToast('Catatan revisi berhasil dikirim!', 'success', 3000);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
     } else {
-      alert('Gagal mengirim revisi: ' + data.message);
+      showNotificationToast(data.message || 'Gagal mengirim revisi.', 'error', 5000);
     }
   } catch (err) {
     console.error('Reject error:', err);
-    alert('Terjadi kesalahan koneksi saat mengirim revisi.');
+    showNotificationToast('Terjadi kesalahan jaringan saat mengirim revisi.', 'error', 4000);
   }
 }
 
 // Export Docx Handler
 async function handleExportDocx() {
   if (!notulenState.id) {
-    showNotificationToast('⏳ Menyimpan notulen terlebih dahulu sebelum unduh Word...');
+    showNotificationToast('Menyimpan notulen terlebih dahulu sebelum unduh Word...', 'loading', 2500);
     const savedId = await handleSaveNotulen(false);
     if (savedId) {
       window.location.href = `/notulen/export-docx/${savedId}`;
@@ -1477,17 +1513,76 @@ async function handleExportDocx() {
   }
 }
 
-function showNotificationToast(msg) {
+let toastTimer = null;
+function showNotificationToast(msg, type = 'info', duration = 4000) {
   let toast = document.getElementById('notulenToast');
   if (!toast) {
     toast = document.createElement('div');
     toast.id = 'notulenToast';
-    toast.style.cssText = 'position: fixed; bottom: 24px; right: 24px; background: #0A2540; color: #fff; padding: 0.85rem 1.35rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 9999; font-size: 0.875rem; font-weight: 600; border-left: 4px solid #10B981; transition: opacity 0.3s ease;';
     document.body.appendChild(toast);
   }
-  toast.textContent = msg;
-  toast.style.opacity = '1';
-  setTimeout(() => {
-    toast.style.opacity = '0';
-  }, 3500);
+
+  let bg = 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)';
+  let borderLeft = '4px solid #3b82f6';
+  let icon = 'ℹ️';
+
+  if (type === 'success') {
+    bg = 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)';
+    borderLeft = '4px solid #10b981';
+    icon = '✅';
+  } else if (type === 'error') {
+    bg = 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)';
+    borderLeft = '4px solid #ef4444';
+    icon = '❌';
+  } else if (type === 'warning') {
+    bg = 'linear-gradient(135deg, #78350f 0%, #92400e 100%)';
+    borderLeft = '4px solid #f59e0b';
+    icon = '⚠️';
+  } else if (type === 'loading') {
+    bg = 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)';
+    borderLeft = '4px solid #60a5fa';
+    icon = '⏳';
+  }
+
+  toast.style.cssText = `
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: ${bg};
+    color: #ffffff;
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+    z-index: 99999;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-left: ${borderLeft};
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 460px;
+    line-height: 1.4;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(-10px);
+    opacity: 0;
+  `;
+
+  toast.innerHTML = `
+    <span style="font-size: 1.15rem; flex-shrink: 0;">${icon}</span>
+    <span style="flex: 1;">${msg}</span>
+    <span style="cursor: pointer; opacity: 0.7; margin-left: 8px; font-size: 1.1rem; line-height: 1;" onclick="this.parentElement.style.opacity='0';">&times;</span>
+  `;
+
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+
+  if (toastTimer) clearTimeout(toastTimer);
+  if (duration > 0) {
+    toastTimer = setTimeout(() => {
+      toast.style.transform = 'translateY(-10px)';
+      toast.style.opacity = '0';
+    }, duration);
+  }
 }
