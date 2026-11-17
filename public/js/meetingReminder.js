@@ -12,6 +12,7 @@
 
     // State & cache
     let todaysReminders = [];
+    let pendingNotulenList = [];
     let isChecking = false;
 
     // Inisialisasi Audio Context
@@ -262,10 +263,12 @@
                 const json = await res.json();
                 if (json.success && Array.isArray(json.data)) {
                     todaysReminders = json.data;
+                    pendingNotulenList = Array.isArray(json.pending_notulen) ? json.pending_notulen : [];
                     const curHM = json.server_time;
                     const todayStr = json.today;
 
-                    updateBellBadge(todaysReminders.length);
+                    const totalBadge = todaysReminders.length + pendingNotulenList.length;
+                    updateBellBadge(totalBadge);
                     evaluateReminders(todaysReminders, curHM, todayStr);
                 }
             }
@@ -347,15 +350,46 @@
     function renderBellDropdownContent(dropdown) {
         const notifGranted = ("Notification" in window && Notification.permission === "granted");
 
+        // Section Notula Menunggu Pengesahan
+        let pendingNotulenHtml = '';
+        if (Array.isArray(pendingNotulenList) && pendingNotulenList.length > 0) {
+            pendingNotulenHtml = `
+                <div style="background: #FFFBEB; border: 1.5px solid #F59E0B; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #92400E; text-transform: uppercase;">
+                            🛡️ Pengesahan Notula
+                        </span>
+                        <span style="background: #D97706; color: #fff; font-size: 9.5px; font-weight: 800; padding: 1px 7px; border-radius: 99px;">
+                            ${pendingNotulenList.length} Menunggu
+                        </span>
+                    </div>
+                    ${pendingNotulenList.map(pn => `
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #FDE68A;">
+                            <div style="font-size: 12px; font-weight: 700; color: #1E293B; line-height: 1.3;">
+                                ${(pn.title || 'Notula Rapat').replace(/</g, '&lt;')}
+                            </div>
+                            <div style="font-size: 10.5px; color: #64748B; margin-top: 2px;">
+                                Notulis: <strong>${(pn.notulis_name || 'Notulis').replace(/</g, '&lt;')}</strong>
+                            </div>
+                            <a href="/notulen?id=${pn.id}&meetingId=${pn.meeting_id || ''}" 
+                               style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #047857; margin-top: 4px; text-decoration: none;">
+                                <span>✓ Tinjau & Sahkan →</span>
+                            </a>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
         let itemsHtml = '';
-        if (todaysReminders.length === 0) {
+        if (todaysReminders.length === 0 && (!pendingNotulenList || pendingNotulenList.length === 0)) {
             itemsHtml = `
                 <div style="text-align: center; padding: 20px 8px; color: #64748b; font-size: 13px;">
                     <span style="font-size: 26px; display: block; margin-bottom: 6px;">☕</span>
-                    Tidak ada agenda rapat yang tersisa hari ini.
+                    Tidak ada agenda rapat atau tugas pengesahan yang tersisa hari ini.
                 </div>
             `;
-        } else {
+        } else if (todaysReminders.length > 0) {
             itemsHtml = todaysReminders.map(m => `
                 <div style="padding: 10px 12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px;">
@@ -383,16 +417,17 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span style="font-size: 16px;">🔔</span>
-                    <strong style="font-size: 13.5px; color: #1e293b;">Agenda Hari Ini</strong>
+                    <strong style="font-size: 13.5px; color: #1e293b;">Pemberitahuan & Agenda</strong>
                 </div>
                 <button type="button" onclick="window.testBknReminder()"
                     style="font-size: 11px; font-weight: 700; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 3px 8px; cursor: pointer;"
                     title="Coba simulasi suara chime dan banner pengingat rapat">
-                    Tes Notifikasi
+                    Tes Suara
                 </button>
             </div>
 
-            <div style="max-height: 240px; overflow-y: auto; margin-bottom: 12px;">
+            <div style="max-height: 280px; overflow-y: auto; margin-bottom: 12px;">
+                ${pendingNotulenHtml}
                 ${itemsHtml}
             </div>
 

@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import pool from "../config/database.js";
 import { ensureAuthenticated, ensureAdmin, ensureNotPegawai } from "../middleware/authMiddleware.js";
 import { uploadManualPdf } from "../middleware/uploadMiddleware.js";
 
@@ -10,10 +11,26 @@ const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-router.get("/dashboard", ensureAuthenticated, (req, res) => {
+router.get("/dashboard", ensureAuthenticated, async (req, res) => {
+    const currentUser = req.user || res.locals.user || {};
+    let pendingApprovals = [];
+    try {
+        const paRes = await pool.query(`
+            SELECT n.id, n.title, n.meeting_date, n.notulis_name, n.created_at, n.meeting_id, n.approval_status
+            FROM notulen n
+            WHERE (n.approver_id = $1 OR ($2 = 'admin' AND n.approval_status = 'pending_approval'))
+              AND n.approval_status = 'pending_approval'
+            ORDER BY n.id DESC
+        `, [String(currentUser.id || ''), currentUser.role || 'user']);
+        pendingApprovals = paRes.rows;
+    } catch (e) {
+        pendingApprovals = [];
+    }
+
     res.render("dashboard2", {
         error: req.query.error || null,
-        msg: req.query.msg || null
+        msg: req.query.msg || null,
+        pendingApprovals: pendingApprovals
     });
 });
 
