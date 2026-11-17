@@ -1163,7 +1163,7 @@
                     <span>Manajemen Meeting</span>
                 </a>
 
-                <% if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
+                <% if (typeof user === 'undefined' || !user || (user.role !== 'pegawai' && user.role !== 'pimpinan')) { %>
                 <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
                     <span>📹</span>
                     <span>Request Zoom</span>

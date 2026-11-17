@@ -26,7 +26,7 @@ export const showMeeting = async (req, res) => {
         }
 
         let meetings = [];
-        if (currentUser.role === "pegawai") {
+        if (currentUser.role === "pegawai" || currentUser.role === "pimpinan") {
             const uid = currentUser.id || currentUser.username || currentUser.nip;
             meetings = await meetingModel.getPegawaiMeetings(uid);
         } else {
@@ -621,7 +621,7 @@ export const getMyAgendaRemindersController = async (req, res) => {
         }
         const uid = currentUser.id || currentUser.username || currentUser.nip;
         let meetings = [];
-        if (currentUser.role === 'pegawai') {
+        if (currentUser.role === 'pegawai' || currentUser.role === 'pimpinan') {
             meetings = await meetingModel.getPegawaiMeetings(uid);
         } else {
             meetings = await meetingModel.getAllMeeting();

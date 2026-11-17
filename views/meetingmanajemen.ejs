@@ -56,7 +56,7 @@
                             <span>Manajemen Meeting</span>
                         </a>
 
-                        <% if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
+                        <% if (typeof user === 'undefined' || !user || (user.role !== 'pegawai' && user.role !== 'pimpinan')) { %>
                         <a href="/request-zoom" class="menu-item" data-tooltip="Request Zoom">
                             <span>📹</span>
                             <span>Request Zoom</span>
@@ -95,8 +95,8 @@
                             📑
                         </div>
                         <div class="management-title-text">
-                            <h1><%= (typeof user !== 'undefined' && user && user.role === 'pegawai') ? 'Agenda Rapat Saya' : 'Manajemen Meeting' %></h1>
-                            <p><%= (typeof user !== 'undefined' && user && user.role === 'pegawai') ? 'Daftar agenda ruang rapat yang Anda ikuti' : 'Halaman untuk menambah, edit dan kelola daftar meeting BKN' %></p>
+                            <h1><%= (typeof user !== 'undefined' && user && (user.role === 'pegawai' || user.role === 'pimpinan')) ? 'Agenda Rapat Saya' : 'Manajemen Meeting' %></h1>
+                            <p><%= (typeof user !== 'undefined' && user && (user.role === 'pegawai' || user.role === 'pimpinan')) ? 'Daftar agenda ruang rapat yang Anda ikuti' : 'Halaman untuk menambah, edit dan kelola daftar meeting BKN' %></p>
                         </div>
                     </div>
 
@@ -118,7 +118,7 @@
                 <div class="management-actions"
                     style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; width: 100%;">
 
-                    <% if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                    <% if (typeof user !== 'undefined' && user && (user.role === 'pegawai' || user.role === 'pimpinan')) { %>
                         <!-- KHUSUS USER PEGAWAI: TOMBOL TAMBAH RAPAT KE AGENDA PRIBADI -->
                         <button type="button" class="btn-add-primary" onclick="openPilihRapatPegawaiModal()"
                             style="background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%); display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3); white-space: nowrap; cursor: pointer; border: none; padding: 0.65rem 1.15rem; font-weight: 700; font-size: 0.875rem; border-radius: 0.625rem; color: #fff;"
@@ -150,7 +150,7 @@
                         <button type="button" class="btn-add-primary" onclick="openMeetingModal()">
                             ＋ Tambah Meeting
                         </button>
-                        <% } else if (typeof user === 'undefined' || !user || user.role !== 'pegawai') { %>
+                        <% } else if (typeof user === 'undefined' || !user || (user.role !== 'pegawai' && user.role !== 'pimpinan')) { %>
                             <!-- KHUSUS USER TIM (DIVISI LAIN) -->
                             <a href="/request-zoom" class="btn-add-primary"
                                 style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); white-space: nowrap;"
@@ -314,7 +314,7 @@
                                 creatorCandidates.some(c => userIdentifiers.some(u => u === c || c.includes(u) || u.includes(c)));
 
                             let meetingCreator = m.creator_user_id || m.pembuat || m.user_id || '';
-                            let canManageMeeting = (typeof user !== 'undefined' && user && user.role !== 'pegawai') ? true : false;
+                            let canManageMeeting = (typeof user !== 'undefined' && user && user.role !== 'pegawai' && user.role !== 'pimpinan') ? true : false;
                             let safeMeetingTitle = (m.meeting_nama || m.m_nama || 'Agenda Rapat BKN').replace(/"/g, '&quot;');
                             let safeMeetingDesc = (m.deskripsi || '').replace(/"/g, '&quot;');
                             let safeCreator = (meetingCreator || 'Admin BKN').replace(/"/g, '&quot;');
@@ -490,7 +490,7 @@
                                                                 📁 Bahan Rapat
                                                             </button>
 
-                                                            <% if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                                                            <% if (typeof user !== 'undefined' && user && (user.role === 'pegawai' || user.role === 'pimpinan')) { %>
                                                             <button type="button" class="btn-card-unenroll"
                                                                 onclick="handleUnenrollPegawaiMeeting('<%= m.meeting_id || m.m_id || m.id %>', '<%= safeMeetingTitle %>')"
                                                                 title="Hapus rapat ini dari agenda pribadi saya">
@@ -501,7 +501,7 @@
                                 </div>
                             </div>
                             <% }); %>
-                                <% } else if (typeof user !== 'undefined' && user && user.role === 'pegawai') { %>
+                                <% } else if (typeof user !== 'undefined' && user && (user.role === 'pegawai' || user.role === 'pimpinan')) { %>
                                     <!-- EMPTY STATE KHUSUS PEGAWAI BELUM IKUT RAPAT -->
                                     <div id="pegawaiEmptyAgenda" style="grid-column: 1 / -1; text-align: center; padding: 60px 24px; background: #ffffff; border-radius: 20px; border: 2px dashed #cbd5e1; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin: 12px 0 30px;">
                                         <div style="width: 72px; height: 72px; line-height: 72px; margin: 0 auto 16px; background: #eef2ff; border-radius: 20px; font-size: 36px;">
