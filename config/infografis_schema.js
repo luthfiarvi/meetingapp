@@ -223,6 +223,10 @@ export async function initInfografisSchema() {
       END $$;
     `);
 
+    // Pastikan kolom penting signature_path & approver_signature selalu ada tanpa terhambat
+    await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+    await pool.query("ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT DEFAULT NULL;").catch(() => {});
+
     console.log("✅ Skema database users (profil, header, footer), infografis, & notulen berhasil diverifikasi.");
   } catch (err) {
     console.warn("⚠️ [DATABASE SCHEMA WARNING]:", err.message);

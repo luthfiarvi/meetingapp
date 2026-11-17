@@ -521,6 +521,8 @@ export const notulenController = {
   // GET /notulen
   getNotulenGenerator: async (req, res) => {
     try {
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+      await pool.query("ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT DEFAULT NULL;").catch(() => {});
       const user = getCurrentUser(req);
       const today = new Date();
       const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
@@ -944,6 +946,7 @@ export const notulenController = {
   // POST /api/notulen (Simpan / Perbarui Notulen & Auto-Integrasi ke Manajemen Meeting)
   saveNotulen: async (req, res) => {
     try {
+      await pool.query("ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT DEFAULT NULL;").catch(() => {});
       const user = getCurrentUser(req);
       const {
         id,
@@ -1297,6 +1300,8 @@ export const notulenController = {
   // POST /api/notulen/approve (Pejabat yang Mengetahui menyetujui & mengesahkan notula secara resmi)
   approveNotulen: async (req, res) => {
     try {
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
+      await pool.query("ALTER TABLE notulen ADD COLUMN IF NOT EXISTS approver_signature TEXT DEFAULT NULL;").catch(() => {});
       const user = getCurrentUser(req);
       const targetId = req.body.id || req.body.notulenId;
       const { notes } = req.body;

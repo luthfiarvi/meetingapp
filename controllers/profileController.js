@@ -29,6 +29,7 @@ export const profileController = {
   // GET /profile
   getProfile: async (req, res) => {
     try {
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
       const fallbackUser = getCurrentUser(req);
       let user = fallbackUser;
 
@@ -56,6 +57,7 @@ export const profileController = {
   // POST /profile
   postProfile: async (req, res) => {
     try {
+      await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS signature_path VARCHAR(255) DEFAULT NULL;").catch(() => {});
       const currentUser = getCurrentUser(req);
       const {
         full_name,
