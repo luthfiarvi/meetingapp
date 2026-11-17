@@ -95,7 +95,7 @@
             <!-- TOPBAR / PROFILE ONLY -->
             <header class="topbar-right-only">
 
-                <div class="profile">
+                <a href="/profile" class="profile" title="Klik untuk mengelola profil & tanda tangan resmi Anda" style="text-decoration: none; color: inherit; cursor: pointer;">
 
                     <div class="profile-info">
                         <strong><%= (typeof user !== 'undefined' && user && (user.full_name || user.username)) ? (user.full_name || user.username) : "Administrator" %></strong>
@@ -106,7 +106,7 @@
                         <img src="<%= (typeof user !== 'undefined' && user && user.avatar_path) ? user.avatar_path : '/images/default_avatar.png' %>" alt="<%= (typeof user !== 'undefined' && user && user.full_name) ? user.full_name : 'Avatar' %>">
                     </div>
 
-                </div>
+                </a>
 
             </header>
 
