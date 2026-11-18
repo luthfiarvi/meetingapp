@@ -63,7 +63,8 @@ export const profileController = {
       });
     } catch (err) {
       console.error("Profile view error:", err);
-      res.redirect("/infografis?error=" + encodeURIComponent(err.message));
+      const isRestricted = req.user?.role === 'pimpinan' || req.user?.role === 'pegawai';
+      res.redirect((isRestricted ? "/dashboard" : "/infografis") + "?error=" + encodeURIComponent(err.message));
     }
   },
 
