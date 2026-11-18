@@ -218,10 +218,5 @@ export const profileController = {
     }
   }
 };
-      console.error("Profile save error:", err);
-      return res.redirect("/profile?error=" + encodeURIComponent("Gagal menyimpan profil: " + err.message));
-    }
-  }
-};
 
 export default profileController;
