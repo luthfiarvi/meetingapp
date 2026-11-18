@@ -506,7 +506,7 @@
             <div style="font-weight: bold; margin-bottom: 4px;" id="previewApproverRole"><%= initialData.approverRole || '(Nama Jabatan)' %></div>
             <div class="notula-sig-space" id="previewApproverSigArea">
               <% if (initialData.approverSignature) { %>
-                <img id="previewApproverSigImg" src="<%= initialData.approverSignature %>" alt="Tanda Tangan Pejabat" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0; display: block;" />
+                <img id="previewApproverSigImg" src="<%= initialData.approverSignature %>" alt="Tanda Tangan Pejabat" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px auto; display: block;" />
               <% } else if (initialData.approvalStatus === 'approved') { %>
                 <div class="notula-approval-badge">
                   <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
@@ -527,7 +527,7 @@
             <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
             <div class="notula-sig-space" id="previewNotulisSigSpace">
               <% if (initialData.notulisSignature || initialData.notulis_signature || (typeof user !== 'undefined' && user.signature_path)) { %>
-                <img id="previewNotulisSigImg" src="<%= initialData.notulisSignature || initialData.notulis_signature || user.signature_path %>" alt="Tanda Tangan Notulis" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0; display: block;" />
+                <img id="previewNotulisSigImg" src="<%= initialData.notulisSignature || initialData.notulis_signature || user.signature_path %>" alt="Tanda Tangan Notulis" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px auto; display: block;" />
               <% } else { %>
                 <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
               <% } %>

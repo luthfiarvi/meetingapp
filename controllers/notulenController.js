@@ -389,7 +389,7 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
       font-family: 'Times New Roman', Times, serif;
       font-size: 11pt;
     }
-    .notula-sig-table td { vertical-align: top; border: none; padding: 0; }
+    .notula-sig-table td { vertical-align: top; border: none; padding: 0 10px; text-align: center; }
     .notula-closing { text-align: justify; margin: 14px 0; }
     @media print {
       body { background: white !important; padding: 0 !important; }
@@ -481,12 +481,12 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
     <!-- Tanda Tangan 2 Kolom (Kiri: Mengetahui, Kanan: Notulis) -->
     <table class="notula-sig-table">
       <tr>
-        <td style="width: 50%; padding-right: 15px;">
+        <td style="width: 50%; padding-right: 12px; text-align: center; vertical-align: top;">
           <div>Mengetahui,</div>
           <div style="font-weight: bold; margin-bottom: 4px;">${docData.approverRole || docData.approver_role || '(Nama Jabatan)'}</div>
-          <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
+          <div style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 6px auto;">
             ${(docData.approver_signature || docData.approverSignature) ? `
-              <img src="${docData.approver_signature || docData.approverSignature}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0;" alt="Tanda Tangan Pejabat" />
+              <img src="${docData.approver_signature || docData.approverSignature}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px auto; display: block;" alt="Tanda Tangan Pejabat" />
             ` : ((docData.approvalStatus === 'approved' || docData.approval_status === 'approved') ? `
               <div style="display: inline-block; border: 1.5px solid #059669; background: #ECFDF5; color: #065F46; padding: 4px 10px; border-radius: 6px; font-family: sans-serif; font-size: 8pt; line-height: 1.3;">
                 <div style="font-weight: bold; font-size: 8.5pt; color: #047857;">✓ DISAHKAN RESMI</div>
@@ -501,12 +501,12 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
           ${(docData.approverNip || docData.approver_nip) ? `<div>${String(docData.approverNip || docData.approver_nip).startsWith('NIP') ? (docData.approverNip || docData.approver_nip) : 'NIP. ' + (docData.approverNip || docData.approver_nip)}</div>` : ''}
         </td>
 
-        <td style="width: 50%; padding-left: 15px;">
+        <td style="width: 50%; padding-left: 12px; text-align: center; vertical-align: top;">
           <div>${user.sig_city || 'Jakarta'}, ${formattedDate.includes(',') ? formattedDate.split(',')[1].trim() : formattedDate}</div>
           <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
-          <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
+          <div style="min-height: 65px; display: flex; align-items: center; justify-content: center; margin: 6px auto;">
             ${(docData.notulis_signature || docData.notulisSignature || user.signature_path) ? `
-              <img src="${docData.notulis_signature || docData.notulisSignature || user.signature_path}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0;" alt="Tanda Tangan Notulis" />
+              <img src="${docData.notulis_signature || docData.notulisSignature || user.signature_path}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px auto; display: block;" alt="Tanda Tangan Notulis" />
             ` : `
               <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
             `}
@@ -2120,10 +2120,12 @@ export const notulenController = {
                 },
                 children: [
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: "Mengetahui,", size: 22, font: "Times New Roman" })],
                     spacing: { after: 40 }
                   }),
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: docData.approver_role || "(Nama Jabatan)", bold: true, size: 22, font: "Times New Roman" })],
                     spacing: { after: 100 }
                   }),
@@ -2136,6 +2138,7 @@ export const notulenController = {
                           const sigData = fs.readFileSync(diskSigPath);
                           return [
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
                               children: [
                                 new ImageRun({
                                   data: sigData,
@@ -2153,16 +2156,19 @@ export const notulenController = {
                     if (isApproved) {
                       return [
                         new Paragraph({
+                          alignment: AlignmentType.CENTER,
                           children: [
                             new TextRun({ text: "✓ DISAHKAN RESMI (DIGITAL)", bold: true, size: 18, color: "047857", font: "Times New Roman" })
                           ]
                         }),
                         new Paragraph({
+                          alignment: AlignmentType.CENTER,
                           children: [
                             new TextRun({ text: docData.approver_name || "Pejabat", size: 18, color: "065F46", font: "Times New Roman" })
                           ]
                         }),
                         new Paragraph({
+                          alignment: AlignmentType.CENTER,
                           children: [
                             new TextRun({ text: approvedDateText, italics: true, size: 16, color: "059669", font: "Times New Roman" })
                           ],
@@ -2172,16 +2178,19 @@ export const notulenController = {
                     }
                     return [
                       new Paragraph({
+                        alignment: AlignmentType.CENTER,
                         children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
                         spacing: { before: 200, after: 300 }
                       })
                     ];
                   })()),
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: docData.approver_name || "Nama", bold: true, underline: {}, size: 22, font: "Times New Roman" })]
                   }),
                   ...(docData.approver_nip ? [
                     new Paragraph({
+                      alignment: AlignmentType.CENTER,
                       children: [new TextRun({
                         text: String(docData.approver_nip).startsWith("NIP")
                           ? String(docData.approver_nip)
@@ -2205,10 +2214,12 @@ export const notulenController = {
                 },
                 children: [
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: `${user.sig_city || "Jakarta"}, ${sigDateOnly}`, size: 22, font: "Times New Roman" })],
                     spacing: { after: 40 }
                   }),
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: "Notulis,", bold: true, size: 22, font: "Times New Roman" })],
                     spacing: { after: 100 }
                   }),
@@ -2222,6 +2233,7 @@ export const notulenController = {
                           const sigData = fs.readFileSync(diskSigPath);
                           return [
                             new Paragraph({
+                              alignment: AlignmentType.CENTER,
                               children: [
                                 new ImageRun({
                                   data: sigData,
@@ -2238,16 +2250,19 @@ export const notulenController = {
                     }
                     return [
                       new Paragraph({
+                        alignment: AlignmentType.CENTER,
                         children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
                         spacing: { before: 200, after: 300 }
                       })
                     ];
                   })()),
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: docData.notulis_name || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })]
                   }),
                   ...((docData.notulis_nip || user.nip) ? [
                     new Paragraph({
+                      alignment: AlignmentType.CENTER,
                       children: [new TextRun({
                         text: String(docData.notulis_nip || user.nip).startsWith("NIP")
                           ? String(docData.notulis_nip || user.nip)
@@ -2258,6 +2273,7 @@ export const notulenController = {
                     })
                   ] : []),
                   new Paragraph({
+                    alignment: AlignmentType.CENTER,
                     children: [new TextRun({ text: docData.notulis_role || user.division, size: 20, font: "Times New Roman" })]
                   })
                 ]

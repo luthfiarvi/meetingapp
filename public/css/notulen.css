@@ -359,25 +359,33 @@
   vertical-align: top;
   border: none;
   padding: 0;
+  text-align: center;
 }
 
 .notula-sig-cell-left {
   width: 50%;
-  text-align: left;
-  padding-right: 1.5rem;
+  text-align: center;
+  padding-right: 1rem;
 }
 
 .notula-sig-cell-right {
   width: 50%;
-  text-align: left;
-  padding-left: 1.5rem;
+  text-align: center;
+  padding-left: 1rem;
 }
 
 .notula-sig-space {
-  min-height: 60px;
-  height: 60px;
+  min-height: 65px;
+  height: 65px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin: 6px auto;
+}
+
+.notula-sig-space img {
+  display: block;
+  margin: 0 auto;
 }
 
 .notula-approval-badge {
