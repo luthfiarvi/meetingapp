@@ -505,7 +505,11 @@ function generateNotulenHtmlFile({ docData, user, notulenId, meetingId }) {
           <div>${user.sig_city || 'Jakarta'}, ${formattedDate.includes(',') ? formattedDate.split(',')[1].trim() : formattedDate}</div>
           <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
           <div style="min-height: 60px; display: flex; align-items: center; margin: 8px 0;">
-            <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            ${(docData.notulis_signature || docData.notulisSignature || user.signature_path) ? `
+              <img src="${docData.notulis_signature || docData.notulisSignature || user.signature_path}" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0;" alt="Tanda Tangan Notulis" />
+            ` : `
+              <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            `}
           </div>
           <div style="font-weight: bold; text-decoration: underline;">${docData.notulisName || docData.notulis_name || user.full_name}</div>
           ${(docData.notulisNip || docData.notulis_nip || user.nip) ? `<div>${String(docData.notulisNip || docData.notulis_nip || user.nip).startsWith('NIP') ? (docData.notulisNip || docData.notulis_nip || user.nip) : 'NIP. ' + (docData.notulisNip || docData.notulis_nip || user.nip)}</div>` : ''}
@@ -864,6 +868,7 @@ export const notulenController = {
         notulisName: latestDoc.notulis_name || latestDoc.notulisName || user.full_name,
         notulisNip: latestDoc.notulis_nip || latestDoc.notulisNip || user.nip || "",
         notulisRole: latestDoc.notulis_role || latestDoc.notulisRole || user.division,
+        notulisSignature: latestDoc.notulis_signature || user.signature_path || '',
         approvalStatus: latestDoc.approval_status || 'draft',
         approverId: latestDoc.approver_id || null,
         approverName: latestDoc.approver_name || '',
@@ -896,6 +901,7 @@ export const notulenController = {
         notulisName: user.full_name,
         notulisNip: user.nip || "",
         notulisRole: user.division,
+        notulisSignature: user.signature_path || '',
         approvalStatus: 'draft',
         approverId: null,
         approverName: "",
@@ -985,7 +991,9 @@ export const notulenController = {
         approverRole,
         approver_role,
         approvalStatus,
-        approval_status
+        approval_status,
+        notulisSignature,
+        notulis_signature
       } = req.body;
 
       if (!title || !meetingDate) {
@@ -1033,6 +1041,7 @@ export const notulenController = {
       const finalApproverNip = (approverNip !== undefined) ? approverNip : (approver_nip || null);
       const finalApproverRole = (approverRole !== undefined) ? approverRole : (approver_role || null);
       const finalApprovalStatus = approvalStatus || approval_status || 'draft';
+      const finalNotulisSignature = notulisSignature || notulis_signature || user.signature_path || null;
 
       let savedId;
       if (id) {
@@ -1062,8 +1071,9 @@ export const notulenController = {
             approver_name = COALESCE($22, approver_name),
             approver_nip = COALESCE($23, approver_nip),
             approver_role = COALESCE($24, approver_role),
-            approval_status = COALESCE($25, approval_status)
-          WHERE id = $26
+            approval_status = COALESCE($25, approval_status),
+            notulis_signature = COALESCE($26, notulis_signature)
+          WHERE id = $27
         `, [
           title, meetingDate, meetingTime || "-", meetingPlace || "-",
           agendaJson, attendeesJson, activitiesJson, actionItemsJson, conclusionsJson,
@@ -1080,6 +1090,7 @@ export const notulenController = {
           finalApproverNip,
           finalApproverRole,
           finalApprovalStatus,
+          finalNotulisSignature,
           id
         ]);
         savedId = id;
@@ -1091,8 +1102,9 @@ export const notulenController = {
             closing_text, documentation_photos, notulis_name, notulis_role, meeting_id,
             kertas_kerja_mt, notulis_nip,
             pelaksanaan_pembukaan, pelaksanaan_pembahasan, pelaksanaan_diskusi, pelaksanaan_rekomendasi,
-            approver_id, approver_name, approver_nip, approver_role, approval_status
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+            approver_id, approver_name, approver_nip, approver_role, approval_status,
+            notulis_signature
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
           RETURNING id
         `, [
           String(user?.id || "user"), title, meetingDate, meetingTime || "-", meetingPlace || "-",
@@ -1109,7 +1121,8 @@ export const notulenController = {
           finalApproverName,
           finalApproverNip,
           finalApproverRole,
-          finalApprovalStatus
+          finalApprovalStatus,
+          finalNotulisSignature
         ]);
         savedId = insertRes.rows[0]?.id;
       }
@@ -1142,6 +1155,8 @@ export const notulenController = {
             closingText, documentationPhotos: Array.isArray(documentationPhotos) ? documentationPhotos : [],
             kertasKerjaMt: mtArray,
             notulisName, notulisNip: finalNotulisNip, notulisRole,
+            notulisSignature: finalNotulisSignature,
+            notulis_signature: finalNotulisSignature,
             approverId: finalApproverId,
             approverName: finalApproverName,
             approverNip: finalApproverNip,
@@ -1233,9 +1248,10 @@ export const notulenController = {
           approver_id = $1,
           approver_name = $2,
           approver_nip = $3,
-          approver_role = $4
+          approver_role = $4,
+          notulis_signature = COALESCE(notulis_signature, $6)
         WHERE id = $5
-      `, [approverId || null, approverName || 'Pejabat Terkait', approverNip || null, approverRole || 'Pejabat BKN', targetId]);
+      `, [approverId || null, approverName || 'Pejabat Terkait', approverNip || null, approverRole || 'Pejabat BKN', targetId, user.signature_path || null]);
 
       // Regenerate file notula fisik agar status pending_approval tersimpan ke berkas
       try {
@@ -1268,6 +1284,8 @@ export const notulenController = {
               notulisName: doc.notulis_name,
               notulisNip: doc.notulis_nip,
               notulisRole: doc.notulis_role,
+              notulisSignature: doc.notulis_signature || user.signature_path || null,
+              notulis_signature: doc.notulis_signature || user.signature_path || null,
               approverId: doc.approver_id,
               approverName: doc.approver_name,
               approverNip: doc.approver_nip,
@@ -1420,6 +1438,8 @@ export const notulenController = {
             notulisName: doc.notulis_name,
             notulisNip: doc.notulis_nip,
             notulisRole: doc.notulis_role,
+            notulisSignature: doc.notulis_signature,
+            notulis_signature: doc.notulis_signature,
             approvalStatus: 'approved',
             approverId: doc.approver_id || user.id,
             approverName: approverName,
@@ -1537,6 +1557,8 @@ export const notulenController = {
           notulisName: doc.notulis_name,
           notulisNip: doc.notulis_nip || user.nip || "",
           notulisRole: doc.notulis_role,
+          notulisSignature: doc.notulis_signature || user.signature_path || '',
+          notulis_signature: doc.notulis_signature || user.signature_path || '',
           formattedDate,
           agenda,
           attendees,
@@ -2166,10 +2188,37 @@ export const notulenController = {
                     children: [new TextRun({ text: "Notulis,", bold: true, size: 22, font: "Times New Roman" })],
                     spacing: { after: 100 }
                   }),
-                  new Paragraph({
-                    children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
-                    spacing: { before: 200, after: 300 }
-                  }),
+                  ...((() => {
+                    const notulisSig = docData.notulis_signature || user.signature_path;
+                    if (notulisSig) {
+                      try {
+                        const cleanSigPath = notulisSig.replace(/^\//, '').split('?')[0];
+                        const diskSigPath = path.join(process.cwd(), 'public', cleanSigPath);
+                        if (fs.existsSync(diskSigPath)) {
+                          const sigData = fs.readFileSync(diskSigPath);
+                          return [
+                            new Paragraph({
+                              children: [
+                                new ImageRun({
+                                  data: sigData,
+                                  transformation: { width: 140, height: 60 }
+                                })
+                              ],
+                              spacing: { before: 80, after: 80 }
+                            })
+                          ];
+                        }
+                      } catch (sigErr) {
+                        console.warn("Notulis sig embed docx error:", sigErr.message);
+                      }
+                    }
+                    return [
+                      new Paragraph({
+                        children: [new TextRun({ text: "ttd", italics: true, size: 20, color: "777777", font: "Times New Roman" })],
+                        spacing: { before: 200, after: 300 }
+                      })
+                    ];
+                  })()),
                   new Paragraph({
                     children: [new TextRun({ text: docData.notulis_name || user.full_name, bold: true, underline: {}, size: 22, font: "Times New Roman" })]
                   }),

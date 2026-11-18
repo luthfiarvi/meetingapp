@@ -525,8 +525,12 @@
           <td class="notula-sig-cell-right">
             <div><span id="previewSigCity"><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %></span>, <span id="previewSigDate"><%= initialData.formattedDate.includes(',') ? initialData.formattedDate.split(',')[1].trim() : initialData.formattedDate %></span></div>
             <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
-            <div class="notula-sig-space">
-              <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            <div class="notula-sig-space" id="previewNotulisSigSpace">
+              <% if (initialData.notulisSignature || initialData.notulis_signature || (typeof user !== 'undefined' && user.signature_path)) { %>
+                <img id="previewNotulisSigImg" src="<%= initialData.notulisSignature || initialData.notulis_signature || user.signature_path %>" alt="Tanda Tangan Notulis" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0; display: block;" />
+              <% } else { %>
+                <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+              <% } %>
             </div>
             <div style="font-weight: bold; text-decoration: underline;" id="previewSigName"><%= initialData.notulisName || (typeof user !== 'undefined' ? user.full_name : '') %></div>
             <div id="previewSigNip"><%= (initialData.notulisNip || (typeof user !== 'undefined' && user.nip)) ? (String(initialData.notulisNip || user.nip).startsWith('NIP') ? String(initialData.notulisNip || user.nip) : 'NIP. ' + (initialData.notulisNip || user.nip)) : '' %></div>

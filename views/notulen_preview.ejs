@@ -282,7 +282,11 @@
           <div><%= (typeof user !== 'undefined' && user.sig_city) ? user.sig_city : 'Jakarta' %>, <%= doc.formattedDate.includes(',') ? doc.formattedDate.split(',')[1].trim() : doc.formattedDate %></div>
           <div style="font-weight: bold; margin-bottom: 4px;">Notulis,</div>
           <div class="notula-sig-space">
-            <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            <% if (doc.notulisSignature || doc.notulis_signature || (typeof user !== 'undefined' && user.signature_path)) { %>
+              <img src="<%= doc.notulisSignature || doc.notulis_signature || user.signature_path %>" alt="Tanda Tangan Notulis" style="max-height: 68px; max-width: 170px; object-fit: contain; margin: 2px 0; display: block;" />
+            <% } else { %>
+              <div style="font-style: italic; color: #666; font-size: 9.5pt;">ttd</div>
+            <% } %>
           </div>
           <div style="font-weight: bold; text-decoration: underline;"><%= doc.notulisName || doc.notulis_name || user.full_name %></div>
           <% const previewNip = doc.notulisNip || doc.notulis_nip || (typeof user !== 'undefined' && user.nip ? user.nip : ''); %>

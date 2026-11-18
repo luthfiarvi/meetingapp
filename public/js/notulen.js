@@ -32,6 +32,7 @@ const defaultNotulenState = {
   notulisNip: '',
   notulisRole: '',
   notulisCity: 'Jakarta',
+  notulisSignature: '',
   documentationPhotos: [],
   isMT: false,
   kertasKerjaMT: null
