@@ -305,9 +305,161 @@
 
   </div>
 
+  <!-- MODERN CUSTOM DIALOG MODAL (CONFIRM & PROMPT BKN) -->
+  <div id="customDialogModal" class="custom-dialog-overlay" style="display: none;">
+    <div class="custom-dialog-card">
+      <div id="customDialogIconContainer" class="custom-dialog-icon-wrap">
+        <div id="customDialogIcon" class="custom-dialog-icon theme-emerald">✍️</div>
+      </div>
+      
+      <div class="custom-dialog-content">
+        <h3 id="customDialogTitle" class="custom-dialog-title">Sahkan Notula Rapat?</h3>
+        <p id="customDialogMessage" class="custom-dialog-message">
+          Notula ini akan disahkan dan dibubuhkan tanda tangan resmi Anda sebagai Pejabat yang Mengetahui.
+        </p>
+
+        <div id="customDialogCardDetails" class="custom-dialog-details" style="display: none;"></div>
+
+        <div id="customDialogInputContainer" style="display: none; margin-top: 1rem; text-align: left;">
+          <label id="customDialogInputLabel" style="display: block; font-size: 0.825rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem;">Catatan:</label>
+          <textarea id="customDialogInput" rows="3" style="width: 100%; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0.65rem; font-size: 0.85rem; font-family: inherit; resize: vertical; box-sizing: border-box; outline: none; transition: border-color 0.2s;" placeholder="Tuliskan catatan..."></textarea>
+        </div>
+      </div>
+
+      <div class="custom-dialog-actions">
+        <button type="button" id="customDialogBtnCancel" class="btn-dialog-cancel">Batal</button>
+        <button type="button" id="customDialogBtnConfirm" class="btn-dialog-confirm theme-emerald">
+          <span id="customDialogBtnIcon">✓</span> <span id="customDialogBtnText">Ya, Sahkan Notula</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function showCustomDialog({
+      title = 'Konfirmasi',
+      message = '',
+      icon = '🚀',
+      theme = 'emerald',
+      confirmText = 'Lanjutkan',
+      confirmIcon = '✓',
+      cancelText = 'Batal',
+      showCancel = true,
+      details = null,
+      isPrompt = false,
+      promptLabel = 'Catatan:',
+      promptPlaceholder = '',
+      promptValue = ''
+    } = {}) {
+      return new Promise((resolve) => {
+        let overlay = document.getElementById('customDialogModal');
+        if (!overlay) {
+          if (isPrompt) return resolve(window.prompt(message, promptValue));
+          if (!showCancel) { window.alert(message); return resolve(true); }
+          return resolve(window.confirm(message));
+        }
+
+        const iconEl = document.getElementById('customDialogIcon');
+        const titleEl = document.getElementById('customDialogTitle');
+        const msgEl = document.getElementById('customDialogMessage');
+        const detailsContainer = document.getElementById('customDialogCardDetails');
+        const inputContainer = document.getElementById('customDialogInputContainer');
+        const inputEl = document.getElementById('customDialogInput');
+        const inputLabelEl = document.getElementById('customDialogInputLabel');
+        const btnCancel = document.getElementById('customDialogBtnCancel');
+        const btnConfirm = document.getElementById('customDialogBtnConfirm');
+        const btnIcon = document.getElementById('customDialogBtnIcon');
+        const btnText = document.getElementById('customDialogBtnText');
+
+        if (titleEl) titleEl.innerText = title;
+        if (msgEl) msgEl.innerText = message;
+        if (iconEl) {
+          iconEl.className = 'custom-dialog-icon theme-' + theme;
+          iconEl.innerText = icon;
+        }
+        if (btnConfirm) btnConfirm.className = 'btn-dialog-confirm theme-' + theme;
+        if (btnIcon) btnIcon.innerText = confirmIcon;
+        if (btnText) btnText.innerText = confirmText;
+        if (btnCancel) {
+          btnCancel.innerText = cancelText;
+          btnCancel.style.display = showCancel ? 'block' : 'none';
+        }
+
+        if (details && Array.isArray(details) && details.length > 0 && detailsContainer) {
+          detailsContainer.innerHTML = details.map(d => `
+            <div class="custom-dialog-details-row">
+              <span class="custom-dialog-details-label">${d.label}</span>
+              <span class="custom-dialog-details-val">${d.value}</span>
+            </div>
+          `).join('');
+          detailsContainer.style.display = 'block';
+        } else if (detailsContainer) {
+          detailsContainer.style.display = 'none';
+        }
+
+        if (isPrompt && inputContainer && inputEl) {
+          inputContainer.style.display = 'block';
+          if (inputLabelEl) inputLabelEl.innerText = promptLabel;
+          inputEl.placeholder = promptPlaceholder;
+          inputEl.value = promptValue;
+        } else if (inputContainer) {
+          inputContainer.style.display = 'none';
+        }
+
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => {
+          overlay.classList.add('show');
+          if (isPrompt && inputEl) inputEl.focus();
+        });
+
+        const cleanup = () => {
+          overlay.classList.remove('show');
+          setTimeout(() => { overlay.style.display = 'none'; }, 250);
+          if (btnConfirm) btnConfirm.onclick = null;
+          if (btnCancel) btnCancel.onclick = null;
+          overlay.onclick = null;
+        };
+
+        if (btnConfirm) {
+          btnConfirm.onclick = () => {
+            const val = isPrompt ? (inputEl ? inputEl.value.trim() : '') : true;
+            cleanup();
+            resolve(val);
+          };
+        }
+
+        if (btnCancel) {
+          btnCancel.onclick = () => {
+            cleanup();
+            resolve(isPrompt ? null : false);
+          };
+        }
+
+        overlay.onclick = (e) => {
+          if (e.target === overlay) {
+            cleanup();
+            resolve(isPrompt ? null : false);
+          }
+        };
+      });
+    }
+
     async function confirmApproval(id) {
-      if (!confirm("Apakah Anda yakin ingin menyetujui dan mengesahkan notula ini?")) return;
+      const confirmed = await showCustomDialog({
+        title: 'Sahkan Notula Rapat Ini?',
+        message: 'Anda akan menyetujui dan membubuhkan tanda tangan resmi kedinasan Anda pada dokumen notula ini.',
+        icon: '✍️',
+        theme: 'emerald',
+        confirmText: 'Ya, Sahkan Dokumen',
+        confirmIcon: '✓',
+        cancelText: 'Batal',
+        details: [
+          { label: 'Judul Notula:', value: '<%= doc.title %>' },
+          { label: 'Notulis Penyusun:', value: '<%= doc.notulisName || doc.notulis_name || "Pegawai BKN" %>' }
+        ]
+      });
+      if (!confirmed) return;
+
       try {
         const res = await fetch("/api/notulen/approve", {
           method: "POST",
@@ -316,7 +468,15 @@
         });
         const result = await res.json();
         if (result.success) {
-          alert("✓ Notula berhasil disetujui & disahkan!");
+          await showCustomDialog({
+            title: 'Notula Berhasil Disahkan!',
+            message: 'Dokumen notula resmi telah disahkan dan tanda tangan Anda telah terpasang dengan sempurna.',
+            icon: '✅',
+            theme: 'emerald',
+            confirmText: 'Lihat Dokumen',
+            confirmIcon: '✓',
+            showCancel: false
+          });
           window.location.reload();
         } else {
           alert("Gagal mengesahkan: " + (result.message || "Terjadi kesalahan"));
@@ -327,8 +487,21 @@
     }
 
     async function confirmReject(id) {
-      const reason = prompt("Masukkan catatan / poin yang perlu direvisi oleh Notulis:");
+      const reason = await showCustomDialog({
+        title: 'Kembalikan Notula (Perlu Revisi)',
+        message: 'Tuliskan catatan arahan atau poin koreksi yang perlu diperbaiki oleh Notulis:',
+        icon: '⚠️',
+        theme: 'rose',
+        confirmText: 'Kirim Catatan Revisi',
+        confirmIcon: '⚠️',
+        cancelText: 'Batal',
+        isPrompt: true,
+        promptLabel: 'Catatan Revisi:',
+        promptPlaceholder: 'Contoh: Mohon koreksi bagian kesimpulan rapat...',
+        promptValue: ''
+      });
       if (!reason) return;
+
       try {
         const res = await fetch("/api/notulen/reject", {
           method: "POST",
@@ -337,7 +510,15 @@
         });
         const result = await res.json();
         if (result.success) {
-          alert("Notula telah dikembalikan untuk revisi.");
+          await showCustomDialog({
+            title: 'Notula Dikembalikan',
+            message: 'Catatan revisi telah dikirimkan ke Notulis.',
+            icon: 'ℹ️',
+            theme: 'rose',
+            confirmText: 'Selesai',
+            confirmIcon: '✓',
+            showCancel: false
+          });
           window.location.reload();
         } else {
           alert("Gagal mengembalikan notula: " + (result.message || "Terjadi kesalahan"));

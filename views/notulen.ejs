@@ -642,6 +642,41 @@
   </div>
 </div>
 
+<!-- MODERN CUSTOM DIALOG MODAL (CONFIRM & PROMPT BKN) -->
+<div id="customDialogModal" class="custom-dialog-overlay" style="display: none;">
+  <div class="custom-dialog-card">
+    <!-- Header Icon -->
+    <div id="customDialogIconContainer" class="custom-dialog-icon-wrap">
+      <div id="customDialogIcon" class="custom-dialog-icon theme-amber">🚀</div>
+    </div>
+    
+    <!-- Title & Body -->
+    <div class="custom-dialog-content">
+      <h3 id="customDialogTitle" class="custom-dialog-title">Ajukan Pengesahan Notula?</h3>
+      <p id="customDialogMessage" class="custom-dialog-message">
+        Kirimkan notula ini ke Pejabat yang Mengetahui untuk diverifikasi dan disahkan secara resmi.
+      </p>
+
+      <!-- Target Info Card -->
+      <div id="customDialogCardDetails" class="custom-dialog-details" style="display: none;"></div>
+
+      <!-- Prompt Input (untuk Catatan Revisi) -->
+      <div id="customDialogInputContainer" style="display: none; margin-top: 1rem; text-align: left;">
+        <label id="customDialogInputLabel" style="display: block; font-size: 0.825rem; font-weight: 600; color: #334155; margin-bottom: 0.35rem;">Catatan:</label>
+        <textarea id="customDialogInput" rows="3" style="width: 100%; border: 1.5px solid #CBD5E1; border-radius: 10px; padding: 0.65rem; font-size: 0.85rem; font-family: inherit; resize: vertical; box-sizing: border-box; outline: none; transition: border-color 0.2s;" placeholder="Tuliskan catatan revisi..."></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="custom-dialog-actions">
+      <button type="button" id="customDialogBtnCancel" class="btn-dialog-cancel">Batal</button>
+      <button type="button" id="customDialogBtnConfirm" class="btn-dialog-confirm theme-amber">
+        <span id="customDialogBtnIcon">🚀</span> <span id="customDialogBtnText">Ya, Ajukan</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   window.initialNotulenData = <%- JSON.stringify(typeof initialData !== 'undefined' ? initialData : {}) %>;
   window.todayFormattedString = "<%= typeof todayFormatted !== 'undefined' ? todayFormatted : '' %>";

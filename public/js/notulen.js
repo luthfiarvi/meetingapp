@@ -1303,12 +1303,19 @@ async function handleSaveNotulen(redirectAfter = true) {
   // Jika rapat tujuan belum terpilih, konfirmasikan ke pengguna
   if (!notulenState.meetingId && Array.isArray(window.availableMeetings) && window.availableMeetings.length > 0) {
     const firstMeeting = window.availableMeetings[0];
-    const wantToLink = confirm(
-      '⚠️ Anda belum memilih rapat tujuan di Manajemen Meeting.\n\n' +
-      'Apakah Anda ingin otomatis menghubungkan notula ini ke rapat "' + firstMeeting.meeting_nama + '"?\n\n' +
-      '- Klik [OK] untuk langsung menghubungkan ke rapat "' + firstMeeting.meeting_nama + '".\n' +
-      '- Klik [Batal] jika ingin memilih rapat lain pada dropdown.'
-    );
+    const wantToLink = await showCustomDialog({
+      title: 'Hubungkan ke Rapat?',
+      message: `Anda belum memilih rapat tujuan di Manajemen Meeting. Apakah Anda ingin menghubungkan notula ini ke rapat berikut?`,
+      icon: '🔗',
+      theme: 'blue',
+      confirmText: 'Hubungkan ke Rapat Ini',
+      confirmIcon: '🔗',
+      cancelText: 'Pilih Sendiri di Dropdown',
+      details: [
+        { label: 'Nama Rapat:', value: firstMeeting.meeting_nama },
+        { label: 'Tanggal Rapat:', value: firstMeeting.tanggal ? new Date(firstMeeting.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-' }
+      ]
+    });
 
     if (wantToLink) {
       notulenState.meetingId = firstMeeting.meeting_id;
@@ -1388,7 +1395,31 @@ async function handleSubmitApproval() {
     return;
   }
 
-  if (!confirm(`Kirimkan notula ini ke ${notulenState.approverName || 'Pejabat yang Mengetahui'} untuk diverifikasi dan disahkan secara resmi?`)) {
+  // Tampilkan Modern Dialog BKN untuk Konfirmasi Pengajuan Pengesahan
+  const approverFullName = notulenState.approverName || 'Pejabat yang Mengetahui';
+  const approverTitle = notulenState.approverRole || 'Pejabat Pengesah';
+  const approverNip = notulenState.approverNip || '';
+  const notulisName = notulenState.notulisName || (typeof window.currentUserFullName !== 'undefined' ? window.currentUserFullName : 'Pegawai BKN');
+
+  const detailsList = [
+    { label: 'Pejabat Pengesah:', value: approverFullName },
+    ...(approverTitle ? [{ label: 'Jabatan / Pangkat:', value: approverTitle }] : []),
+    ...(approverNip ? [{ label: 'NIP Pejabat:', value: approverNip.startsWith('NIP') ? approverNip : 'NIP. ' + approverNip }] : []),
+    { label: 'Penyusun (Notulis):', value: notulisName }
+  ];
+
+  const confirmed = await showCustomDialog({
+    title: 'Ajukan Pengesahan Notula?',
+    message: `Notula akan diajukan ke ${approverFullName} untuk diverifikasi dan dibubuhkan tanda tangan pengesahan resmi.`,
+    icon: '🚀',
+    theme: 'amber',
+    confirmText: 'Ya, Ajukan Pengesahan',
+    confirmIcon: '🚀',
+    cancelText: 'Batal Periksa Dulu',
+    details: detailsList
+  });
+
+  if (!confirmed) {
     return;
   }
 
@@ -1574,7 +1605,21 @@ async function handleRejectNotulen() {
     showNotificationToast('Notula belum tersimpan.', 'warning', 3000);
     return;
   }
-  const notes = prompt('Masukkan catatan perbaikan / revisi untuk notulis:');
+  
+  const notes = await showCustomDialog({
+    title: 'Kembalikan Notula (Perlu Revisi)',
+    message: 'Tuliskan catatan arahan atau poin koreksi yang perlu diperbaiki oleh Notulis:',
+    icon: '⚠️',
+    theme: 'rose',
+    confirmText: 'Kirim Catatan Revisi',
+    confirmIcon: '⚠️',
+    cancelText: 'Batal',
+    isPrompt: true,
+    promptLabel: 'Catatan Arahan Revisi:',
+    promptPlaceholder: 'Contoh: Mohon lengkapi bagian tindak lanjut dan perbaiki kesimpulan rapat...',
+    promptValue: ''
+  });
+  
   if (notes === null) return;
 
   try {
@@ -1617,6 +1662,122 @@ async function handleExportDocx() {
     window.location.href = `/notulen/export-docx/${notulenState.id}`;
   }
 }
+
+/**
+ * Modern BKN Custom Dialog Helper (Promise-based modal replacement for confirm / prompt / alert)
+ */
+function showCustomDialog({
+  title = 'Konfirmasi',
+  message = '',
+  icon = '🚀',
+  theme = 'amber', // 'amber' | 'emerald' | 'rose' | 'blue'
+  confirmText = 'Lanjutkan',
+  confirmIcon = '✓',
+  cancelText = 'Batal',
+  showCancel = true,
+  details = null, // array of { label, value }
+  isPrompt = false,
+  promptLabel = 'Catatan:',
+  promptPlaceholder = '',
+  promptValue = ''
+} = {}) {
+  return new Promise((resolve) => {
+    let overlay = document.getElementById('customDialogModal');
+    if (!overlay) {
+      if (isPrompt) return resolve(window.prompt(message, promptValue));
+      if (!showCancel) { window.alert(message); return resolve(true); }
+      return resolve(window.confirm(message));
+    }
+
+    const iconEl = document.getElementById('customDialogIcon');
+    const titleEl = document.getElementById('customDialogTitle');
+    const msgEl = document.getElementById('customDialogMessage');
+    const detailsContainer = document.getElementById('customDialogCardDetails');
+    const inputContainer = document.getElementById('customDialogInputContainer');
+    const inputEl = document.getElementById('customDialogInput');
+    const inputLabelEl = document.getElementById('customDialogInputLabel');
+    const btnCancel = document.getElementById('customDialogBtnCancel');
+    const btnConfirm = document.getElementById('customDialogBtnConfirm');
+    const btnIcon = document.getElementById('customDialogBtnIcon');
+    const btnText = document.getElementById('customDialogBtnText');
+
+    if (titleEl) titleEl.innerText = title;
+    if (msgEl) msgEl.innerText = message;
+    if (iconEl) {
+      iconEl.className = 'custom-dialog-icon theme-' + theme;
+      iconEl.innerText = icon;
+    }
+    if (btnConfirm) {
+      btnConfirm.className = 'btn-dialog-confirm theme-' + theme;
+    }
+    if (btnIcon) btnIcon.innerText = confirmIcon;
+    if (btnText) btnText.innerText = confirmText;
+    if (btnCancel) {
+      btnCancel.innerText = cancelText;
+      btnCancel.style.display = showCancel ? 'block' : 'none';
+    }
+
+    if (details && Array.isArray(details) && details.length > 0 && detailsContainer) {
+      detailsContainer.innerHTML = details.map(d => `
+        <div class="custom-dialog-details-row">
+          <span class="custom-dialog-details-label">${d.label}</span>
+          <span class="custom-dialog-details-val">${d.value}</span>
+        </div>
+      `).join('');
+      detailsContainer.style.display = 'block';
+    } else if (detailsContainer) {
+      detailsContainer.style.display = 'none';
+    }
+
+    if (isPrompt && inputContainer && inputEl) {
+      inputContainer.style.display = 'block';
+      if (inputLabelEl) inputLabelEl.innerText = promptLabel;
+      inputEl.placeholder = promptPlaceholder;
+      inputEl.value = promptValue;
+    } else if (inputContainer) {
+      inputContainer.style.display = 'none';
+    }
+
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => {
+      overlay.classList.add('show');
+      if (isPrompt && inputEl) inputEl.focus();
+    });
+
+    const cleanup = () => {
+      overlay.classList.remove('show');
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 250);
+      if (btnConfirm) btnConfirm.onclick = null;
+      if (btnCancel) btnCancel.onclick = null;
+      overlay.onclick = null;
+    };
+
+    if (btnConfirm) {
+      btnConfirm.onclick = () => {
+        const val = isPrompt ? (inputEl ? inputEl.value.trim() : '') : true;
+        cleanup();
+        resolve(val);
+      };
+    }
+
+    if (btnCancel) {
+      btnCancel.onclick = () => {
+        cleanup();
+        resolve(isPrompt ? null : false);
+      };
+    }
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        cleanup();
+        resolve(isPrompt ? null : false);
+      }
+    };
+  });
+}
+window.showCustomDialog = showCustomDialog;
 
 let toastTimer = null;
 function showNotificationToast(msg, type = 'info', duration = 4000) {
