@@ -1298,7 +1298,19 @@ export const notulenController = {
           });
           fs.writeFileSync(filePath, htmlContent, "utf-8");
           if (doc.meeting_id) {
-            await pool.query("UPDATE meetings SET notulen = $1, notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+            try {
+              const mRes = await pool.query("SELECT notulen FROM meetings WHERE meeting_id = $1", [doc.meeting_id]);
+              if (mRes.rows.length > 0 && mRes.rows[0].notulen) {
+                const oldRelative = mRes.rows[0].notulen.replace(/^\//, '');
+                const oldFullPath = path.join(process.cwd(), "public", oldRelative);
+                if (fs.existsSync(oldFullPath)) {
+                  fs.writeFileSync(oldFullPath, htmlContent, "utf-8");
+                }
+              }
+            } catch (oldErr) {}
+
+            await pool.query("UPDATE meetings SET notulen = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+            await pool.query("UPDATE meetings SET notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]).catch(() => {});
           }
         }
       } catch (e) {
@@ -1455,9 +1467,21 @@ export const notulenController = {
 
         fs.writeFileSync(filePath, htmlContent, "utf-8");
 
-        // Hubungkan ke rapat di meetings
+        // Hubungkan ke rapat di meetings dan sinkronkan file yang sudah ada
         if (doc.meeting_id) {
-          await pool.query("UPDATE meetings SET notulen = $1, notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+          try {
+            const mRes = await pool.query("SELECT notulen FROM meetings WHERE meeting_id = $1", [doc.meeting_id]);
+            if (mRes.rows.length > 0 && mRes.rows[0].notulen) {
+              const oldRelative = mRes.rows[0].notulen.replace(/^\//, '');
+              const oldFullPath = path.join(process.cwd(), "public", oldRelative);
+              if (fs.existsSync(oldFullPath)) {
+                fs.writeFileSync(oldFullPath, htmlContent, "utf-8");
+              }
+            }
+          } catch (oldErr) {}
+
+          await pool.query("UPDATE meetings SET notulen = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]);
+          await pool.query("UPDATE meetings SET notulen_pdf = $1 WHERE meeting_id = $2", [fileUrl, doc.meeting_id]).catch(() => {});
         }
       } catch (fErr) {
         console.warn("⚠️ Gagal regenerate file disahkan:", fErr.message);
